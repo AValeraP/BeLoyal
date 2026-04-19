@@ -1,0 +1,13 @@
+[    {
+        "id":"1",
+        "nombre": "Refresco",
+        "descripcion": "",
+        "precio": "2,5 Euros"
+    },
+     {
+        "id":"2",
+        "nombre": "Café",
+        "descripcion": "",
+        "precio": "2 Euros"
+    }
+]
