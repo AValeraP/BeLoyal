@@ -2,42 +2,46 @@
 session_start();
 error_reporting(E_ALL);
 
-// Enrutador simple: lee el parámetro "page" de la URL
+// ── Conexión única compartida ──────────────────────────────────────────────────
+require_once __DIR__ . '/Conn/conexion.php';   // define $pdo
+
+// ── Enrutador ─────────────────────────────────────────────────────────────────
 $page = $_GET['page'] ?? 'login';
 
 switch ($page) {
+
     case 'login':
         require_once 'Controlador/ControladorAutenticacion.php';
-        $controller = new ControladorAutenticacion();
-        $controller->index();
+        (new ControladorAutenticacion($pdo))->index();
         break;
 
     case 'login_post':
         require_once 'Controlador/ControladorAutenticacion.php';
-        $controller = new ControladorAutenticacion();
-        $controller->login();
+        (new ControladorAutenticacion($pdo))->login();
         break;
 
     case 'logout':
         require_once 'Controlador/ControladorAutenticacion.php';
-        $controller = new ControladorAutenticacion();
-        $controller->logout();
+        (new ControladorAutenticacion($pdo))->logout();
         break;
 
     case 'admin':
         require_once 'Controlador/ControladorAdmin.php';
-        $controller = new ControladorAdmin();
-        $controller->index();
+        (new ControladorAdmin($pdo))->index();
         break;
 
     case 'empleado':
         require_once 'Controlador/ControladorEmpleado.php';
-        $controller = new ControladorEmpleado();
-        $controller->index();
+        (new ControladorEmpleado($pdo))->index();
+        break;
+
+    case 'guardar_venta':
+        require_once 'Controlador/ControladorEmpleado.php';
+        (new ControladorEmpleado($pdo))->guardarVenta();
         break;
 
     default:
         http_response_code(404);
-        echo "Página no encontrada.";
+        echo 'Página no encontrada.';
         break;
 }

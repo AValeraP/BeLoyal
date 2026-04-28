@@ -2,25 +2,20 @@
 
 class ControladorAdmin
 {
-    public function __construct()
+    private PDO $pdo;
+
+    public function __construct(PDO $pdo)
     {
         $this->proteger('admin');
+        $this->pdo = $pdo;
     }
 
-    /**
-     * Página principal del admin.
-     */
     public function index(): void
     {
         $usuario = $_SESSION['usuario'];
-        require_once __DIR__ . '/../vista/PanelAdmin.php';
+        require_once __DIR__ . '/../Vista/PanelAdmin.php';
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
-
-    /**
-     * Si no hay sesión o el rol no coincide, redirige al login.
-     */
     private function proteger(string $rolRequerido): void
     {
         if (empty($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== $rolRequerido) {
