@@ -1,0 +1,8 @@
+{
+    "bonos": [
+        { "nombre": "4 Cortes", "descripcion": "", "precio": "40" },
+        { "nombre": "4 Cortes + Barba", "descripcion": "", "precio": "50" },
+        { "nombre": "4 Cortes", "descripcion": "", "precio": "40" },
+        { "nombre": "4 Cortes", "descripcion": "", "precio": "40" }
+    ]
+}
