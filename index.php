@@ -2,14 +2,11 @@
 session_start();
 error_reporting(E_ALL);
 
-// ── Conexión única compartida ──────────────────────────────────────────────────
-require_once __DIR__ . '/Conn/conexion.php';   // define $pdo
+require_once 'Conn/conexion.php';
 
-// ── Enrutador ─────────────────────────────────────────────────────────────────
 $page = $_GET['page'] ?? 'login';
 
 switch ($page) {
-
     case 'login':
         require_once 'Controlador/ControladorAutenticacion.php';
         (new ControladorAutenticacion($pdo))->index();
@@ -27,21 +24,46 @@ switch ($page) {
 
     case 'admin':
         require_once 'Controlador/ControladorAdmin.php';
-        (new ControladorAdmin($pdo))->index();
+        (new ControladorAdmin())->index();
+        break;
+
+    case 'admin_crear_servicio':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->crearServicio();
+        break;
+
+    case 'admin_actualizar_servicio':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->actualizarServicio();
+        break;
+
+    case 'admin_eliminar_servicio':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarServicio();
+        break;
+
+    case 'admin_crear_producto':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->crearProducto();
+        break;
+
+    case 'admin_actualizar_producto':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->actualizarProducto();
+        break;
+
+    case 'admin_eliminar_producto':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarProducto();
         break;
 
     case 'empleado':
         require_once 'Controlador/ControladorEmpleado.php';
-        (new ControladorEmpleado($pdo))->index();
-        break;
-
-    case 'guardar_venta':
-        require_once 'Controlador/ControladorEmpleado.php';
-        (new ControladorEmpleado($pdo))->guardarVenta();
+        (new ControladorEmpleado())->index();
         break;
 
     default:
         http_response_code(404);
-        echo 'Página no encontrada.';
+        echo "Página no encontrada.";
         break;
 }
