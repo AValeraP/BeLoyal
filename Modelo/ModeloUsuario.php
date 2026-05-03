@@ -1,24 +1,21 @@
 <?php
 
-class UsuarioModel
+class ModeloUsuario
 {
-    private $pdo;
+    private PDO $pdo;
 
-    public function __construct()
+    public function __construct(PDO $pdo)
     {
-        // Incluimos la conexión; $pdo queda disponible en este scope
-        require_once __DIR__ . '/../Conn/conexion.php';
         $this->pdo = $pdo;
     }
 
     /**
-     * Busca un usuario por email y devuelve el registro completo,
-     * o false si no existe.
+     * Busca un usuario por email. Devuelve el registro completo o false.
      */
     public function buscarPorEmail(string $email)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id_usuario, nombre, email, password, rol, activo
+            "SELECT id_usuario, nombre, email, password, rol, especialidad, activo
              FROM usuarios
              WHERE email = :email
              LIMIT 1"
