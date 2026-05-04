@@ -19,4 +19,19 @@ class ModeloProductos
     {
         return json_decode(file_get_contents($this->dir . 'bebidas.json'), true) ?? [];
     }
+
+    public function obtenerServiciosPeluqueros(): array
+    {
+        return json_decode(file_get_contents($this->dir . 'servicios_peluqueros.json'), true) ?? [];
+    }
+
+    public function obtenerServiciosTrenzas(): array
+    {
+        return json_decode(file_get_contents($this->dir . 'servicios_trenzas.json'), true) ?? [];
+    }
+
+    public function obtenerServiciosUnas(): array
+    {
+        return json_decode(file_get_contents($this->dir . 'servicios_unas.json'), true) ?? [];
+    }
 }

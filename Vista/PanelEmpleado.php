@@ -1,9 +1,6 @@
 <?php
-function extraerPrecio(string $texto): float {
-    return (float) preg_replace('/[^0-9.]/', '', str_replace(',', '.', $texto));
-}
 $twJson = json_encode(
-    array_map(fn($t) => ['id' => $t['id'], 'nombre' => $t['nombre'], 'rol' => $t['rol']], $trabajadores),
+    ['id' => $usuario['id'], 'nombre' => $usuario['nombre'], 'rol' => $usuario['rol']],
     JSON_UNESCAPED_UNICODE
 );
 ?>
@@ -12,29 +9,24 @@ $twJson = json_encode(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TPV Peluquería</title>
+    <title>TPV – <?= htmlspecialchars($usuario['nombre']) ?></title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
 
         .header { background: #222; color: #fff; padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; }
         .header h1 { font-size: 1.1rem; }
-        .header a { color: #ccc; font-size: 0.85rem; text-decoration: none; }
+        .header-user { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: #ccc; }
+        .header a { color: #ccc; text-decoration: none; }
         .header a:hover { color: #fff; }
 
-        .tabs { background: #333; display: flex; gap: 0.5rem; padding: 0.6rem 1.5rem; overflow-x: auto; }
-        .tab-btn { background: transparent; border: 1px solid #555; color: #ccc; padding: 0.4rem 1.1rem; border-radius: 20px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; position: relative; }
-        .tab-btn:hover { border-color: #aaa; color: #fff; }
-        .tab-btn.active { background: #d4a017; border-color: #d4a017; color: #000; font-weight: bold; }
-        .tab-badge { display: none; position: absolute; top: -6px; right: -6px; background: red; color: #fff; border-radius: 50%; font-size: 0.7rem; width: 18px; height: 18px; line-height: 18px; text-align: center; }
+        .worker-bar { background: #333; padding: 0.8rem 1.5rem; border-bottom: 2px solid #d4a017; }
+        .worker-bar h2 { color: #d4a017; font-size: 1rem; }
+        .worker-bar span { color: #999; font-size: 0.85rem; }
 
         .main { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 100px); }
 
         .servicios { overflow-y: auto; padding: 1.2rem; }
-        .worker-panel { display: none; }
-        .worker-panel.active { display: block; }
-        .worker-title { font-size: 1.3rem; font-weight: bold; margin-bottom: 0.3rem; }
-        .worker-rol { display: inline-block; background: #eee; color: #555; font-size: 0.78rem; padding: 0.2rem 0.6rem; border-radius: 20px; margin-bottom: 1.2rem; }
         .seccion-titulo { font-size: 0.78rem; font-weight: bold; text-transform: uppercase; color: #888; letter-spacing: 0.08em; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-bottom: 0.7rem; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.6rem; margin-bottom: 1.5rem; }
 
@@ -93,61 +85,62 @@ $twJson = json_encode(
 
 <div class="header">
     <h1>✂️ TPV Peluquería</h1>
-    <span>👤 <?= htmlspecialchars($usuario['nombre']) ?> &nbsp;|&nbsp;
+    <div class="header-user">
+        <span>👤 <?= htmlspecialchars($usuario['nombre']) ?></span>
         <a href="index.php?page=logout">Cerrar sesión</a>
-    </span>
+    </div>
 </div>
 
-<div class="tabs">
-    <?php foreach ($trabajadores as $i => $t): ?>
-    <button class="tab-btn <?= $i === 0 ? 'active' : '' ?>"
-            id="tab-<?= $t['id'] ?>"
-            onclick="seleccionarTrabajador('<?= $t['id'] ?>')">
-        <?= htmlspecialchars($t['nombre']) ?>
-        <span class="tab-badge" id="badge-<?= $t['id'] ?>">0</span>
-    </button>
-    <?php endforeach; ?>
+<div class="worker-bar">
+    <h2><?= htmlspecialchars($usuario['nombre']) ?></h2>
+    <span><?= htmlspecialchars(ucfirst($especialidad)) ?></span>
 </div>
 
 <div class="main">
 
     <div class="servicios">
-        <?php foreach ($trabajadores as $i => $t): ?>
-        <div class="worker-panel <?= $i === 0 ? 'active' : '' ?>" id="panel-<?= $t['id'] ?>">
 
-            <div class="worker-title"><?= htmlspecialchars($t['nombre']) ?></div>
-            <span class="worker-rol"><?= htmlspecialchars($t['rol']) ?></span>
-
-            <?php if ($t['bonos'] && !empty($bonos)): ?>
-            <div class="seccion-titulo">🎟 Bonos</div>
-            <div class="grid">
-                <?php foreach ($bonos as $bi => $b): ?>
-                <div class="card bono" onclick="anadir('bono_<?= $bi ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
-                    <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
-                    <div class="card-precio">Precio a acordar</div>
-                </div>
-                <?php endforeach; ?>
+        <!-- Servicios propios -->
+        <div class="seccion-titulo"><?= $seccionTitulo ?></div>
+        <div class="grid">
+            <?php foreach ($servicios as $s): ?>
+            <div class="card" onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>)">
+                <div class="card-nombre"><?= htmlspecialchars($s['nombre']) ?></div>
+                <div class="card-precio">€<?= $s['precio'] ?></div>
             </div>
-            <?php endif; ?>
-
-            <div class="seccion-titulo">☕ Bebidas</div>
-            <div class="grid">
-                <?php foreach ($bebidas as $b): ?>
-                <div class="card bebida" onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= extraerPrecio($b['precio']) ?>)">
-                    <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
-                    <div class="card-precio"><?= htmlspecialchars($b['precio']) ?></div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
+
+        <!-- Bonos solo para peluqueros -->
+        <?php if ($mostrarBonos && !empty($bonos)): ?>
+        <div class="seccion-titulo">🎟 Bonos</div>
+        <div class="grid">
+            <?php foreach ($bonos as $bi => $b): ?>
+            <div class="card bono" onclick="anadir('bono_<?= $bi ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
+                <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
+                <div class="card-precio">€<?= $b['precio'] ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- Bebidas para todos -->
+        <div class="seccion-titulo">☕ Bebidas</div>
+        <div class="grid">
+            <?php foreach ($bebidas as $b): ?>
+            <div class="card bebida" onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
+                <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
+                <div class="card-precio">€<?= $b['precio'] ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
     </div>
 
     <div class="carrito">
         <div class="carrito-header">
             <h2>🛒 Carrito</h2>
-            <div class="carrito-worker" id="carrito-nombre">-</div>
+            <div class="carrito-worker"><?= htmlspecialchars($usuario['nombre']) ?></div>
         </div>
         <div class="carrito-items" id="carrito-items">
             <div class="carrito-vacio">
@@ -170,7 +163,7 @@ $twJson = json_encode(
 <div class="modal-overlay" id="modal">
     <div class="modal">
         <h2>Confirmar cobro</h2>
-        <div class="modal-sub" id="modal-nombre"></div>
+        <div class="modal-sub"><?= htmlspecialchars($usuario['nombre']) ?></div>
         <div class="modal-importe">
             <div class="modal-importe-label">Total</div>
             <div class="modal-importe-num" id="modal-total">€0,00</div>
@@ -183,47 +176,30 @@ $twJson = json_encode(
 </div>
 
 <script>
-const trabajadores = <?php echo $twJson; ?>;
-const carritos = {};
-trabajadores.forEach(t => carritos[t.id] = {});
-let activo = trabajadores[0].id;
-
-function seleccionarTrabajador(id) {
-    activo = id;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active');
-    document.querySelectorAll('.worker-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-    const t = trabajadores.find(x => x.id === id);
-    document.getElementById('carrito-nombre').textContent = t.nombre + ' · ' + t.rol;
-    renderizar();
-}
+const carrito = {};
 
 function anadir(itemId, nombre, precio) {
-    if (!carritos[activo][itemId]) {
-        carritos[activo][itemId] = { nombre: nombre, precio: parseFloat(precio) || 0, cantidad: 0 };
+    if (!carrito[itemId]) {
+        carrito[itemId] = { nombre: nombre, precio: parseFloat(precio) || 0, cantidad: 0 };
     }
-    carritos[activo][itemId].cantidad++;
+    carrito[itemId].cantidad++;
     renderizar();
-    actualizarBadge(activo);
 }
 
 function quitar(itemId) {
-    if (!carritos[activo][itemId]) return;
-    carritos[activo][itemId].cantidad--;
-    if (carritos[activo][itemId].cantidad <= 0) delete carritos[activo][itemId];
+    if (!carrito[itemId]) return;
+    carrito[itemId].cantidad--;
+    if (carrito[itemId].cantidad <= 0) delete carrito[itemId];
     renderizar();
-    actualizarBadge(activo);
 }
 
 function limpiarCarrito() {
-    carritos[activo] = {};
+    Object.keys(carrito).forEach(k => delete carrito[k]);
     renderizar();
-    actualizarBadge(activo);
 }
 
 function renderizar() {
-    const items = Object.entries(carritos[activo]);
+    const items = Object.entries(carrito);
     const el = document.getElementById('carrito-items');
     if (!items.length) {
         el.innerHTML = '<div class="carrito-vacio"><span style="font-size:2rem">🛒</span><span>Carrito vacío</span></div>';
@@ -237,33 +213,24 @@ function renderizar() {
         html += '<div class="item">'
             + '<div class="item-info">'
             + '<div class="item-nombre">' + item.nombre + '</div>'
-            + '<div class="item-precio">' + (item.precio > 0 ? '€' + item.precio.toFixed(2) + ' c/u' : 'Precio a acordar') + '</div>'
+            + '<div class="item-precio">€' + item.precio.toFixed(2) + ' c/u</div>'
             + '</div>'
             + '<div class="item-controles">'
             + '<button class="btn-qty" onclick="quitar(\'' + id + '\')">−</button>'
             + '<span class="item-qty">' + item.cantidad + '</span>'
             + '<button class="btn-qty" onclick="anadir(\'' + id + '\', \'' + item.nombre + '\', ' + item.precio + ')">+</button>'
             + '</div>'
-            + '<div class="item-total">' + (item.precio > 0 ? '€' + sub.toFixed(2) : '-') + '</div>'
+            + '<div class="item-total">€' + sub.toFixed(2) + '</div>'
             + '</div>';
     });
     el.innerHTML = html;
     document.getElementById('total').textContent = '€' + total.toFixed(2);
 }
 
-function actualizarBadge(id) {
-    const n = Object.values(carritos[id]).reduce((a, i) => a + i.cantidad, 0);
-    const badge = document.getElementById('badge-' + id);
-    badge.style.display = n > 0 ? 'inline-block' : 'none';
-    badge.textContent = n;
-}
-
 function abrirModal() {
-    const items = Object.values(carritos[activo]);
+    const items = Object.values(carrito);
     if (!items.length) { alert('El carrito está vacío'); return; }
     const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
-    const t = trabajadores.find(x => x.id === activo);
-    document.getElementById('modal-nombre').textContent = t.nombre + ' · ' + t.rol;
     document.getElementById('modal-total').textContent = '€' + total.toFixed(2);
     document.getElementById('modal').classList.add('open');
 }
@@ -278,8 +245,6 @@ function confirmarCobro() {
 document.getElementById('modal').addEventListener('click', function(e) {
     if (e.target === this) cerrarModal();
 });
-
-seleccionarTrabajador(trabajadores[0].id);
 </script>
 </body>
 </html>
