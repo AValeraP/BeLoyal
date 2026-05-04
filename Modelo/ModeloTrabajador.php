@@ -1,33 +1,28 @@
 <?php
-
+ 
 class ModeloTrabajador
 {
-    // Para añadir un trabajador nuevo, añade una entrada aquí.
-    // 'bonos' => true  si el trabajador vende bonos
-    // 'unas'  => true  si el trabajador hace uñas (solo ve bebidas + uñas en el futuro)
-    private array $trabajadores = [
-        [
-            'id'     => 'luis',
-            'nombre' => 'Luis',
-            'rol'    => 'Barbero',
-            'bonos'  => true,
-        ],
-        [
-            'id'     => 'maria',
-            'nombre' => 'María',
-            'rol'    => 'Estilista',
-            'bonos'  => false,
-        ],
-        [
-            'id'     => 'sofia',
-            'nombre' => 'Sofía',
-            'rol'    => 'Manicurista',
-            'bonos'  => false,
-        ],
-    ];
-
-    public function obtenerTodos(): array
+    private PDO $pdo;
+ 
+    public function __construct(PDO $pdo)
     {
-        return $this->trabajadores;
+        $this->pdo = $pdo;
+    }
+ 
+    /**
+     * Devuelve los datos del empleado por su id desde la BD.
+     */
+    public function obtenerPorId(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id_usuario, nombre, email, rol, especialidad
+             FROM usuarios
+             WHERE id_usuario = :id AND activo = 1
+             LIMIT 1"
+        );
+        $stmt->execute([':id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
     }
 }
+ 

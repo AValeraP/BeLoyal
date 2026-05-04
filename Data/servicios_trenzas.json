@@ -1,0 +1,7 @@
+[
+    {"id": "1", "nombre": "Lavado de pelo", "descripcion": "", "precio": "5"},
+    {"id": "2", "nombre": "Trenzas básicas", "descripcion": "", "precio": "40"},
+    {"id": "3", "nombre": "Twist", "descripcion": "", "precio": "170"},
+    {"id": "4", "nombre": "Pony Tail Braids", "descripcion": "", "precio": "75"},
+    {"id": "5", "nombre": "Crochet Braids", "descripcion": "", "precio": "150"}
+]
