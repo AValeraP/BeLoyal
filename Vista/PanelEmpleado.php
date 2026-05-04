@@ -76,9 +76,16 @@ $twJson = json_encode(
         .modal-importe { background: #f5f5f5; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1.2rem; }
         .modal-importe-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
         .modal-importe-num { font-size: 2.2rem; font-weight: bold; color: #d4a017; }
+        /* .modal-metodo oculto temporalmente, se habilitará más adelante */
+        .modal-metodo { display: none; gap: 0.5rem; margin-bottom: 1.2rem; }
+        .btn-metodo { flex: 1; padding: 0.6rem; border: 2px solid #ddd; background: #fff; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s; }
+        .btn-metodo.active { border-color: #d4a017; background: #d4a017; color: #000; }
         .modal-btns { display: flex; gap: 0.6rem; }
         .btn-cancelar { flex: 1; padding: 0.7rem; border: 1px solid #ddd; background: transparent; border-radius: 8px; cursor: pointer; }
         .btn-confirmar { flex: 2; padding: 0.7rem; border: none; background: #27ae60; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-confirmar:disabled { background: #aaa; cursor: not-allowed; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #27ae60; color: #fff; padding: 0.8rem 1.4rem; border-radius: 8px; font-weight: bold; font-size: 0.9rem; z-index: 200; display: none; }
+        .toast.error { background: #c0392b; }
     </style>
 </head>
 <body>
@@ -104,7 +111,7 @@ $twJson = json_encode(
         <div class="seccion-titulo"><?= $seccionTitulo ?></div>
         <div class="grid">
             <?php foreach ($servicios as $s): ?>
-            <div class="card" onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>)">
+            <div class="card" onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>, 'servicio', <?= $s['id'] ?>)">
                 <div class="card-nombre"><?= htmlspecialchars($s['nombre']) ?></div>
                 <div class="card-precio">€<?= $s['precio'] ?></div>
             </div>
@@ -115,8 +122,8 @@ $twJson = json_encode(
         <?php if ($mostrarBonos && !empty($bonos)): ?>
         <div class="seccion-titulo">🎟 Bonos</div>
         <div class="grid">
-            <?php foreach ($bonos as $bi => $b): ?>
-            <div class="card bono" onclick="anadir('bono_<?= $bi ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
+            <?php foreach ($bonos as $b): ?>
+            <div class="card bono" onclick="anadir('svc_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'servicio', <?= $b['id'] ?>)">
                 <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
                 <div class="card-precio">€<?= $b['precio'] ?></div>
             </div>
@@ -128,7 +135,7 @@ $twJson = json_encode(
         <div class="seccion-titulo">☕ Bebidas</div>
         <div class="grid">
             <?php foreach ($bebidas as $b): ?>
-            <div class="card bebida" onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
+            <div class="card bebida" onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'producto', <?= $b['id'] ?>)">
                 <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
                 <div class="card-precio">€<?= $b['precio'] ?></div>
             </div>
@@ -160,6 +167,7 @@ $twJson = json_encode(
 
 </div>
 
+<!-- MODAL COBRO -->
 <div class="modal-overlay" id="modal">
     <div class="modal">
         <h2>Confirmar cobro</h2>
@@ -168,19 +176,34 @@ $twJson = json_encode(
             <div class="modal-importe-label">Total</div>
             <div class="modal-importe-num" id="modal-total">€0,00</div>
         </div>
+        <div class="modal-metodo">
+            <button class="btn-metodo active" id="btn-efectivo" onclick="seleccionarMetodo('efectivo')">💵 Efectivo</button>
+            <button class="btn-metodo" id="btn-tarjeta" onclick="seleccionarMetodo('tarjeta')">💳 Tarjeta</button>
+            <button class="btn-metodo" id="btn-bizum" onclick="seleccionarMetodo('bizum')">📱 Bizum</button>
+        </div>
         <div class="modal-btns">
             <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-confirmar" onclick="confirmarCobro()">✓ Confirmar</button>
+            <button class="btn-confirmar" id="btn-confirmar" onclick="confirmarCobro()">✓ Confirmar</button>
         </div>
     </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const carrito = {};
+let metodoPago = 'efectivo';
 
-function anadir(itemId, nombre, precio) {
+function seleccionarMetodo(metodo) {
+    metodoPago = metodo;
+    ['efectivo', 'tarjeta', 'bizum'].forEach(m => {
+        document.getElementById('btn-' + m).classList.toggle('active', m === metodo);
+    });
+}
+
+function anadir(itemId, nombre, precio, tipo, idReal) {
     if (!carrito[itemId]) {
-        carrito[itemId] = { nombre: nombre, precio: parseFloat(precio) || 0, cantidad: 0 };
+        carrito[itemId] = { nombre, precio: parseFloat(precio) || 0, cantidad: 0, tipo, idReal };
     }
     carrito[itemId].cantidad++;
     renderizar();
@@ -218,7 +241,7 @@ function renderizar() {
             + '<div class="item-controles">'
             + '<button class="btn-qty" onclick="quitar(\'' + id + '\')">−</button>'
             + '<span class="item-qty">' + item.cantidad + '</span>'
-            + '<button class="btn-qty" onclick="anadir(\'' + id + '\', \'' + item.nombre + '\', ' + item.precio + ')">+</button>'
+            + '<button class="btn-qty" onclick="anadir(\'' + id + '\', \'' + item.nombre.replace(/'/g, "\\'") + '\', ' + item.precio + ', \'' + item.tipo + '\', ' + item.idReal + ')">+</button>'
             + '</div>'
             + '<div class="item-total">€' + sub.toFixed(2) + '</div>'
             + '</div>';
@@ -232,14 +255,52 @@ function abrirModal() {
     if (!items.length) { alert('El carrito está vacío'); return; }
     const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
     document.getElementById('modal-total').textContent = '€' + total.toFixed(2);
+    seleccionarMetodo('efectivo');
     document.getElementById('modal').classList.add('open');
 }
 
 function cerrarModal() { document.getElementById('modal').classList.remove('open'); }
 
-function confirmarCobro() {
-    cerrarModal();
-    limpiarCarrito();
+function mostrarToast(msg, error = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (error ? ' error' : '');
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+}
+
+async function confirmarCobro() {
+    const btn = document.getElementById('btn-confirmar');
+    btn.disabled = true;
+
+    const items = Object.values(carrito).map(i => ({
+        tipo:     i.tipo,
+        id:       i.idReal,
+        cantidad: i.cantidad,
+        precio:   i.precio,
+    }));
+    const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
+
+    try {
+        const res = await fetch('index.php?page=registrar_venta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, total: total.toFixed(2), metodo_pago: metodoPago }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            cerrarModal();
+            limpiarCarrito();
+            mostrarToast('✓ Venta registrada correctamente');
+        } else {
+            mostrarToast('Error: ' + data.error, true);
+        }
+    } catch (e) {
+        mostrarToast('Error de conexión', true);
+    }
+
+    btn.disabled = false;
 }
 
 document.getElementById('modal').addEventListener('click', function(e) {
