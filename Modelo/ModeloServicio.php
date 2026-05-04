@@ -9,47 +9,37 @@ class ModeloServicio
         $this->pdo = $pdo;
     }
 
-    /**
-     * Devuelve los servicios que corresponden a la especialidad del empleado
-     * MÁS siempre las bebidas (categoría 'bebida').
-     *
-     * Si la especialidad es 'todas', devuelve todos los servicios excepto bebidas.
-     */
-    public function obtenerPorEspecialidad(string $especialidad): array
+    public function obtenerTodos(): array
     {
-        if ($especialidad === 'todas') {
-            // Admin o empleado con acceso total: todo excepto bebidas
-            $stmt = $this->pdo->prepare(
-                "SELECT id_servicio, nombre, categoria, precio
-                 FROM servicios
-                 WHERE activo = 1 AND categoria != 'bebida'
-                 ORDER BY categoria, nombre"
-            );
-            $stmt->execute();
-        } else {
-            // Solo su especialidad + bebidas
-            $stmt = $this->pdo->prepare(
-                "SELECT id_servicio, nombre, categoria, precio
-                 FROM servicios
-                 WHERE activo = 1 AND (categoria = :especialidad OR categoria = 'bebida')
-                 ORDER BY categoria, nombre"
-            );
-            $stmt->execute([':especialidad' => $especialidad]);
-        }
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->pdo->query("SELECT * FROM servicios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Agrupa los servicios por categoría para renderizado en la vista.
-     * Devuelve un array [ 'barberia' => [...], 'bebida' => [...], ... ]
-     */
-    public function agruparPorCategoria(array $servicios): array
+    public function obtenerPorId(int $id): ?array
     {
-        $grupos = [];
-        foreach ($servicios as $s) {
-            $grupos[$s['categoria']][] = $s;
-        }
-        return $grupos;
+        $stmt = $this->pdo->prepare("SELECT * FROM servicios WHERE id_servicio = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function crear(string $nombre, float $precio, int $duracion): void
+    {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO servicios (nombre, precio, duracion, activo) VALUES (:nombre, :precio, :duracion, 1)"
+        );
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion]);
+    }
+
+    public function actualizar(int $id, string $nombre, float $precio, int $duracion): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion WHERE id_servicio = :id"
+        );
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':id' => $id]);
+    }
+
+    public function eliminar(int $id): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 0 WHERE id_servicio = :id");
+        $stmt->execute([':id' => $id]);
     }
 }
