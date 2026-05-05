@@ -37,13 +37,13 @@ class ControladorEmpleado
 
         if ($especialidad === 'peluqueria' || $especialidad === 'todas') {
             $servicios     = $modeloProductos->obtenerServiciosPeluqueros();
-            $seccionTitulo = '✂️ Servicios';
+            $seccionTitulo = 'Servicios';
         } elseif ($especialidad === 'trenzas') {
             $servicios     = $modeloProductos->obtenerServiciosTrenzas();
-            $seccionTitulo = '💇 Trenzas';
+            $seccionTitulo = 'Trenzas';
         } elseif ($especialidad === 'unas') {
             $servicios     = $modeloProductos->obtenerServiciosUnas();
-            $seccionTitulo = '💅 Uñas';
+            $seccionTitulo = 'Uñas';
         } else {
             $servicios     = [];
             $seccionTitulo = 'Servicios';
