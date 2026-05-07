@@ -12,7 +12,7 @@ class ModeloTrabajador
     public function obtenerTodos(): array
     {
         $stmt = $this->pdo->query(
-            "SELECT id_usuario, nombre, email, rol, activo, especialidad
+            "SELECT id_usuario, nombre, email, rol, activo, especialidad, logo
              FROM usuarios
              WHERE rol = 'empleado'
              ORDER BY nombre"
@@ -23,7 +23,7 @@ class ModeloTrabajador
     public function obtenerPorId(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id_usuario, nombre, email, rol, activo, especialidad
+            "SELECT id_usuario, nombre, email, rol, activo, especialidad, logo
              FROM usuarios
              WHERE id_usuario = :id
              LIMIT 1"
@@ -77,10 +77,10 @@ class ModeloTrabajador
     }
 
     public function desactivar(int $id): void
-{
-    $stmt = $this->pdo->prepare(
-        "UPDATE usuarios SET activo = 0 WHERE id_usuario = :id AND rol = 'empleado'"
-    );
-    $stmt->execute([':id' => $id]);
-}
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE usuarios SET activo = 0 WHERE id_usuario = :id AND rol = 'empleado'"
+        );
+        $stmt->execute([':id' => $id]);
+    }
 }

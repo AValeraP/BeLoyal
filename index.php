@@ -62,24 +62,31 @@ switch ($page) {
         (new ControladorEmpleado())->index();
         break;
 
+    case 'admin_crear_empleado':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->crearEmpleado();
+        break;
+
+    case 'admin_actualizar_empleado':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->actualizarEmpleado();
+        break;
+
+    case 'admin_eliminar_empleado':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarEmpleado();
+        break;
+
+    case 'admin_resetear_ventas':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->resetearVentas();
+        break;
+
     case 'registrar_venta':
         require_once 'Controlador/ControladorVenta.php';
         (new ControladorVenta())->registrar();
         break;
-    case 'admin_crear_empleado':
-    require_once 'Controlador/ControladorAdmin.php';
-    (new ControladorAdmin())->crearEmpleado();
-    break;
 
-    case 'admin_actualizar_empleado':
-    require_once 'Controlador/ControladorAdmin.php';
-    (new ControladorAdmin())->actualizarEmpleado();
-    break;
-
-    case 'admin_eliminar_empleado':
-    require_once 'Controlador/ControladorAdmin.php';
-    (new ControladorAdmin())->eliminarEmpleado();
-    break;
     default:
         http_response_code(404);
         echo "Página no encontrada.";

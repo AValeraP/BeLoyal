@@ -12,20 +12,18 @@ class ControladorAutenticacion
         $this->model = new ModeloUsuario($pdo);
     }
 
-    /** Muestra el formulario de login (GET). */
     public function index(): void
     {
         if (!empty($_SESSION['usuario'])) {
             $this->redirigirSegunRol($_SESSION['usuario']['rol']);
         }
 
-        $error = $_SESSION['login_error'] ?? null;
+        $mensajeerror = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
 
         require_once __DIR__ . '/../Vista/LogIn.php';
     }
 
-    /** Procesa el formulario de login (POST). */
     public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -45,12 +43,11 @@ class ControladorAutenticacion
         $usuario = $this->model->buscarPorEmail($email);
 
         if (!$usuario || $password !== $usuario['password'] || !$usuario['activo']) {
-            $_SESSION['login_error'] = 'Credenciales incorrectas.';
+            $_SESSION['login_error'] = 'Email o contraseña incorrectos.';
             header('Location: index.php?page=login');
             exit;
         }
 
-        // Guardamos en sesión — incluimos especialidad
         $_SESSION['usuario'] = [
             'id'          => $usuario['id_usuario'],
             'nombre'      => $usuario['nombre'],
@@ -62,15 +59,12 @@ class ControladorAutenticacion
         $this->redirigirSegunRol($usuario['rol']);
     }
 
-    /** Cierra sesión y redirige al login. */
     public function logout(): void
     {
         session_destroy();
         header('Location: index.php?page=login');
         exit;
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private function redirigirSegunRol(string $rol): void
     {
