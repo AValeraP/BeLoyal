@@ -33,6 +33,7 @@
         }
     </style>
 </head>
+<?php include __DIR__ . '/PasarelaPago.php'; ?>
 <body class="bg-marble flex flex-col h-screen overflow-hidden text-white">
 
 <!-- HEADER -->
@@ -251,8 +252,16 @@ function mostrarToast(msg, error = false) {
 }
 
 async function confirmarCobro() {
+    // Abre la pasarela de pago — cuando el cobro se complete,
+    // PasarelaPago.php llamará a registrarVenta() automáticamente
+    const items = Object.assign({}, carrito);
+    const total = Object.values(carrito).reduce((a, i) => a + i.precio * i.cantidad, 0);
+    window.abrirPasarela(items, total);
+}
+
+async function registrarVenta(metodoPago) {
     const btn = document.getElementById('btn-confirmar');
-    btn.disabled = true;
+    if (btn) btn.disabled = true;
     const items = Object.values(carrito).map(i => ({ tipo: i.tipo, id: i.idReal, cantidad: i.cantidad, precio: i.precio }));
     const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
     try {
@@ -267,13 +276,15 @@ async function confirmarCobro() {
     } catch (e) {
         mostrarToast('Error de conexión', true);
     }
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
 }
 
 document.getElementById('modal').addEventListener('click', function(e) {
     if (e.target === this) cerrarModal();
 });
 </script>
+
+<?php include __DIR__ . '/PasarelaPago.php'; ?>
 
 </body>
 </html>

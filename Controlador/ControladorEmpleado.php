@@ -49,6 +49,7 @@ class ControladorEmpleado
             $seccionTitulo = 'Servicios';
         }
 
+        $stripePublicKey = 'pk_test_51TUYfWBLLZWK8N7qmlmzbvfPdsNrRUdoCNEmJi0JLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK'; 
         require_once __DIR__ . '/../Vista/PanelEmpleado.php';
     }
 
