@@ -11,40 +11,46 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
-
         .bg-marble {
             background-color: #1a1a1a;
             background-image:
                 radial-gradient(ellipse at 10% 20%, rgba(255,255,255,0.04) 0%, transparent 50%),
                 radial-gradient(ellipse at 90% 80%, rgba(255,255,255,0.03) 0%, transparent 50%),
                 radial-gradient(ellipse at 60% 40%, rgba(200,200,200,0.02) 0%, transparent 40%),
-                repeating-linear-gradient(
-                    115deg,
-                    transparent 0px, transparent 20px,
-                    rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px,
-                    transparent 21px, transparent 45px,
-                    rgba(255,255,255,0.008) 45px, rgba(255,255,255,0.008) 46px
-                ),
-                repeating-linear-gradient(
-                    68deg,
-                    transparent 0px, transparent 35px,
-                    rgba(255,255,255,0.01) 35px, rgba(255,255,255,0.01) 36px
-                );
+                repeating-linear-gradient(115deg, transparent 0px, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px, transparent 21px, transparent 45px, rgba(255,255,255,0.008) 45px, rgba(255,255,255,0.008) 46px),
+                repeating-linear-gradient(68deg, transparent 0px, transparent 35px, rgba(255,255,255,0.01) 35px, rgba(255,255,255,0.01) 36px);
         }
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 0.65rem 1.4rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0;
+            white-space: nowrap;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.ok  { border-color: #34d399; color: #34d399; }
+        .toast.err { border-color: #f87171; color: #f87171; }
     </style>
 </head>
-<?php include __DIR__ . '/PasarelaPago.php'; ?>
 <body class="bg-marble flex flex-col h-screen overflow-hidden text-white">
 
 <!-- HEADER -->
 <header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-6 flex-shrink-0">
     <p class="text-sm font-semibold tracking-widest uppercase text-white">Be Loyal</p>
     <div class="flex items-center gap-4">
-        <?php if (!empty($trabajador['logo'])): ?>
-            <img src="public/img/logos/<?= htmlspecialchars($trabajador['logo']) ?>"
-                 alt="<?= htmlspecialchars($trabajador['nombre']) ?>"
-                 class="w-8 h-8 rounded-full object-cover ring-2 ring-white/20">
-        <?php endif; ?>
         <span class="text-xs text-zinc-400"><?= htmlspecialchars($usuario['nombre']) ?></span>
         <a href="index.php?page=logout" class="text-xs text-zinc-500 hover:text-white transition">Cerrar sesión</a>
     </div>
@@ -64,7 +70,6 @@
     <!-- SERVICIOS -->
     <div class="flex-1 overflow-y-auto p-6">
 
-        <!-- Servicios propios -->
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= $seccionTitulo ?></p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($servicios as $s): ?>
@@ -76,7 +81,6 @@
             <?php endforeach; ?>
         </div>
 
-        <!-- Bonos -->
         <?php if ($mostrarBonos && !empty($bonos)): ?>
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bonos</p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
@@ -91,7 +95,6 @@
         </div>
         <?php endif; ?>
 
-        <!-- Bebidas -->
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bebidas</p>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] auto-rows-fr gap-3">
             <?php foreach ($bebidas as $b): ?>
@@ -107,84 +110,37 @@
 
     <!-- CARRITO -->
     <div class="w-72 bg-black/50 backdrop-blur-sm border-l border-white/10 flex flex-col flex-shrink-0">
-
         <div class="px-5 py-4 border-b border-white/10">
             <p class="text-sm font-medium text-white">Carrito</p>
             <p class="text-xs text-zinc-500 mt-0.5"><?= htmlspecialchars($usuario['nombre']) ?></p>
         </div>
-
         <div class="flex-1 overflow-y-auto px-5 py-3" id="carrito-items">
-            <div class="h-full flex items-center justify-center text-zinc-600 text-xs">
-                Carrito vacío
-            </div>
+            <div class="h-full flex items-center justify-center text-zinc-600 text-xs">Carrito vacío</div>
         </div>
-
         <div class="px-5 py-4 border-t border-white/10">
             <div class="flex justify-between items-baseline mb-4">
                 <span class="text-xs text-zinc-500">Total</span>
                 <span class="text-2xl font-light text-white" id="total">€0,00</span>
             </div>
-            <button onclick="abrirModal()" class="w-full bg-white text-zinc-900 text-sm font-semibold py-3 rounded-xl hover:bg-zinc-100 transition mb-2">
+            <button onclick="abrirPasarela(Object.assign({}, carrito), Object.values(carrito).reduce((a,i) => a + i.precio * i.cantidad, 0))"
+                    class="w-full bg-white text-zinc-900 text-sm font-semibold py-3 rounded-xl hover:bg-zinc-100 transition mb-2">
                 Cobrar
             </button>
             <button onclick="limpiarCarrito()" class="w-full border border-white/10 text-zinc-600 text-xs py-2 rounded-xl hover:text-red-400 hover:border-red-900/50 transition">
                 Limpiar
             </button>
         </div>
-
     </div>
 
-</div>
-
-<!-- MODAL -->
-<div id="modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
-        <p class="text-base font-semibold text-white mb-0.5">Confirmar cobro</p>
-        <p class="text-xs text-zinc-500 mb-6"><?= htmlspecialchars($usuario['nombre']) ?></p>
-
-        <div class="bg-zinc-800/80 border border-white/10 rounded-xl p-5 text-center mb-6">
-            <p class="text-xs uppercase tracking-widest text-zinc-500 mb-2">Total</p>
-            <p class="text-4xl font-light text-white" id="modal-total">€0,00</p>
-        </div>
-
-        <!-- Método de pago — oculto temporalmente -->
-        <div style="display:none;" id="metodo-pago" class="flex gap-2 mb-5">
-            <button onclick="seleccionarMetodo('efectivo')" id="btn-efectivo" class="flex-1 border border-zinc-700 text-xs text-zinc-400 py-2 rounded-lg hover:border-white hover:text-white transition">Efectivo</button>
-            <button onclick="seleccionarMetodo('tarjeta')"  id="btn-tarjeta"  class="flex-1 border border-zinc-700 text-xs text-zinc-400 py-2 rounded-lg hover:border-white hover:text-white transition">Tarjeta</button>
-            <button onclick="seleccionarMetodo('bizum')"   id="btn-bizum"    class="flex-1 border border-zinc-700 text-xs text-zinc-400 py-2 rounded-lg hover:border-white hover:text-white transition">Bizum</button>
-        </div>
-
-        <div class="flex gap-3">
-            <button onclick="cerrarModal()" class="flex-1 border border-white/10 text-xs text-zinc-400 py-3 rounded-xl hover:text-white hover:border-white/30 transition">
-                Cancelar
-            </button>
-            <button onclick="confirmarCobro()" id="btn-confirmar" class="flex-1 bg-white text-zinc-900 text-xs font-semibold py-3 rounded-xl hover:bg-zinc-100 transition disabled:opacity-30">
-                ✓ Confirmar
-            </button>
-        </div>
-    </div>
 </div>
 
 <!-- TOAST -->
-<div id="toast" style="display:none;" class="fixed bottom-5 right-5 text-xs font-medium px-4 py-3 rounded-xl z-50 shadow-lg"></div>
+<div id="toast" class="toast"></div>
+
+<?php include __DIR__ . '/PasarelaPago.php'; ?>
 
 <script>
 const carrito = {};
-let metodoPago = 'efectivo';
-
-function seleccionarMetodo(metodo) {
-    metodoPago = metodo;
-    ['efectivo', 'tarjeta', 'bizum'].forEach(m => {
-        const btn = document.getElementById('btn-' + m);
-        if (m === metodo) {
-            btn.classList.add('border-white', 'text-white');
-            btn.classList.remove('border-zinc-700', 'text-zinc-400');
-        } else {
-            btn.classList.remove('border-white', 'text-white');
-            btn.classList.add('border-zinc-700', 'text-zinc-400');
-        }
-    });
-}
 
 function anadir(itemId, nombre, precio, tipo, idReal) {
     if (!carrito[itemId]) carrito[itemId] = { nombre, precio: parseFloat(precio) || 0, cantidad: 0, tipo, idReal };
@@ -233,36 +189,19 @@ function renderizar() {
     document.getElementById('total').textContent = '€' + total.toFixed(2);
 }
 
-function abrirModal() {
-    const items = Object.values(carrito);
-    if (!items.length) { alert('El carrito está vacío'); return; }
-    const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
-    document.getElementById('modal-total').textContent = '€' + total.toFixed(2);
-    document.getElementById('modal').style.display = 'flex';
-}
-
-function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
-
-function mostrarToast(msg, error = false) {
+function mostrarToast(msg, tipo = 'ok') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = `fixed bottom-5 right-5 text-xs font-medium px-4 py-3 rounded-xl z-50 shadow-lg ${error ? 'bg-red-900 text-red-200 border border-red-800' : 'bg-emerald-900 text-emerald-200 border border-emerald-800'}`;
-    t.style.display = 'block';
-    setTimeout(() => t.style.display = 'none', 3000);
+    t.className = 'toast show ' + tipo;
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-async function confirmarCobro() {
-    // Abre la pasarela de pago — cuando el cobro se complete,
-    // PasarelaPago.php llamará a registrarVenta() automáticamente
-    const items = Object.assign({}, carrito);
-    const total = Object.values(carrito).reduce((a, i) => a + i.precio * i.cantidad, 0);
-    window.abrirPasarela(items, total);
-}
-
+// Llamada desde PasarelaPago cuando el cobro se completa
 async function registrarVenta(metodoPago) {
-    const btn = document.getElementById('btn-confirmar');
-    if (btn) btn.disabled = true;
-    const items = Object.values(carrito).map(i => ({ tipo: i.tipo, id: i.idReal, cantidad: i.cantidad, precio: i.precio }));
+    const items = Object.values(carrito).map(i => ({
+        tipo: i.tipo, id: i.idReal, cantidad: i.cantidad, precio: i.precio
+    }));
     const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
     try {
         const res = await fetch('index.php?page=registrar_venta', {
@@ -271,20 +210,17 @@ async function registrarVenta(metodoPago) {
             body: JSON.stringify({ items, total: total.toFixed(2), metodo_pago: metodoPago }),
         });
         const data = await res.json();
-        if (data.ok) { cerrarModal(); limpiarCarrito(); mostrarToast('Venta registrada correctamente'); }
-        else mostrarToast('Error: ' + data.error, true);
+        if (data.ok) {
+            limpiarCarrito();
+            mostrarToast('✓ Venta registrada correctamente');
+        } else {
+            mostrarToast('Error: ' + data.error, 'err');
+        }
     } catch (e) {
-        mostrarToast('Error de conexión', true);
+        mostrarToast('Error de conexión', 'err');
     }
-    if (btn) btn.disabled = false;
 }
-
-document.getElementById('modal').addEventListener('click', function(e) {
-    if (e.target === this) cerrarModal();
-});
 </script>
-
-<?php include __DIR__ . '/PasarelaPago.php'; ?>
 
 </body>
 </html>

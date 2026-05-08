@@ -31,8 +31,8 @@ class ControladorPago
 
         // ── Configura aquí tus claves Stripe ────────────────────────────────
         // En producción usa variables de entorno o un archivo de config seguro.
-        $this->stripePublicKey  = getenv('STRIPE_PUBLIC_KEY')  ?: '';
-        $this->stripeSecretKey  = getenv('STRIPE_SECRET_KEY')  ?: '';
+        $this->stripePublicKey  = getenv('STRIPE_PUBLIC_KEY')  ?: 'pk_test_51TUYfWBLLZWK8N7qmlmzLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK';
+        $this->stripeSecretKey  = getenv('STRIPE_SECRET_KEY')  ?: 'sk_test_51TUYfWBLLZWK8N7qL0vyRb9xfJOP7w34ajwQp6Bxv5OjYjUIZTwLx0J4IahagHv25UbxFJ0jDEfabMxwmF8GClAb00InE8NGF2';
     }
 
     // ────────────────────────────────────────────────────────────────────────
