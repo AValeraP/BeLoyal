@@ -20,7 +20,6 @@
                 repeating-linear-gradient(115deg, transparent 0px, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px, transparent 21px, transparent 45px, rgba(255,255,255,0.008) 45px, rgba(255,255,255,0.008) 46px),
                 repeating-linear-gradient(68deg, transparent 0px, transparent 35px, rgba(255,255,255,0.01) 35px, rgba(255,255,255,0.01) 36px);
         }
-        /* TOAST */
         .toast {
             position: fixed;
             bottom: 1.5rem;
@@ -47,7 +46,7 @@
 </head>
 <body class="bg-marble flex flex-col h-screen overflow-hidden text-white">
 
-<!-- HEADER -->
+<!-- HEADER — foto arriba derecha -->
 <header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-6 flex-shrink-0">
     <p class="text-sm font-semibold tracking-widest uppercase text-white">Be Loyal</p>
     <div class="flex items-center gap-3">
@@ -66,26 +65,12 @@
     </div>
 </header>
 
-<!-- WORKER BAR -->
+<!-- WORKER BAR — sin foto -->
 <div class="bg-black/40 backdrop-blur-sm border-b border-white/10 px-6 py-3 flex-shrink-0 flex items-center gap-3">
-    <?php if (!empty($trabajador['logo'])): ?>
-    <img src="public/img/logos/<?= htmlspecialchars($trabajador['logo']) ?>"
-         alt="<?= htmlspecialchars($trabajador['nombre']) ?>"
-         class="w-8 h-8 rounded-full object-cover border border-white/20"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="w-8 h-8 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300" style="display:none">
-        <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
-    </div>
-    <?php else: ?>
-    <div class="w-8 h-8 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300">
-        <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
-    </div>
-    <?php endif; ?>
-    <div>
-        <p class="text-sm font-medium text-white"><?= htmlspecialchars($trabajador['nombre']) ?></p>
-        <p class="text-xs text-zinc-400"><?= htmlspecialchars(ucfirst($especialidad)) ?></p>
-    </div>
-    <div class="ml-1 w-2 h-2 rounded-full bg-emerald-400"></div>
+    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+    <p class="text-sm font-medium text-white"><?= htmlspecialchars($trabajador['nombre']) ?></p>
+    <span class="text-xs text-zinc-500">·</span>
+    <p class="text-xs text-zinc-400"><?= htmlspecialchars(ucfirst($especialidad)) ?></p>
 </div>
 
 <!-- MAIN -->
@@ -97,9 +82,9 @@
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= $seccionTitulo ?></p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($servicios as $s): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[110px]"
                  onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>, 'servicio', <?= $s['id'] ?>)">
-                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($s['nombre']) ?></p>
+                <p class="text-sm font-semibold text-white mb-2 leading-tight"><?= htmlspecialchars($s['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($s['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
@@ -109,10 +94,10 @@
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bonos</p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($bonos as $b): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[110px]"
                  onclick="anadir('svc_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'servicio', <?= $b['id'] ?>)">
-                <p class="text-xs text-zinc-500 mb-1">🎟 Bono</p>
-                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
+                <p class="text-xs text-zinc-500 mb-1">Bono</p>
+                <p class="text-sm font-semibold text-white mb-2 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
@@ -120,11 +105,11 @@
         <?php endif; ?>
 
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bebidas</p>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] auto-rows-fr gap-3">
+        <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             <?php foreach ($bebidas as $b): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[110px]"
                  onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'producto', <?= $b['id'] ?>)">
-                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
+                <p class="text-sm font-semibold text-white mb-2 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
@@ -221,7 +206,6 @@ function mostrarToast(msg, tipo = 'ok') {
     window._toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// Llamada desde PasarelaPago cuando el cobro se completa
 async function registrarVenta(metodoPago) {
     const items = Object.values(carrito).map(i => ({
         tipo: i.tipo, id: i.idReal, cantidad: i.cantidad, precio: i.precio
@@ -236,7 +220,7 @@ async function registrarVenta(metodoPago) {
         const data = await res.json();
         if (data.ok) {
             limpiarCarrito();
-            mostrarToast('✓ Venta registrada correctamente');
+            mostrarToast('Venta registrada correctamente');
         } else {
             mostrarToast('Error: ' + data.error, 'err');
         }
