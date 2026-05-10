@@ -50,18 +50,42 @@
 <!-- HEADER -->
 <header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-6 flex-shrink-0">
     <p class="text-sm font-semibold tracking-widest uppercase text-white">Be Loyal</p>
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
         <span class="text-xs text-zinc-400"><?= htmlspecialchars($usuario['nombre']) ?></span>
+        <?php if (!empty($trabajador['logo'])): ?>
+        <img src="public/img/logos/<?= htmlspecialchars($trabajador['logo']) ?>"
+             alt="<?= htmlspecialchars($trabajador['nombre']) ?>"
+             class="w-7 h-7 rounded-full object-cover border border-white/20"
+             onerror="this.style.display='none'">
+        <?php else: ?>
+        <div class="w-7 h-7 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300">
+            <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
+        </div>
+        <?php endif; ?>
         <a href="index.php?page=logout" class="text-xs text-zinc-500 hover:text-white transition">Cerrar sesión</a>
     </div>
 </header>
 
 <!-- WORKER BAR -->
 <div class="bg-black/40 backdrop-blur-sm border-b border-white/10 px-6 py-3 flex-shrink-0 flex items-center gap-3">
-    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-    <p class="text-sm font-medium text-white"><?= htmlspecialchars($usuario['nombre']) ?></p>
-    <span class="text-xs text-zinc-500">·</span>
-    <p class="text-xs text-zinc-400"><?= htmlspecialchars(ucfirst($especialidad)) ?></p>
+    <?php if (!empty($trabajador['logo'])): ?>
+    <img src="public/img/logos/<?= htmlspecialchars($trabajador['logo']) ?>"
+         alt="<?= htmlspecialchars($trabajador['nombre']) ?>"
+         class="w-8 h-8 rounded-full object-cover border border-white/20"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="w-8 h-8 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300" style="display:none">
+        <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
+    </div>
+    <?php else: ?>
+    <div class="w-8 h-8 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300">
+        <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
+    </div>
+    <?php endif; ?>
+    <div>
+        <p class="text-sm font-medium text-white"><?= htmlspecialchars($trabajador['nombre']) ?></p>
+        <p class="text-xs text-zinc-400"><?= htmlspecialchars(ucfirst($especialidad)) ?></p>
+    </div>
+    <div class="ml-1 w-2 h-2 rounded-full bg-emerald-400"></div>
 </div>
 
 <!-- MAIN -->

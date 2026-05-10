@@ -29,6 +29,42 @@ class ModeloInforme
         )->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Desglose de ingresos por método de pago (efectivo vs tarjeta/digital)
+     */
+    public function ingresosPorMetodo(string $periodo = 'todo'): array
+    {
+        $filtro = $this->filtroFecha($periodo);
+
+        $rows = $this->pdo->query(
+            "SELECT metodo_pago, COUNT(*) as ventas, COALESCE(SUM(total), 0) as ingresos
+             FROM ventas
+             WHERE 1=1 $filtro
+             GROUP BY metodo_pago"
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // Normaliza en dos cubos: efectivo y tarjeta/digital
+        $efectivo = ['ventas' => 0, 'ingresos' => 0.0];
+        $tarjeta  = ['ventas' => 0, 'ingresos' => 0.0];
+
+        foreach ($rows as $row) {
+            $metodo = strtolower(trim($row['metodo_pago'] ?? ''));
+            if (str_contains($metodo, 'efectivo')) {
+                $efectivo['ventas']   += (int)   $row['ventas'];
+                $efectivo['ingresos'] += (float)  $row['ingresos'];
+            } else {
+                $tarjeta['ventas']    += (int)   $row['ventas'];
+                $tarjeta['ingresos']  += (float)  $row['ingresos'];
+            }
+        }
+
+        return [
+            'efectivo' => $efectivo,
+            'tarjeta'  => $tarjeta,
+            'detalle'  => $rows,   // filas originales por si se necesitan
+        ];
+    }
+
     public function serviciosMasVendidos(string $periodo = 'todo'): array
     {
         $filtro = $this->filtroFecha($periodo);
@@ -63,7 +99,7 @@ class ModeloInforme
     {
         $filtro = str_replace('fecha', 'v.fecha', $this->filtroFecha($periodo));
         return $this->pdo->query(
-            "SELECT u.nombre, COUNT(v.id_venta) as ventas, COALESCE(SUM(v.total), 0) as ingresos
+            "SELECT u.nombre, u.logo, COUNT(v.id_venta) as ventas, COALESCE(SUM(v.total), 0) as ingresos
              FROM usuarios u
              LEFT JOIN ventas v ON v.id_usuario = u.id_usuario AND 1=1 $filtro
              WHERE u.rol = 'empleado'

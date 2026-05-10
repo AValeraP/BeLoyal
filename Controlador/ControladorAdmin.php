@@ -32,14 +32,16 @@ class ControladorAdmin
         $modeloInforme    = new ModeloInforme($this->pdo);
         $modeloTrabajador = new ModeloTrabajador($this->pdo);
 
-        $empleados    = $modeloTrabajador->obtenerTodos();
-        $servicios    = $modeloServicio->obtenerTodos();
-        $productos    = $modeloProducto->obtenerTodos();
-        $resumen      = $modeloInforme->resumenGeneral($periodo);
-        $svcVendidos  = $modeloInforme->serviciosMasVendidos($periodo);
-        $prodVendidos = $modeloInforme->productosMasVendidos($periodo);
-        $porEmpleado  = $modeloInforme->ventasPorEmpleado($periodo);
-        $porDia       = $modeloInforme->ventasPorDia($periodo);
+        $empleados       = $modeloTrabajador->obtenerTodos();
+        $servicios       = $modeloServicio->obtenerTodos();
+        $productos       = $modeloProducto->obtenerTodos();
+        $resumen         = $modeloInforme->resumenGeneral($periodo);
+        $svcVendidos     = $modeloInforme->serviciosMasVendidos($periodo);
+        $prodVendidos    = $modeloInforme->productosMasVendidos($periodo);
+        $porEmpleado     = $modeloInforme->ventasPorEmpleado($periodo);
+        $porDia          = $modeloInforme->ventasPorDia($periodo);
+        // ── NUEVO: desglose por método de pago ──────────────────────────────
+        $porMetodo       = $modeloInforme->ingresosPorMetodo($periodo);
 
         $editServicio = null;
         $editProducto = null;
