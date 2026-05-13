@@ -42,6 +42,11 @@ switch ($page) {
         (new ControladorAdmin())->eliminarServicio();
         break;
 
+    case 'admin_activar_servicio':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->activarServicio();
+        break;
+
     case 'admin_crear_producto':
         require_once 'Controlador/ControladorAdmin.php';
         (new ControladorAdmin())->crearProducto();
@@ -55,6 +60,11 @@ switch ($page) {
     case 'admin_eliminar_producto':
         require_once 'Controlador/ControladorAdmin.php';
         (new ControladorAdmin())->eliminarProducto();
+        break;
+
+    case 'admin_activar_producto':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->activarProducto();
         break;
 
     case 'admin_crear_empleado':
@@ -110,6 +120,11 @@ switch ($page) {
     case 'pago_registrar':
         require_once 'Controlador/Controladorpago.php';
         (new ControladorPago())->registrarTicket();
+        break;
+
+    case 'enviar_ticket':
+        require_once 'Controlador/ControladorTicket.php';
+        (new ControladorTicket())->enviar();
         break;
 
     default:

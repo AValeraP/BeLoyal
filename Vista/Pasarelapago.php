@@ -62,6 +62,15 @@
             <p class="exito-title">Cobro realizado</p>
             <p class="exito-sub" id="exito-metodo-label">Pago completado</p>
             <p class="exito-importe" id="exito-importe-label"></p>
+            <!-- Campo email para enviar ticket -->
+            <div class="email-ticket-box" id="email-ticket-box">
+                <p class="email-ticket-label">¿Enviar ticket al cliente?</p>
+                <div class="email-ticket-row">
+                    <input type="email" id="email-cliente-input" placeholder="email@cliente.com" class="email-ticket-input">
+                    <button class="email-ticket-btn" id="btn-enviar-ticket">Enviar</button>
+                </div>
+                <p class="email-ticket-feedback" id="email-ticket-feedback"></p>
+            </div>
             <button class="pago-btn-confirmar exito-nuevo" id="btn-nuevo-cobro">Nueva venta</button>
         </div>
 
@@ -286,6 +295,42 @@
 .exito-title { text-align: center; font-size: 1.2rem; font-weight: 600; color: #fff; }
 .exito-sub { text-align: center; color: #666; font-size: .82rem; margin-top: .3rem; }
 .exito-importe { text-align: center; font-size: 1.6rem; font-weight: 300; color: #fff; margin-top: .4rem; }
+
+/* ── Email ticket ── */
+.email-ticket-box { margin: 1rem 0 .5rem; }
+.email-ticket-label { font-size: .78rem; color: #666; text-align: center; margin-bottom: .5rem; }
+.email-ticket-row { display: flex; gap: .4rem; }
+.email-ticket-input {
+    flex: 1;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: .55rem .75rem;
+    font-size: .85rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+}
+.email-ticket-input::placeholder { color: #555; }
+.email-ticket-input:focus { border-color: rgba(255,255,255,0.35); }
+.email-ticket-btn {
+    padding: .55rem .9rem;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+}
+.email-ticket-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); }
+.email-ticket-btn:disabled { background: transparent; color: #444; border-color: #333; cursor: not-allowed; }
+.email-ticket-feedback { font-size: .78rem; text-align: center; margin-top: .4rem; min-height: 1em; color: #34d399; }
+.email-ticket-feedback.err { color: #f87171; }
 </style>
 
 <script src="https://js.stripe.com/v3/"></script>
@@ -413,12 +458,19 @@
         return data;
     }
 
+    let ultimoIdVenta = null;
+    let ultimoMetodo  = null;
+
     async function finalizarCobro(intentId, metodo) {
         if (yaRegistrado) return;
         yaRegistrado = true;
+        ultimoMetodo = metodo;
 
         if (typeof registrarVenta === 'function') {
-            await registrarVenta(metodo);
+            const resultado = await registrarVenta(metodo);
+            if (resultado && resultado.id_venta) {
+                ultimoIdVenta = resultado.id_venta;
+            }
         }
 
         mostrarExito(metodo, totalCents / 100);
@@ -483,11 +535,68 @@
     });
 
     btnConfEfe.addEventListener('click', async () => {
-        await finalizarCobro(null, 'efectivo');
+        await finalizarCobro(null, 'Efectivo');
+    });
+
+    // ── Enviar ticket por email ──────────────────────────────────────
+    document.getElementById('btn-enviar-ticket').addEventListener('click', async () => {
+        const emailInput    = document.getElementById('email-cliente-input');
+        const feedback      = document.getElementById('email-ticket-feedback');
+        const btnEnviar     = document.getElementById('btn-enviar-ticket');
+        const email         = emailInput.value.trim();
+
+        if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+            feedback.textContent = 'Introduce un email válido';
+            feedback.className   = 'email-ticket-feedback err';
+            return;
+        }
+
+        btnEnviar.disabled      = true;
+        feedback.textContent    = 'Enviando...';
+        feedback.className      = 'email-ticket-feedback';
+
+        try {
+            const res = await fetch('index.php?page=enviar_ticket', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    email_cliente:  email,
+                    nombre_cliente: email.split('@')[0],
+                    id_venta:       ultimoIdVenta,
+                    metodo_pago:    ultimoMetodo,
+                    total:          totalCents / 100,
+                    items:          Object.values(carritoActual).map(i => ({
+                        nombre:   i.nombre,
+                        precio:   i.precio,
+                        cantidad: i.cantidad,
+                        tipo:     i.tipo,
+                        id:       i.idReal,
+                    })),
+                }),
+            });
+            const data = await res.json();
+            if (data.ok) {
+                feedback.textContent = '✓ Ticket enviado a ' + email;
+                feedback.className   = 'email-ticket-feedback';
+                emailInput.value     = '';
+                btnEnviar.disabled   = false;
+            } else {
+                feedback.textContent = 'Error: ' + (data.error || 'No se pudo enviar');
+                feedback.className   = 'email-ticket-feedback err';
+                btnEnviar.disabled   = false;
+            }
+        } catch (e) {
+            feedback.textContent = 'Error de conexión';
+            feedback.className   = 'email-ticket-feedback err';
+            btnEnviar.disabled   = false;
+        }
     });
 
     btnNuevoCobro.addEventListener('click', () => {
         overlay.classList.remove('open');
+        document.getElementById('email-cliente-input').value = '';
+        document.getElementById('email-ticket-feedback').textContent = '';
+        document.getElementById('btn-enviar-ticket').disabled = false;
         if (typeof limpiarCarrito === 'function') limpiarCarrito();
     });
 })();

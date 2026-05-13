@@ -284,7 +284,11 @@
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=servicios&editar=<?= $s['id_servicio'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
+                        <?php if ($s['activo']): ?>
                         <a href="#" onclick="abrirConfirm('¿Eliminar este servicio? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_servicio&id=<?= $s['id_servicio'] ?>', 'Eliminar servicio')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar</a>
+                        <?php else: ?>
+                        <a href="index.php?page=admin_activar_servicio&id=<?= $s['id_servicio'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -356,7 +360,11 @@
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=productos&editar=<?= $p['id_producto'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
+                        <?php if ($p['activo']): ?>
                         <a href="#" onclick="abrirConfirm('¿Eliminar este producto? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_producto&id=<?= $p['id_producto'] ?>', 'Eliminar producto')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar</a>
+                        <?php else: ?>
+                        <a href="index.php?page=admin_activar_producto&id=<?= $p['id_producto'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -465,7 +473,6 @@
     <?php endif; ?>
 
 </main>
-
 
 <!-- MODAL CONFIRMACIÓN -->
 <div id="confirm-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">

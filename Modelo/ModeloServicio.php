@@ -29,17 +29,23 @@ class ModeloServicio
         $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad]);
     }
 
-    public function actualizar(int $id, string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria'): void
+    public function actualizar(int $id, string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria', bool $activo = true): void
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion, especialidad = :especialidad WHERE id_servicio = :id"
+            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion, especialidad = :especialidad, activo = :activo WHERE id_servicio = :id"
         );
-        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad, ':id' => $id]);
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad, ':activo' => (int)$activo, ':id' => $id]);
     }
 
     public function eliminar(int $id): void
     {
         $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 0 WHERE id_servicio = :id");
+        $stmt->execute([':id' => $id]);
+    }
+
+    public function activar(int $id): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 1 WHERE id_servicio = :id");
         $stmt->execute([':id' => $id]);
     }
 }

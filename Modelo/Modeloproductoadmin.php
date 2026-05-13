@@ -42,4 +42,10 @@ class ModeloProductoAdmin
         $stmt = $this->pdo->prepare("UPDATE productos SET activo = 0 WHERE id_producto = :id");
         $stmt->execute([':id' => $id]);
     }
+
+    public function activar(int $id): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE productos SET activo = 1 WHERE id_producto = :id");
+        $stmt->execute([':id' => $id]);
+    }
 }

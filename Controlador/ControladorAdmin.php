@@ -40,7 +40,6 @@ class ControladorAdmin
         $prodVendidos    = $modeloInforme->productosMasVendidos($periodo);
         $porEmpleado     = $modeloInforme->ventasPorEmpleado($periodo);
         $porDia          = $modeloInforme->ventasPorDia($periodo);
-        // ── NUEVO: desglose por método de pago ──────────────────────────────
         $porMetodo       = $modeloInforme->ingresosPorMetodo($periodo);
 
         $editServicio = null;
@@ -89,6 +88,15 @@ class ControladorAdmin
         exit;
     }
 
+    public function activarServicio(): void
+    {
+        $modelo = new ModeloServicio($this->pdo);
+        $modelo->activar((int)$_GET['id']);
+        $_SESSION['admin_msg'] = '✓ Servicio activado.';
+        header('Location: index.php?page=admin&seccion=servicios');
+        exit;
+    }
+
     // ── PRODUCTOS ─────────────────────────────────────────────────────────────
 
     public function crearProducto(): void
@@ -114,6 +122,15 @@ class ControladorAdmin
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->eliminar((int)$_GET['id']);
         $_SESSION['admin_msg'] = '✓ Producto eliminado.';
+        header('Location: index.php?page=admin&seccion=productos');
+        exit;
+    }
+
+    public function activarProducto(): void
+    {
+        $modelo = new ModeloProductoAdmin($this->pdo);
+        $modelo->activar((int)$_GET['id']);
+        $_SESSION['admin_msg'] = '✓ Producto activado.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }

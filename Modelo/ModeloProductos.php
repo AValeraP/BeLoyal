@@ -24,7 +24,7 @@ class ModeloProductos
         return $this->pdo->query(
             "SELECT id_producto AS id, nombre, precio
              FROM productos
-             WHERE activo = 1 AND categoria = 'bebida'
+             WHERE activo = 1
              ORDER BY nombre"
         )->fetchAll(PDO::FETCH_ASSOC);
     }
