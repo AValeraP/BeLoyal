@@ -158,6 +158,15 @@ class ControladorAdmin
         exit;
     }
 
+    public function activarEmpleado(): void
+    {
+        $modelo = new ModeloTrabajador($this->pdo);
+        $modelo->activar((int)$_GET['id']);
+        $_SESSION['admin_msg'] = '✓ Empleado activado.';
+        header('Location: index.php?page=admin&seccion=empleados');
+        exit;
+    }
+
     public function eliminarEmpleado(): void
     {
         $modelo = new ModeloTrabajador($this->pdo);

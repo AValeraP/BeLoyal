@@ -53,19 +53,27 @@ class ControladorPago
         }
 
         $importeCents = (int) $input['importe_cents'];
+        $metodo       = $input['metodo'] ?? null;
 
         try {
             \Stripe\Stripe::setApiKey($this->stripeSecretKey);
 
-            $intent = \Stripe\PaymentIntent::create([
-                'amount'   => $importeCents,        // en céntimos (ej. 1500 = 15,00 €)
+            $intentParams = [
+                'amount'   => $importeCents,
                 'currency' => 'eur',
-                'automatic_payment_methods' => ['enabled' => true],
                 'metadata' => [
                     'empleado' => $_SESSION['usuario']['nombre'] ?? '',
                     'items'    => json_encode($input['items'] ?? []),
                 ],
-            ]);
+            ];
+
+            if ($metodo === 'bizum') {
+                $intentParams['payment_method_types'] = ['bizum'];
+            } else {
+                $intentParams['automatic_payment_methods'] = ['enabled' => true];
+            }
+
+            $intent = \Stripe\PaymentIntent::create($intentParams);
 
             echo json_encode([
                 'clientSecret' => $intent->client_secret,

@@ -5,32 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Be Loyal – Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: { extend: { fontFamily: { inter: ['Inter', 'sans-serif'] } } }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .bg-marble {
-            background-color: #1a1a1a;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(255,255,255,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(255,255,255,0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 40%, rgba(200,200,200,0.02) 0%, transparent 40%),
-                repeating-linear-gradient(
-                    115deg,
-                    transparent 0px, transparent 20px,
-                    rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px,
-                    transparent 21px, transparent 45px,
-                    rgba(255,255,255,0.008) 45px, rgba(255,255,255,0.008) 46px
-                ),
-                repeating-linear-gradient(
-                    68deg,
-                    transparent 0px, transparent 35px,
-                    rgba(255,255,255,0.01) 35px, rgba(255,255,255,0.01) 36px
-                );
-        }
-    </style>
 </head>
 
-<body class="bg-marble min-h-screen flex items-center justify-center px-4">
+<body class="font-inter min-h-screen flex items-center justify-center px-4"
+      style="background-color:#1a1a1a;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.03) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(200,200,200,.02) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.015) 20px,rgba(255,255,255,.015) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.008) 45px,rgba(255,255,255,.008) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.01) 35px,rgba(255,255,255,.01) 36px)">
 
     <div class="bg-black/50 backdrop-blur-sm border border-white/10 rounded-2xl p-10 w-full max-w-sm shadow-2xl">
 

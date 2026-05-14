@@ -1,337 +1,163 @@
-<div class="pago-overlay" id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago">
-    <div class="pago-modal">
+<style>
+@keyframes fadeIn  { from { opacity: 0 }                            to { opacity: 1 } }
+@keyframes slideUp { from { transform: translateY(20px); opacity:0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes popIn   { from { transform: scale(0) }                   to { transform: scale(1) } }
+@keyframes spin    { to   { transform: rotate(360deg) } }
 
-        <div class="pago-header">
-            <span class="pago-logo">BeLoyal</span>
-            <button class="pago-cerrar" id="pago-cerrar" aria-label="Cerrar">x</button>
+#pago-overlay.open { display: flex; animation: fadeIn .18s ease; }
+.pago-modal        { animation: slideUp .22s ease; }
+.exito-pop         { animation: popIn .3s cubic-bezier(.17,.67,.28,1.3); }
+.spin-anim         { animation: spin .7s linear infinite; }
+
+/* Divisor "o" con líneas laterales */
+.pago-o-sep { position: relative; }
+.pago-o-sep::before,
+.pago-o-sep::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.06); }
+.pago-o-sep::before { left: 0; }
+.pago-o-sep::after  { right: 0; }
+
+/* Focus en el elemento Stripe Card */
+.stripe-card-box:focus-within { border-color: #fff; }
+
+/* Herencia de fuente en elementos de formulario */
+#pago-overlay button,
+#pago-overlay input { font-family: inherit; }
+</style>
+
+<div id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago"
+     class="hidden fixed inset-0 bg-black/75 backdrop-blur-[6px] z-[9999] items-center justify-center font-dm">
+
+    <div class="pago-modal bg-[#111] border border-white/[0.08] rounded-3xl w-[400px] max-w-[96vw] pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden">
+
+        <!-- Cabecera -->
+        <div class="flex items-center justify-between px-[1.4rem] py-[0.9rem] bg-black border-b border-white/[0.06]">
+            <span class="text-white font-bold text-[0.95rem] tracking-[0.03em]">BeLoyal</span>
+            <button id="pago-cerrar" aria-label="Cerrar"
+                    class="bg-white/[0.06] border-0 text-[#888] text-[1rem] cursor-pointer w-7 h-7 rounded-full flex items-center justify-center transition-all duration-150 hover:bg-white/[0.12] hover:text-white">×</button>
         </div>
 
-        <div class="pago-importe-box">
-            <span class="pago-importe-label">Total a cobrar</span>
-            <span class="pago-importe-num" id="pago-total-display">0,00</span>
+        <!-- Importe -->
+        <div class="flex flex-col items-center px-[1.4rem] pt-[1.6rem] pb-4 border-b border-white/[0.06]">
+            <span class="text-[0.72rem] uppercase tracking-[0.1em] text-[#666] mb-[0.4rem]">Total a cobrar</span>
+            <span id="pago-total-display" class="text-[2.8rem] font-light text-white tracking-[-0.02em]">0,00</span>
         </div>
 
         <!-- Paso 1: Selector de método -->
-        <div class="pago-step" id="step-metodo">
-            <p class="pago-step-title">Elige el método de pago</p>
-            <div id="pago-request-btn-wrapper">
-                <div id="pago-request-btn"></div>
-                <p class="pago-o hidden" id="pago-o"><span>o</span></p>
+        <div id="step-metodo" class="px-[1.4rem] pt-[1.2rem]">
+            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Elige el método de pago</p>
+            <div id="pago-request-btn-wrapper" class="mb-[0.2rem]">
+                <div id="pago-request-btn" class="min-h-[44px]"></div>
+                <p id="pago-o" class="hidden text-center my-[0.8rem] text-[0.78rem] text-[#555] pago-o-sep"><span>o</span></p>
             </div>
-            <button class="pago-btn-metodo" id="btn-ir-tarjeta">Pagar con tarjeta</button>
-            <button class="pago-btn-metodo efectivo" id="btn-ir-efectivo">Cobrar en efectivo</button>
+            <button id="btn-ir-tarjeta"
+                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
+                Pagar con tarjeta
+            </button>
+            <button id="btn-ir-bizum"
+                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left flex items-center gap-[0.55rem] hover:border-bizum hover:text-bizum-light hover:bg-bizum/[0.07]">
+                <span class="inline-flex items-center justify-center w-[22px] h-[22px] bg-bizum text-white rounded-[6px] text-[0.75rem] font-extrabold flex-shrink-0">B</span>
+                Pagar con Bizum
+            </button>
+            <button id="btn-ir-efectivo"
+                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-[#34d399] hover:text-[#34d399] hover:bg-[#34d399]/[0.06]">
+                Cobrar en efectivo
+            </button>
+        </div>
+
+        <!-- Paso 2b: Bizum -->
+        <div id="step-bizum" class="hidden px-[1.4rem] pt-[1.2rem]">
+            <button id="btn-volver-bizum"
+                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
+            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Pagar con Bizum</p>
+            <div class="flex items-center gap-[0.6rem] bg-bizum/[0.08] border border-bizum/20 rounded-xl px-4 py-[0.8rem] mb-4">
+                <span class="inline-flex items-center justify-center w-9 h-9 bg-bizum text-white rounded-[10px] text-[1.1rem] font-extrabold">B</span>
+                <span class="text-bizum-light font-bold text-[1rem] tracking-[0.02em]">Bizum</span>
+            </div>
+            <div class="mb-[0.7rem]">
+                <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Teléfono del cliente</label>
+                <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
+                    <span class="px-[0.7rem] text-[#555] text-[1rem]">+34</span>
+                    <input type="tel" id="bizum-telefono" maxlength="9" placeholder="612 345 678"
+                           class="flex-1 border-0 outline-none text-[1.2rem] font-medium py-[0.55rem] px-[0.4rem] bg-transparent text-white placeholder-[#555]">
+                </div>
+                <p class="text-[0.72rem] text-[#555] mt-[0.45rem]">El cliente recibirá una solicitud en su app Bizum</p>
+            </div>
+            <div id="bizum-error" class="text-[#f87171] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]"></div>
+            <button id="btn-pagar-bizum"
+                    class="w-full py-[0.85rem] rounded-xl border-0 bg-bizum text-white text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center gap-2 hover:bg-bizum-dark active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
+                <span id="btn-bizum-label">Enviar solicitud Bizum</span>
+                <span id="btn-bizum-spinner" class="hidden w-[18px] h-[18px] border-2 border-white/20 border-t-white rounded-full spin-anim"></span>
+            </button>
         </div>
 
         <!-- Paso 2: Tarjeta Stripe -->
-        <div class="pago-step hidden" id="step-tarjeta">
-            <button class="pago-volver" id="btn-volver-metodo">← Volver</button>
-            <p class="pago-step-title">Datos de la tarjeta</p>
-            <div id="stripe-card-element" class="stripe-card-box"></div>
-            <div id="stripe-card-error" class="pago-error" role="alert"></div>
-            <button class="pago-btn-confirmar" id="btn-pagar-tarjeta">
+        <div id="step-tarjeta" class="hidden px-[1.4rem] pt-[1.2rem]">
+            <button id="btn-volver-metodo"
+                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
+            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Datos de la tarjeta</p>
+            <div id="stripe-card-element"
+                 class="stripe-card-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.7rem] bg-white/[0.03] transition-colors duration-200"></div>
+            <div id="stripe-card-error" class="text-[#f87171] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]" role="alert"></div>
+            <button id="btn-pagar-tarjeta"
+                    class="w-full py-[0.85rem] rounded-xl border-0 bg-white text-black text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center gap-2 hover:bg-[#e5e5e5] active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
                 <span id="btn-pagar-label">Pagar <strong id="btn-pagar-importe"></strong></span>
-                <span id="btn-pagar-spinner" class="spinner hidden"></span>
+                <span id="btn-pagar-spinner" class="hidden w-[18px] h-[18px] border-2 border-black/20 border-t-black rounded-full spin-anim"></span>
             </button>
         </div>
 
         <!-- Paso 3: Efectivo -->
-        <div class="pago-step hidden" id="step-efectivo">
-            <button class="pago-volver" id="btn-volver-efectivo">← Volver</button>
-            <p class="pago-step-title">Cobro en efectivo</p>
-            <div class="efectivo-display">
-                <span class="efectivo-label">Total</span>
-                <span class="efectivo-num" id="efectivo-total">0,00</span>
+        <div id="step-efectivo" class="hidden px-[1.4rem] pt-[1.2rem]">
+            <button id="btn-volver-efectivo"
+                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
+            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Cobro en efectivo</p>
+            <div class="flex justify-between items-baseline bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
+                <span class="text-[0.78rem] text-[#666]">Total</span>
+                <span id="efectivo-total" class="text-[1.8rem] font-light text-white">0,00</span>
             </div>
-            <div class="efectivo-calculadora">
-                <label class="efectivo-field-label">Entrega el cliente</label>
-                <div class="efectivo-input-wrap">
-                    <span class="efectivo-euro">€</span>
-                    <input type="number" id="efectivo-entrega" min="0" step="0.01" placeholder="0,00" class="efectivo-input">
+            <div class="bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
+                <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Entrega el cliente</label>
+                <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
+                    <span class="px-[0.7rem] text-[#555] text-[1rem]">€</span>
+                    <input type="number" id="efectivo-entrega" min="0" step="0.01" placeholder="0,00"
+                           class="flex-1 border-0 outline-none text-[1.2rem] font-medium py-[0.55rem] px-[0.4rem] bg-transparent text-white placeholder-[#555]">
                 </div>
-                <div class="efectivo-cambio-row">
+                <div class="flex justify-between mt-[0.7rem] text-[0.88rem] text-[#888]">
                     <span>Cambio</span>
-                    <span class="efectivo-cambio" id="efectivo-cambio">€0,00</span>
+                    <span id="efectivo-cambio" class="font-semibold text-[#34d399]">€0,00</span>
                 </div>
             </div>
-            <button class="pago-btn-confirmar efectivo-ok" id="btn-confirmar-efectivo">Confirmar cobro</button>
+            <button id="btn-confirmar-efectivo"
+                    class="w-full py-[0.85rem] rounded-xl bg-transparent border border-[#34d399] text-[#34d399] text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center hover:bg-[#34d399]/[0.08] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                Confirmar cobro
+            </button>
         </div>
 
-        <!-- Paso 4: Exito -->
-        <div class="pago-step hidden" id="step-exito">
-            <div class="exito-icon">✓</div>
-            <p class="exito-title">Cobro realizado</p>
-            <p class="exito-sub" id="exito-metodo-label">Pago completado</p>
-            <p class="exito-importe" id="exito-importe-label"></p>
-            <!-- Campo email para enviar ticket -->
-            <div class="email-ticket-box" id="email-ticket-box">
-                <p class="email-ticket-label">¿Enviar ticket al cliente?</p>
-                <div class="email-ticket-row">
-                    <input type="email" id="email-cliente-input" placeholder="email@cliente.com" class="email-ticket-input">
-                    <button class="email-ticket-btn" id="btn-enviar-ticket">Enviar</button>
+        <!-- Paso 4: Éxito -->
+        <div id="step-exito" class="hidden px-[1.4rem] pt-[1.2rem]">
+            <div class="exito-pop w-[60px] h-[60px] bg-[#34d399]/10 border border-[#34d399] text-[#34d399] rounded-full flex items-center justify-center text-[1.6rem] font-bold mx-auto mb-4">✓</div>
+            <p class="text-center text-[1.2rem] font-semibold text-white">Cobro realizado</p>
+            <p id="exito-metodo-label" class="text-center text-[#666] text-[0.82rem] mt-[0.3rem]">Pago completado</p>
+            <p id="exito-importe-label" class="text-center text-[1.6rem] font-light text-white mt-[0.4rem]"></p>
+            <div id="email-ticket-box" class="my-4">
+                <p class="text-[0.78rem] text-[#666] text-center mb-[0.5rem]">¿Enviar ticket al cliente?</p>
+                <div class="flex gap-[0.4rem]">
+                    <input type="email" id="email-cliente-input" placeholder="email@cliente.com"
+                           class="flex-1 border border-white/[0.12] rounded-lg px-3 py-[0.55rem] text-[0.85rem] outline-none transition-colors duration-150 bg-white/[0.05] text-white placeholder-[#555] focus:border-white/[0.35]">
+                    <button id="btn-enviar-ticket"
+                            class="px-[0.9rem] py-[0.55rem] bg-white/[0.08] text-white border border-white/[0.15] rounded-lg text-[0.82rem] font-semibold cursor-pointer whitespace-nowrap transition-all duration-150 hover:bg-white/[0.14] hover:border-white/30 disabled:bg-transparent disabled:text-[#444] disabled:border-[#333] disabled:cursor-not-allowed">
+                        Enviar
+                    </button>
                 </div>
-                <p class="email-ticket-feedback" id="email-ticket-feedback"></p>
+                <p id="email-ticket-feedback" class="text-[0.78rem] text-center mt-[0.4rem] min-h-[1em] text-[#34d399]"></p>
             </div>
-            <button class="pago-btn-confirmar exito-nuevo" id="btn-nuevo-cobro">Nueva venta</button>
+            <button id="btn-nuevo-cobro"
+                    class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-4 hover:bg-white/10 active:scale-[0.98]">
+                Nueva venta
+            </button>
         </div>
 
     </div>
 </div>
-
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-
-.pago-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    backdrop-filter: blur(6px);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    font-family: 'DM Sans', Arial, sans-serif;
-}
-.pago-overlay.open { display: flex; animation: fadeIn .18s ease; }
-@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-
-.pago-modal {
-    background: #111;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px;
-    width: 400px;
-    max-width: 96vw;
-    padding: 0 0 1.6rem;
-    box-shadow: 0 32px 80px rgba(0,0,0,.6);
-    animation: slideUp .22s ease;
-    overflow: hidden;
-}
-@keyframes slideUp { from { transform:translateY(20px);opacity:0 } to { transform:translateY(0);opacity:1 } }
-
-.pago-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .9rem 1.4rem;
-    background: #000;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.pago-logo { color: #fff; font-weight: 700; font-size: .95rem; letter-spacing: .03em; }
-.pago-cerrar {
-    background: rgba(255,255,255,0.06);
-    border: none;
-    color: #888;
-    font-size: 1rem;
-    cursor: pointer;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .15s, color .15s;
-}
-.pago-cerrar:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-.pago-importe-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.6rem 1.4rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.pago-importe-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: #666; margin-bottom: .4rem; }
-.pago-importe-num { font-size: 2.8rem; font-weight: 300; color: #fff; letter-spacing: -.02em; }
-
-.pago-step { padding: 1.2rem 1.4rem 0; }
-.pago-step.hidden { display: none; }
-.pago-step-title { font-weight: 600; font-size: .88rem; margin-bottom: .9rem; color: #ccc; }
-
-#pago-request-btn-wrapper { margin-bottom: .2rem; }
-#pago-request-btn { min-height: 44px; }
-.pago-o {
-    text-align: center;
-    margin: .8rem 0;
-    position: relative;
-    font-size: .78rem;
-    color: #555;
-}
-.pago-o::before, .pago-o::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 40%;
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-}
-.pago-o::before { left: 0; }
-.pago-o::after { right: 0; }
-
-.pago-btn-metodo {
-    width: 100%;
-    padding: .75rem 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04);
-    color: #fff;
-    font-size: .9rem;
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: .55rem;
-    transition: border-color .15s, background .15s;
-    font-family: inherit;
-    text-align: left;
-}
-.pago-btn-metodo:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
-.pago-btn-metodo.efectivo:hover { border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.06); }
-
-.pago-volver {
-    background: none;
-    border: none;
-    color: #555;
-    font-size: .8rem;
-    cursor: pointer;
-    padding: 0;
-    margin-bottom: .8rem;
-    font-family: inherit;
-    transition: color .15s;
-}
-.pago-volver:hover { color: #ccc; }
-
-.stripe-card-box {
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px;
-    padding: .85rem 1rem;
-    margin-bottom: .7rem;
-    background: rgba(255,255,255,0.03);
-    transition: border-color .2s;
-}
-.stripe-card-box:focus-within { border-color: #fff; }
-.pago-error { color: #f87171; font-size: .8rem; min-height: 1.2em; margin-bottom: .5rem; }
-
-.pago-btn-confirmar {
-    width: 100%;
-    padding: .85rem;
-    border-radius: 12px;
-    border: none;
-    background: #fff;
-    color: #000;
-    font-size: .95rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background .15s, transform .1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-}
-.pago-btn-confirmar:hover { background: #e5e5e5; }
-.pago-btn-confirmar:active { transform: scale(.98); }
-.pago-btn-confirmar:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
-.pago-btn-confirmar.efectivo-ok { background: transparent; border: 1px solid #34d399; color: #34d399; }
-.pago-btn-confirmar.efectivo-ok:hover { background: rgba(52,211,153,0.08); }
-.pago-btn-confirmar.exito-nuevo { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid rgba(255,255,255,0.1); margin-top: 1rem; }
-.pago-btn-confirmar.exito-nuevo:hover { background: rgba(255,255,255,0.1); }
-
-.spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(0,0,0,.2);
-    border-top-color: #000;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.hidden { display: none !important; }
-
-.efectivo-display {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: .9rem 1.1rem;
-    margin-bottom: 1rem;
-}
-.efectivo-label { font-size: .78rem; color: #666; }
-.efectivo-num { font-size: 1.8rem; font-weight: 300; color: #fff; }
-.efectivo-calculadora {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: .9rem 1.1rem;
-    margin-bottom: 1rem;
-}
-.efectivo-field-label { font-size: .72rem; color: #666; text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: .5rem; }
-.efectivo-input-wrap {
-    display: flex;
-    align-items: center;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.03);
-    overflow: hidden;
-}
-.efectivo-euro { padding: 0 .7rem; color: #555; font-size: 1rem; }
-.efectivo-input {
-    flex: 1; border: none; outline: none;
-    font-size: 1.2rem; font-weight: 500;
-    padding: .55rem .4rem;
-    font-family: inherit;
-    background: transparent;
-    color: #fff;
-}
-.efectivo-cambio-row { display: flex; justify-content: space-between; margin-top: .7rem; font-size: .88rem; color: #888; }
-.efectivo-cambio { font-weight: 600; color: #34d399; }
-
-.exito-icon {
-    width: 60px; height: 60px;
-    background: rgba(52,211,153,0.1);
-    border: 1px solid #34d399;
-    color: #34d399;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; font-weight: 700;
-    margin: 0 auto 1rem;
-    animation: popIn .3s cubic-bezier(.17,.67,.28,1.3);
-}
-@keyframes popIn { from { transform:scale(0) } to { transform:scale(1) } }
-.exito-title { text-align: center; font-size: 1.2rem; font-weight: 600; color: #fff; }
-.exito-sub { text-align: center; color: #666; font-size: .82rem; margin-top: .3rem; }
-.exito-importe { text-align: center; font-size: 1.6rem; font-weight: 300; color: #fff; margin-top: .4rem; }
-
-/* ── Email ticket ── */
-.email-ticket-box { margin: 1rem 0 .5rem; }
-.email-ticket-label { font-size: .78rem; color: #666; text-align: center; margin-bottom: .5rem; }
-.email-ticket-row { display: flex; gap: .4rem; }
-.email-ticket-input {
-    flex: 1;
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    padding: .55rem .75rem;
-    font-size: .85rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color .15s;
-    background: rgba(255,255,255,0.05);
-    color: #fff;
-}
-.email-ticket-input::placeholder { color: #555; }
-.email-ticket-input:focus { border-color: rgba(255,255,255,0.35); }
-.email-ticket-btn {
-    padding: .55rem .9rem;
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
-    font-size: .82rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    white-space: nowrap;
-    transition: background .15s, border-color .15s;
-}
-.email-ticket-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); }
-.email-ticket-btn:disabled { background: transparent; color: #444; border-color: #333; cursor: not-allowed; }
-.email-ticket-feedback { font-size: .78rem; text-align: center; margin-top: .4rem; min-height: 1em; color: #34d399; }
-.email-ticket-feedback.err { color: #f87171; }
-</style>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
@@ -351,6 +177,7 @@
     const totalDisplay    = document.getElementById('pago-total-display');
     const stepMetodo      = document.getElementById('step-metodo');
     const stepTarjeta     = document.getElementById('step-tarjeta');
+    const stepBizum       = document.getElementById('step-bizum');
     const stepEfectivo    = document.getElementById('step-efectivo');
     const stepExito       = document.getElementById('step-exito');
     const btnIrTarjeta    = document.getElementById('btn-ir-tarjeta');
@@ -370,9 +197,19 @@
     const exitoMetLbl     = document.getElementById('exito-metodo-label');
     const exitoImpLbl     = document.getElementById('exito-importe-label');
 
+    function abrirOverlay() {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('open');
+    }
+
+    function cerrarOverlay() {
+        overlay.classList.remove('open');
+        overlay.classList.add('hidden');
+    }
+
     function initStripe() {
         if (stripe) return;
-        stripe   = Stripe(STRIPE_PUBLIC_KEY);
+        stripe   = Stripe(STRIPE_PUBLIC_KEY, { betas: ['bizum_pm_beta_1'] });
         elements = stripe.elements({ locale: 'es' });
         cardElement = elements.create('card', {
             style: {
@@ -444,18 +281,67 @@
         }
     }
 
-    async function crearIntent() {
+    async function crearIntent(metodo = null) {
         const res = await fetch(URL_CREAR_INTENT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 importe_cents: totalCents,
+                metodo: metodo,
                 items: Object.values(carritoActual).map(i => ({ nombre: i.nombre, precio: i.precio, cantidad: i.cantidad })),
             }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         return data;
+    }
+
+    function setLoadingBizum(loading) {
+        const btn = document.getElementById('btn-pagar-bizum');
+        btn.disabled = loading;
+        document.getElementById('btn-bizum-label').classList.toggle('hidden', loading);
+        document.getElementById('btn-bizum-spinner').classList.toggle('hidden', !loading);
+    }
+
+    async function procesarBizum() {
+        const telefonoInput = document.getElementById('bizum-telefono');
+        const bizumError    = document.getElementById('bizum-error');
+        const telefono = telefonoInput.value.replace(/\s/g, '');
+
+        if (!/^[6-9]\d{8}$/.test(telefono)) {
+            bizumError.textContent = 'Introduce un número español válido (9 dígitos, empieza por 6, 7, 8 o 9)';
+            return;
+        }
+
+        setLoadingBizum(true);
+        bizumError.textContent = '';
+
+        try {
+            sessionStorage.setItem('biz_carrito', JSON.stringify(carritoActual));
+            sessionStorage.setItem('biz_cents',   String(totalCents));
+
+            const { clientSecret } = await crearIntent('bizum');
+            const returnUrl = window.location.href.split('?')[0] + '?page=empleado&bizum_return=1';
+
+            const { error } = await stripe.confirmBizumPayment(clientSecret, {
+                payment_method: {
+                    billing_details: { phone: '+34' + telefono },
+                },
+                return_url: returnUrl,
+            });
+
+            if (error) {
+                bizumError.textContent = error.message;
+                setLoadingBizum(false);
+                sessionStorage.removeItem('biz_carrito');
+                sessionStorage.removeItem('biz_cents');
+            }
+        } catch (err) {
+            bizumError.textContent = err.message || 'Error al procesar el pago';
+            setLoadingBizum(false);
+            sessionStorage.removeItem('biz_carrito');
+            sessionStorage.removeItem('biz_cents');
+        }
     }
 
     let ultimoIdVenta = null;
@@ -477,7 +363,7 @@
     }
 
     function irStep(step) {
-        [stepMetodo, stepTarjeta, stepEfectivo, stepExito].forEach(s => s.classList.add('hidden'));
+        [stepMetodo, stepTarjeta, stepBizum, stepEfectivo, stepExito].forEach(s => s.classList.add('hidden'));
         step.classList.remove('hidden');
     }
 
@@ -515,17 +401,54 @@
 
         initStripe();
         irStep(stepMetodo);
-        overlay.classList.add('open');
+        abrirOverlay();
         await setupPaymentRequest();
     };
 
-    btnCerrar.addEventListener('click', () => overlay.classList.remove('open'));
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+    btnCerrar.addEventListener('click', cerrarOverlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) cerrarOverlay(); });
     btnIrTarjeta.addEventListener('click', () => irStep(stepTarjeta));
+    document.getElementById('btn-ir-bizum').addEventListener('click', () => {
+        document.getElementById('bizum-telefono').value = '';
+        document.getElementById('bizum-error').textContent = '';
+        irStep(stepBizum);
+    });
     btnIrEfectivo.addEventListener('click', () => irStep(stepEfectivo));
     btnVolverMet.addEventListener('click', () => irStep(stepMetodo));
     btnVolverEfe.addEventListener('click', () => irStep(stepMetodo));
+    document.getElementById('btn-volver-bizum').addEventListener('click', () => irStep(stepMetodo));
     btnPagarTar.addEventListener('click', procesarTarjeta);
+    document.getElementById('btn-pagar-bizum').addEventListener('click', procesarBizum);
+
+    // ── Retorno tras redirect de Bizum ──────────────────────────────────────
+    (async function manejarRetornoBizum() {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('bizum_return')) return;
+
+        const redirectStatus  = params.get('redirect_status');
+        const carritoGuardado = sessionStorage.getItem('biz_carrito');
+        const centsGuardado   = sessionStorage.getItem('biz_cents');
+        sessionStorage.removeItem('biz_carrito');
+        sessionStorage.removeItem('biz_cents');
+
+        const urlLimpia = window.location.href.split('?')[0] + '?page=empleado';
+        history.replaceState(null, '', urlLimpia);
+
+        if (redirectStatus !== 'succeeded' || !carritoGuardado || !centsGuardado) return;
+
+        carritoActual = JSON.parse(carritoGuardado);
+        totalCents    = parseInt(centsGuardado, 10);
+        yaRegistrado  = false;
+
+        const totalFmt = fmt(totalCents / 100);
+        totalDisplay.textContent = totalFmt;
+        btnPagarImp.textContent  = totalFmt;
+
+        initStripe();
+        abrirOverlay();
+        irStep(stepExito);
+        await finalizarCobro(params.get('payment_intent'), 'Bizum');
+    })();
 
     efectivoEntrega.addEventListener('input', () => {
         const entrega = parseFloat(efectivoEntrega.value) || 0;
@@ -538,22 +461,24 @@
         await finalizarCobro(null, 'Efectivo');
     });
 
-    // ── Enviar ticket por email ──────────────────────────────────────
+    // ── Enviar ticket por email ──────────────────────────────────────────────
     document.getElementById('btn-enviar-ticket').addEventListener('click', async () => {
-        const emailInput    = document.getElementById('email-cliente-input');
-        const feedback      = document.getElementById('email-ticket-feedback');
-        const btnEnviar     = document.getElementById('btn-enviar-ticket');
-        const email         = emailInput.value.trim();
+        const emailInput = document.getElementById('email-cliente-input');
+        const feedback   = document.getElementById('email-ticket-feedback');
+        const btnEnviar  = document.getElementById('btn-enviar-ticket');
+        const email      = emailInput.value.trim();
+
+        const clsBase = 'text-[0.78rem] text-center mt-[0.4rem] min-h-[1em]';
 
         if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
             feedback.textContent = 'Introduce un email válido';
-            feedback.className   = 'email-ticket-feedback err';
+            feedback.className   = clsBase + ' text-[#f87171]';
             return;
         }
 
-        btnEnviar.disabled      = true;
-        feedback.textContent    = 'Enviando...';
-        feedback.className      = 'email-ticket-feedback';
+        btnEnviar.disabled   = true;
+        feedback.textContent = 'Enviando...';
+        feedback.className   = clsBase + ' text-[#34d399]';
 
         try {
             const res = await fetch('index.php?page=enviar_ticket', {
@@ -577,23 +502,23 @@
             const data = await res.json();
             if (data.ok) {
                 feedback.textContent = '✓ Ticket enviado a ' + email;
-                feedback.className   = 'email-ticket-feedback';
+                feedback.className   = clsBase + ' text-[#34d399]';
                 emailInput.value     = '';
                 btnEnviar.disabled   = false;
             } else {
                 feedback.textContent = 'Error: ' + (data.error || 'No se pudo enviar');
-                feedback.className   = 'email-ticket-feedback err';
+                feedback.className   = clsBase + ' text-[#f87171]';
                 btnEnviar.disabled   = false;
             }
         } catch (e) {
             feedback.textContent = 'Error de conexión';
-            feedback.className   = 'email-ticket-feedback err';
+            feedback.className   = clsBase + ' text-[#f87171]';
             btnEnviar.disabled   = false;
         }
     });
 
     btnNuevoCobro.addEventListener('click', () => {
-        overlay.classList.remove('open');
+        cerrarOverlay();
         document.getElementById('email-cliente-input').value = '';
         document.getElementById('email-ticket-feedback').textContent = '';
         document.getElementById('btn-enviar-ticket').disabled = false;

@@ -71,6 +71,14 @@ class ModeloTrabajador
         $stmt->execute([':password' => $password, ':id' => $id]);
     }
 
+    public function activar(int $id): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE usuarios SET activo = 1 WHERE id_usuario = :id AND rol = 'empleado'"
+        );
+        $stmt->execute([':id' => $id]);
+    }
+
     public function desactivar(int $id): void
     {
         $stmt = $this->pdo->prepare(

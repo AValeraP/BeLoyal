@@ -5,24 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin – Be Loyal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: { extend: { fontFamily: { inter: ['Inter', 'sans-serif'] } } }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        /* Scrollbar — sin equivalente en Tailwind */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
-        .bg-marble {
-            background-color: #262626;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(255,255,255,0.10) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(255,255,255,0.07) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 40%, rgba(220,220,220,0.05) 0%, transparent 40%),
-                repeating-linear-gradient(115deg, transparent 0px, transparent 20px, rgba(255,255,255,0.05) 20px, rgba(255,255,255,0.05) 21px, transparent 21px, transparent 45px, rgba(255,255,255,0.025) 45px, rgba(255,255,255,0.025) 46px),
-                repeating-linear-gradient(68deg, transparent 0px, transparent 35px, rgba(255,255,255,0.03) 35px, rgba(255,255,255,0.03) 36px);
-        }
     </style>
 </head>
-<body class="bg-marble flex min-h-screen text-white">
+<body class="font-inter flex min-h-screen text-white"
+      style="background-color:#262626;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(220,220,220,.05) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.05) 20px,rgba(255,255,255,.05) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.025) 45px,rgba(255,255,255,.025) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.03) 35px,rgba(255,255,255,.03) 36px)">
 
 <!-- SIDEBAR -->
 <aside class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 min-h-screen">
@@ -79,7 +76,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-4 gap-3 mb-6">
+    <div class="grid grid-cols-6 gap-3 mb-6">
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Total ventas</p>
             <p class="text-3xl font-light text-white"><?= $resumen['total_ventas'] ?></p>
@@ -87,6 +84,16 @@
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Ingresos</p>
             <p class="text-3xl font-light text-white">€<?= number_format($resumen['ingresos_totales'], 2) ?></p>
+        </div>
+        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-emerald-900/40">
+            <p class="text-xs font-light uppercase tracking-widest text-emerald-700 mb-2">Efectivo</p>
+            <p class="text-3xl font-light text-emerald-400">€<?= number_format($porMetodo['efectivo']['ingresos'], 2) ?></p>
+            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['efectivo']['ventas'] ?> ventas</p>
+        </div>
+        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-blue-900/40">
+            <p class="text-xs font-light uppercase tracking-widest text-blue-700 mb-2">Tarjeta / Bizum</p>
+            <p class="text-3xl font-light text-blue-400">€<?= number_format($porMetodo['tarjeta']['ingresos'], 2) ?></p>
+            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['tarjeta']['ventas'] ?> ventas</p>
         </div>
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Servicios activos</p>
@@ -106,6 +113,8 @@
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Empleado</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ventas</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ingresos</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-emerald-700 pb-2 border-b border-white/5">Efectivo</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-700 pb-2 border-b border-white/5">Tarjeta / Bizum</th>
                 </tr>
             </thead>
             <tbody>
@@ -114,10 +123,12 @@
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($e['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= $e['ventas'] ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($e['ingresos'], 2) ?></td>
+                    <td class="py-2.5 text-xs font-light text-emerald-400">€<?= number_format($e['ingresos_efectivo'], 2) ?></td>
+                    <td class="py-2.5 text-xs font-light text-blue-400">€<?= number_format($e['ingresos_tarjeta'], 2) ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($porEmpleado)): ?>
-                <tr><td colspan="3" class="py-4 text-center text-xs font-light text-zinc-600">Sin datos</td></tr>
+                <tr><td colspan="5" class="py-4 text-center text-xs font-light text-zinc-600">Sin datos</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -432,7 +443,12 @@
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=empleados&editar=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
-                        <a href="#" onclick="abrirConfirm('¿Desactivar este empleado?', 'index.php?page=admin_eliminar_empleado&id=<?= $emp['id_usuario'] ?>', 'Desactivar empleado')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar</a>
+                        <?php if ($emp['activo']): ?>
+                        <a href="#" onclick="abrirConfirm('¿Desactivar este empleado? Podrás eliminarlo definitivamente cuando esté inactivo.', 'index.php?page=admin_eliminar_empleado&id=<?= $emp['id_usuario'] ?>', 'Desactivar empleado')" class="text-xs font-light text-amber-500/70 hover:text-amber-400 transition">Desactivar</a>
+                        <?php else: ?>
+                        <a href="index.php?page=admin_activar_empleado&id=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
+                        <a href="#" onclick="abrirConfirm('¿Eliminar definitivamente este empleado? Esta acción no se puede deshacer. Solo es posible si no tiene ventas registradas.', 'index.php?page=admin_eliminar_definitivo_empleado&id=<?= $emp['id_usuario'] ?>', 'Eliminar definitivamente')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar definitivo</a>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>

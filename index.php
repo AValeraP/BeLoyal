@@ -132,6 +132,11 @@ switch ($page) {
         (new ControladorAdmin())->eliminarDefinitivamenteEmpleado();
         break;
 
+    case 'admin_activar_empleado':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->activarEmpleado();
+        break;
+
     default:
         http_response_code(404);
         echo "Página no encontrada.";

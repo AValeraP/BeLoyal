@@ -5,46 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TPV – <?= htmlspecialchars($usuario['nombre']) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    inter: ['Inter', 'sans-serif'],
+                    dm: ["'DM Sans'", 'Arial', 'sans-serif'],
+                },
+                colors: {
+                    bizum: { DEFAULT: '#0040e5', light: '#5b8fff', dark: '#0033b8' },
+                }
+            }
+        }
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        /* Scrollbar — sin equivalente en Tailwind */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
-        .bg-marble {
-            background-color: #1a1a1a;
-            background-image:
-                radial-gradient(ellipse at 10% 20%, rgba(255,255,255,0.04) 0%, transparent 50%),
-                radial-gradient(ellipse at 90% 80%, rgba(255,255,255,0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 40%, rgba(200,200,200,0.02) 0%, transparent 40%),
-                repeating-linear-gradient(115deg, transparent 0px, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px, transparent 21px, transparent 45px, rgba(255,255,255,0.008) 45px, rgba(255,255,255,0.008) 46px),
-                repeating-linear-gradient(68deg, transparent 0px, transparent 35px, rgba(255,255,255,0.01) 35px, rgba(255,255,255,0.01) 36px);
-        }
-        .toast {
-            position: fixed;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: #18181b;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            padding: 0.65rem 1.4rem;
-            border-radius: 50px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-            z-index: 99999;
-            pointer-events: none;
-            opacity: 0;
-            white-space: nowrap;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.ok  { border-color: #34d399; color: #34d399; }
-        .toast.err { border-color: #f87171; color: #f87171; }
     </style>
 </head>
-<body class="bg-marble flex flex-col h-screen overflow-hidden text-white">
+<body class="font-inter flex flex-col h-screen overflow-hidden text-white"
+      style="background-color:#1a1a1a;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.03) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(200,200,200,.02) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.015) 20px,rgba(255,255,255,.015) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.008) 45px,rgba(255,255,255,.008) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.01) 35px,rgba(255,255,255,.01) 36px)">
 
 <!-- HEADER -->
 <header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-6 flex-shrink-0">
@@ -144,7 +129,9 @@
 </div>
 
 <!-- TOAST -->
-<div id="toast" class="toast"></div>
+<div id="toast"
+     class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 bg-[#18181b] border border-white/10 text-white px-[1.4rem] py-[0.65rem] rounded-full text-[0.82rem] font-medium shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-[99999] pointer-events-none whitespace-nowrap transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+</div>
 
 <?php include __DIR__ . '/Pasarelapago.php'; ?>
 
@@ -201,9 +188,15 @@ function renderizar() {
 function mostrarToast(msg, tipo = 'ok') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast show ' + tipo;
+    t.classList.remove('translate-y-20', 'opacity-0', 'border-[#34d399]', 'text-[#34d399]', 'border-[#f87171]', 'text-[#f87171]', 'border-white/10', 'text-white');
+    t.classList.add('translate-y-0', 'opacity-100');
+    if (tipo === 'ok') t.classList.add('border-[#34d399]', 'text-[#34d399]');
+    else               t.classList.add('border-[#f87171]', 'text-[#f87171]');
     clearTimeout(window._toastTimer);
-    window._toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    window._toastTimer = setTimeout(() => {
+        t.classList.remove('translate-y-0', 'opacity-100', 'border-[#34d399]', 'text-[#34d399]', 'border-[#f87171]', 'text-[#f87171]');
+        t.classList.add('translate-y-20', 'opacity-0', 'border-white/10', 'text-white');
+    }, 2800);
 }
 
 async function registrarVenta(metodoPago) {
