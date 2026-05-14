@@ -32,15 +32,15 @@ class ControladorAdmin
         $modeloInforme    = new ModeloInforme($this->pdo);
         $modeloTrabajador = new ModeloTrabajador($this->pdo);
 
-        $empleados       = $modeloTrabajador->obtenerTodos();
-        $servicios       = $modeloServicio->obtenerTodos();
-        $productos       = $modeloProducto->obtenerTodos();
-        $resumen         = $modeloInforme->resumenGeneral($periodo);
-        $svcVendidos     = $modeloInforme->serviciosMasVendidos($periodo);
-        $prodVendidos    = $modeloInforme->productosMasVendidos($periodo);
-        $porEmpleado     = $modeloInforme->ventasPorEmpleado($periodo);
-        $porDia          = $modeloInforme->ventasPorDia($periodo);
-        $porMetodo       = $modeloInforme->ingresosPorMetodo($periodo);
+        $empleados    = $modeloTrabajador->obtenerTodos();
+        $servicios    = $modeloServicio->obtenerTodos();
+        $productos    = $modeloProducto->obtenerTodos();
+        $resumen      = $modeloInforme->resumenGeneral($periodo);
+        $svcVendidos  = $modeloInforme->serviciosMasVendidos($periodo);
+        $prodVendidos = $modeloInforme->productosMasVendidos($periodo);
+        $porEmpleado  = $modeloInforme->ventasPorEmpleado($periodo);
+        $porDia       = $modeloInforme->ventasPorDia($periodo);
+        $porMetodo    = $modeloInforme->ingresosPorMetodo($periodo);
 
         $editServicio = null;
         $editProducto = null;
@@ -163,6 +163,23 @@ class ControladorAdmin
         $modelo = new ModeloTrabajador($this->pdo);
         $modelo->desactivar((int)$_GET['id']);
         $_SESSION['admin_msg'] = 'Empleado desactivado.';
+        header('Location: index.php?page=admin&seccion=empleados');
+        exit;
+    }
+
+    public function eliminarDefinitivamenteEmpleado(): void
+    {
+        $modelo = new ModeloTrabajador($this->pdo);
+        $id     = (int)$_GET['id'];
+
+        if ($modelo->tieneVentas($id)) {
+            $_SESSION['admin_msg'] = '⚠ No se puede eliminar: el empleado tiene ventas registradas.';
+            header('Location: index.php?page=admin&seccion=empleados');
+            exit;
+        }
+
+        $modelo->eliminarDefinitivamente($id);
+        $_SESSION['admin_msg'] = '✓ Empleado eliminado definitivamente.';
         header('Location: index.php?page=admin&seccion=empleados');
         exit;
     }

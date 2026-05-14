@@ -1,20 +1,5 @@
 <?php
 
-/**
- * ServicioQuaderno.php
- * ─────────────────────────────────────────────────────────────────
- * Integración con la API de Quaderno para:
- *   1. Crear una transacción (venta)
- *   2. Quaderno genera automáticamente el PDF del ticket
- *   3. Quaderno envía el ticket por email al cliente
- *
- * Credenciales:
- *   QUADERNO_API_KEY     → sk_live_nd928TSA6qTF8J1_LYt2  (en producción usar variable de entorno)
- *   QUADERNO_ACCOUNT     → assur-10785
- *   QUADERNO_BASE_URL    → https://assur-10785.quadernoapp.com/api
- * ─────────────────────────────────────────────────────────────────
- */
-
 class ServicioQuaderno
 {
     private string $apiKey;
@@ -22,24 +7,11 @@ class ServicioQuaderno
 
     public function __construct()
     {
-        // ── En producción usa variables de entorno ──────────────────
         $this->apiKey  = getenv('QUADERNO_API_KEY') ?: 'sk_live_nd928TSA6qTF8J1_LYt2';
         $account       = getenv('QUADERNO_ACCOUNT')  ?: 'assur-10785';
         $this->baseUrl = "https://{$account}.quadernoapp.com/api";
     }
 
-    /**
-     * Crea una transacción en Quaderno y envía el ticket por email.
-     *
-     * @param array  $items      Lista de items: [['nombre'=>..., 'precio'=>..., 'cantidad'=>...]]
-     * @param float  $total      Total de la venta en EUR
-     * @param string $metodoPago 'efectivo' | 'Tarjeta bancaria' | 'Google Pay / Apple Pay'
-     * @param string $emailCliente Email del cliente (opcional, si no se tiene se omite)
-     * @param string $nombreCliente Nombre del cliente (opcional)
-     * @param int    $idVenta     ID de la venta en tu BD
-     *
-     * @return array ['ok' => bool, 'quaderno_id' => string|null, 'error' => string|null]
-     */
     public function emitirTicket(
         array  $items,
         float  $total,
@@ -49,102 +21,78 @@ class ServicioQuaderno
         int    $idVenta       = 0
     ): array {
         try {
-            // ── 1. Normalizar método de pago al formato Quaderno ────────
             $metodoPagoQ = $this->normalizarMetodoPago($metodoPago);
 
-            // ── 2. Construir los items para Quaderno ────────────────────
+            // ── 1. Construir items ───────────────────────────────────────
+            // El precio ya incluye IVA — se calcula la base imponible
+            // para que Quaderno muestre "IVA incluido" sin sumarlo encima
             $itemsQ = [];
             foreach ($items as $item) {
+                $precioConIva  = round((float) $item['precio'], 2);
+                // Base imponible = precio / 1.21
+                $baseImponible = round($precioConIva / 1.21, 4);
+                $cuotaIva      = round($precioConIva - $baseImponible, 2);
+
                 $itemsQ[] = [
                     'description' => $item['nombre'],
                     'quantity'    => (int) ($item['cantidad'] ?? 1),
-                    'amount'      => round((float) $item['precio'], 2),
-                    'tax'         => [
-                        'country'  => 'ES',
-                        'rate'     => 21.0,   // IVA España (ajusta si aplica tipo reducido)
-                        'tax_code' => 'standard',
-                    ],
+                    'unit_price'  => $baseImponible,  // base sin IVA
+                    'tax_1_name'  => 'IVA',
+                    'tax_1_rate'  => 21,
                 ];
             }
 
-            // ── 3. Construir payload de la transacción ──────────────────
-            $payload = [
-                'type'         => 'sale',
-                'currency'     => 'EUR',
-                'date'         => date('Y-m-d'),
-                'processor'    => 'BeLoyal_TPV',
-                'processor_id' => 'venta_' . (is_array($idVenta) ? ($idVenta['id_venta'] ?? 0) : (int)$idVenta) . '_' . time(),
-                'items'        => $itemsQ,
-                'payment'      => [
-                    'method'    => $metodoPagoQ,
-                    'processor' => 'BeLoyal',
-                ],
-                'notes'        => 'Ticket BeLoyal · Venta #' . (is_array($idVenta) ? ($idVenta['id_venta'] ?? 0) : (int)$idVenta),
+            // ── 2. Preparar datos del cliente ────────────────────────────
+            $partes   = explode(' ', trim($nombreCliente), 2);
+            $customer = [
+                'first_name' => $partes[0],
+                'last_name'  => $partes[1] ?? '',
+                'country'    => 'ES',
+            ];
+            if (!empty($emailCliente)) {
+                $customer['email'] = $emailCliente;
+            }
+
+            // ── 3. Crear factura ─────────────────────────────────────────
+            $facturaPayload = [
+                'currency'       => 'EUR',
+                'date'           => date('Y-m-d'),
+                'payment_method' => $metodoPagoQ,
+                'notes'          => 'Ticket BeLoyal · Venta #' . $idVenta,
+                'contact'        => $customer,
+                'items'          => $itemsQ,
+                'po_number'      => 'venta_' . $idVenta . '_' . time(),
             ];
 
-            // ── 4. Añadir cliente si tiene email ────────────────────────
-            if (!empty($emailCliente)) {
-                $partes = explode(' ', trim($nombreCliente), 2);
-                $payload['customer'] = [
-                    'first_name' => $partes[0],
-                    'last_name'  => $partes[1] ?? '',
-                    'email'      => $emailCliente,
-                    'country'    => 'ES',
-                ];
-            } else {
-                // Sin email: cliente anónimo (ticket simplificado)
-                $payload['customer'] = [
-                    'first_name' => 'Cliente',
-                    'last_name'  => 'BeLoyal',
-                    'country'    => 'ES',
-                ];
-            }
-
-            // ── 5. Llamada a la API ─────────────────────────────────────
-            $respuesta = $this->request('POST', '/transactions', $payload);
+            $respuesta = $this->request('POST', '/invoices', $facturaPayload);
 
             if (!$respuesta['ok']) {
-                return [
-                    'ok'    => false,
-                    'error' => $respuesta['error'] ?? 'Error desconocido en Quaderno',
-                ];
+                return ['ok' => false, 'error' => $respuesta['error'] ?? 'Error al crear factura en Quaderno'];
             }
 
-            $transaccion = $respuesta['data'];
-            $quaderno_id = $transaccion['id'] ?? null;
+            $factura     = $respuesta['data'];
+            $facturaId   = $factura['id'] ?? null;
+            $quaderno_id = $facturaId;
 
-            // ── 6. Si hay email, enviar el documento generado ───────────
-            if (!empty($emailCliente) && !empty($transaccion['document']['id'])) {
-                $this->enviarDocumento($transaccion['document']['type'], $transaccion['document']['id']);
+            // ── 4. Enviar por email si hay dirección ─────────────────────
+            if (!empty($emailCliente) && $facturaId) {
+                $deliver = $this->request('GET', '/invoices/' . $facturaId . '/deliver');
+                if (!$deliver['ok']) {
+                    $this->request('POST', '/invoices/' . $facturaId . '/deliver');
+                }
             }
 
             return [
                 'ok'          => true,
                 'quaderno_id' => $quaderno_id,
-                'documento'   => $transaccion['document'] ?? null,
+                'factura'     => $factura,
             ];
 
         } catch (\Exception $e) {
-            return [
-                'ok'    => false,
-                'error' => $e->getMessage(),
-            ];
+            return ['ok' => false, 'error' => $e->getMessage()];
         }
     }
 
-    /**
-     * Envía por email el documento (invoice/receipt) generado por Quaderno.
-     */
-    private function enviarDocumento(string $tipo, string $idDocumento): void
-    {
-        // El tipo viene como 'Invoice', 'Receipt', etc.
-        $endpoint = '/' . strtolower($tipo) . 's/' . $idDocumento . '/deliver';
-        $this->request('GET', $endpoint);
-    }
-
-    /**
-     * Normaliza el método de pago al formato que acepta Quaderno.
-     */
     private function normalizarMetodoPago(string $metodo): string
     {
         $metodo = strtolower($metodo);
@@ -155,9 +103,6 @@ class ServicioQuaderno
         return 'credit_card';
     }
 
-    /**
-     * Realiza una petición HTTP a la API de Quaderno.
-     */
     private function request(string $metodo, string $endpoint, array $body = []): array
     {
         $url  = $this->baseUrl . $endpoint;
@@ -196,7 +141,13 @@ class ServicioQuaderno
         }
 
         $msg = $data['errors'] ?? ($data['message'] ?? "HTTP $code");
-        if (is_array($msg)) $msg = implode(', ', array_map(fn($k,$v) => "$k: " . (is_array($v) ? implode(', ', $v) : $v), array_keys($msg), $msg));
+        if (is_array($msg)) {
+            $msg = implode(', ', array_map(
+                fn($k, $v) => "$k: " . (is_array($v) ? implode(', ', $v) : $v),
+                array_keys($msg), $msg
+            ));
+        }
+
         return ['ok' => false, 'error' => $msg];
     }
 }

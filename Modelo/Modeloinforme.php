@@ -29,9 +29,6 @@ class ModeloInforme
         )->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Desglose de ingresos por método de pago (efectivo vs tarjeta/digital)
-     */
     public function ingresosPorMetodo(string $periodo = 'todo'): array
     {
         $filtro = $this->filtroFecha($periodo);
@@ -43,7 +40,6 @@ class ModeloInforme
              GROUP BY metodo_pago"
         )->fetchAll(PDO::FETCH_ASSOC);
 
-        // Normaliza en dos cubos: efectivo y tarjeta/digital
         $efectivo = ['ventas' => 0, 'ingresos' => 0.0];
         $tarjeta  = ['ventas' => 0, 'ingresos' => 0.0];
 
@@ -61,7 +57,7 @@ class ModeloInforme
         return [
             'efectivo' => $efectivo,
             'tarjeta'  => $tarjeta,
-            'detalle'  => $rows,   // filas originales por si se necesitan
+            'detalle'  => $rows,
         ];
     }
 
@@ -98,14 +94,23 @@ class ModeloInforme
     public function ventasPorEmpleado(string $periodo = 'todo'): array
     {
         $filtro = str_replace('fecha', 'v.fecha', $this->filtroFecha($periodo));
-        return $this->pdo->query(
-            "SELECT u.nombre, u.logo, COUNT(v.id_venta) as ventas, COALESCE(SUM(v.total), 0) as ingresos
+
+        $rows = $this->pdo->query(
+            "SELECT
+                u.nombre,
+                u.logo,
+                COUNT(v.id_venta) as ventas,
+                COALESCE(SUM(v.total), 0) as ingresos,
+                COALESCE(SUM(CASE WHEN LOWER(v.metodo_pago) LIKE '%efectivo%' THEN v.total ELSE 0 END), 0) as ingresos_efectivo,
+                COALESCE(SUM(CASE WHEN LOWER(v.metodo_pago) NOT LIKE '%efectivo%' AND v.metodo_pago IS NOT NULL THEN v.total ELSE 0 END), 0) as ingresos_tarjeta
              FROM usuarios u
              LEFT JOIN ventas v ON v.id_usuario = u.id_usuario AND 1=1 $filtro
              WHERE u.rol = 'empleado'
              GROUP BY u.id_usuario
              ORDER BY ingresos DESC"
         )->fetchAll(PDO::FETCH_ASSOC);
+
+        return $rows;
     }
 
     public function ventasPorDia(string $periodo = 'todo'): array

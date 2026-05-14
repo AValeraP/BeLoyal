@@ -1,7 +1,6 @@
 <?php
 
 require_once __DIR__ . '/../Conn/conexion.php';
-require_once __DIR__ . '/../Servicios/ServicioQuaderno.php';
 
 class ControladorVenta
 {
@@ -34,13 +33,11 @@ class ControladorVenta
         $total         = (float) $body['total'];
         $metodoPago    = $body['metodo_pago'];
         $items         = $body['items'];
-        $emailCliente  = trim($body['email_cliente']  ?? '');
-        $nombreCliente = trim($body['nombre_cliente'] ?? 'Cliente');
 
         try {
             $this->pdo->beginTransaction();
 
-            // ── 1. Validar stock de todos los productos antes de vender ──
+            // ── 1. Validar stock antes de vender ────────────────────────
             foreach ($items as $item) {
                 if ($item['tipo'] !== 'producto') continue;
 
@@ -69,7 +66,7 @@ class ControladorVenta
                 }
             }
 
-            // ── 2. Insertar venta en BD ─────────────────────────────────
+            // ── 2. Insertar venta ────────────────────────────────────────
             $stmt = $this->pdo->prepare(
                 "INSERT INTO ventas (total, metodo_pago, id_empleado, id_usuario)
                  VALUES (:total, :metodo_pago, :id_empleado, :id_usuario)"
@@ -115,13 +112,13 @@ class ControladorVenta
                         ':subtotal'        => $subtotal,
                     ]);
 
-                    // ── Bajar stock ──────────────────────────────────────
+                    // Bajar stock
                     $upd = $this->pdo->prepare(
                         "UPDATE productos SET stock = GREATEST(stock - :cantidad, 0) WHERE id_producto = :id"
                     );
                     $upd->execute([':cantidad' => $cantidad, ':id' => $idRef]);
 
-                    // ── Desactivar solo si stock llega exactamente a 0 ───
+                    // Desactivar si stock llega a 0
                     $des = $this->pdo->prepare(
                         "UPDATE productos SET activo = 0 WHERE id_producto = :id AND stock = 0"
                     );
@@ -131,22 +128,10 @@ class ControladorVenta
 
             $this->pdo->commit();
 
-            // ── 4. Emitir ticket en Quaderno ────────────────────────────
-            $quaderno   = new ServicioQuaderno();
-            $resultadoQ = $quaderno->emitirTicket(
-                items:         $items,
-                total:         $total,
-                metodoPago:    $metodoPago,
-                emailCliente:  $emailCliente,
-                nombreCliente: $nombreCliente,
-                idVenta:       $idVenta
-            );
-
+            // Quaderno se llama solo desde ControladorTicket cuando el empleado introduce el email
             echo json_encode([
-                'ok'             => true,
-                'id_venta'       => $idVenta,
-                'ticket_enviado' => $resultadoQ['ok'],
-                'ticket_error'   => $resultadoQ['error'] ?? null,
+                'ok'      => true,
+                'id_venta' => $idVenta,
             ]);
 
         } catch (Exception $e) {

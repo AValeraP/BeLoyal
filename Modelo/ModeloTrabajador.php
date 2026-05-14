@@ -66,20 +66,40 @@ class ModeloTrabajador
     public function actualizarPassword(int $id, string $password): void
     {
         $stmt = $this->pdo->prepare(
-            "UPDATE usuarios
-             SET password = :password
-             WHERE id_usuario = :id"
+            "UPDATE usuarios SET password = :password WHERE id_usuario = :id"
         );
-        $stmt->execute([
-            ':password' => $password,
-            ':id'       => $id,
-        ]);
+        $stmt->execute([':password' => $password, ':id' => $id]);
     }
 
     public function desactivar(int $id): void
     {
         $stmt = $this->pdo->prepare(
             "UPDATE usuarios SET activo = 0 WHERE id_usuario = :id AND rol = 'empleado'"
+        );
+        $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Comprueba si el empleado tiene ventas registradas.
+     * Si tiene ventas no se puede eliminar para conservar el historial.
+     */
+    public function tieneVentas(int $id): bool
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM ventas WHERE id_empleado = :id"
+        );
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Elimina definitivamente el empleado de la BD.
+     * Solo se debe llamar si tieneVentas() devuelve false.
+     */
+    public function eliminarDefinitivamente(int $id): void
+    {
+        $stmt = $this->pdo->prepare(
+            "DELETE FROM usuarios WHERE id_usuario = :id AND rol = 'empleado'"
         );
         $stmt->execute([':id' => $id]);
     }

@@ -127,6 +127,11 @@ switch ($page) {
         (new ControladorTicket())->enviar();
         break;
 
+    case 'admin_eliminar_definitivo_empleado':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarDefinitivamenteEmpleado();
+        break;
+
     default:
         http_response_code(404);
         echo "Página no encontrada.";

@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-6 gap-3 mb-6">
+    <div class="grid grid-cols-4 gap-3 mb-6">
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Total ventas</p>
             <p class="text-3xl font-light text-white"><?= $resumen['total_ventas'] ?></p>
@@ -96,16 +96,6 @@
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Productos activos</p>
             <p class="text-3xl font-light text-white"><?= count($productos) ?></p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-l-2 border-l-emerald-500/50">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Efectivo</p>
-            <p class="text-3xl font-light text-emerald-400">€<?= number_format($porMetodo['efectivo']['ingresos'], 2) ?></p>
-            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['efectivo']['ventas'] ?> ventas</p>
-        </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-l-2 border-l-blue-500/50">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Tarjeta / Digital</p>
-            <p class="text-3xl font-light text-blue-400">€<?= number_format($porMetodo['tarjeta']['ingresos'], 2) ?></p>
-            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['tarjeta']['ventas'] ?> ventas</p>
-        </div>
     </div>
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
@@ -121,24 +111,7 @@
             <tbody>
                 <?php foreach ($porEmpleado as $e): ?>
                 <tr class="border-b border-white/5 last:border-0">
-                    <td class="py-2.5">
-                        <div class="flex items-center gap-2.5">
-                            <?php if (!empty($e['logo'])): ?>
-                            <img src="public/img/logos/<?= htmlspecialchars($e['logo']) ?>"
-                                 alt="<?= htmlspecialchars($e['nombre']) ?>"
-                                 class="w-7 h-7 rounded-full object-cover border border-white/10 flex-shrink-0"
-                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                            <div class="w-7 h-7 rounded-full bg-zinc-700 border border-white/10 flex items-center justify-center text-xs font-medium text-zinc-300 flex-shrink-0" style="display:none">
-                                <?= mb_strtoupper(mb_substr($e['nombre'], 0, 1)) ?>
-                            </div>
-                            <?php else: ?>
-                            <div class="w-7 h-7 rounded-full bg-zinc-700 border border-white/10 flex items-center justify-center text-xs font-medium text-zinc-300 flex-shrink-0">
-                                <?= mb_strtoupper(mb_substr($e['nombre'], 0, 1)) ?>
-                            </div>
-                            <?php endif; ?>
-                            <span class="text-xs font-light text-zinc-400"><?= htmlspecialchars($e['nombre']) ?></span>
-                        </div>
-                    </td>
+                    <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($e['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= $e['ventas'] ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($e['ingresos'], 2) ?></td>
                 </tr>
@@ -250,7 +223,7 @@
     </div>
 
     <?php
-    $grupos = ['peluqueria' => 'Peluquería', 'trenzas' => ' Trenzas', 'unas' => 'Uñas', 'bono' => '🎟 Bonos'];
+    $grupos = ['peluqueria' => 'Peluquería', 'trenzas' => 'Trenzas', 'unas' => ' Uñas', 'bono' => 'Bonos'];
     $serviciosPorGrupo = [];
     foreach ($servicios as $s) {
         $esp = $s['especialidad'] ?? 'peluqueria';
@@ -473,6 +446,7 @@
     <?php endif; ?>
 
 </main>
+
 
 <!-- MODAL CONFIRMACIÓN -->
 <div id="confirm-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
