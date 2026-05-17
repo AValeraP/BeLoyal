@@ -316,32 +316,9 @@
         setLoadingBizum(true);
         bizumError.textContent = '';
 
-        try {
-            sessionStorage.setItem('biz_carrito', JSON.stringify(carritoActual));
-            sessionStorage.setItem('biz_cents',   String(totalCents));
-
-            const { clientSecret } = await crearIntent('bizum');
-            const returnUrl = window.location.href.split('?')[0] + '?page=empleado&bizum_return=1';
-
-            const { error } = await stripe.confirmBizumPayment(clientSecret, {
-                payment_method: {
-                    billing_details: { phone: '+34' + telefono },
-                },
-                return_url: returnUrl,
-            });
-
-            if (error) {
-                bizumError.textContent = error.message;
-                setLoadingBizum(false);
-                sessionStorage.removeItem('biz_carrito');
-                sessionStorage.removeItem('biz_cents');
-            }
-        } catch (err) {
-            bizumError.textContent = err.message || 'Error al procesar el pago';
-            setLoadingBizum(false);
-            sessionStorage.removeItem('biz_carrito');
-            sessionStorage.removeItem('biz_cents');
-        }
+        // Simulación de envío para demos — sustituir por integración real en producción
+        await new Promise(r => setTimeout(r, 1500));
+        await finalizarCobro(null, 'Bizum');
     }
 
     let ultimoIdVenta = null;
