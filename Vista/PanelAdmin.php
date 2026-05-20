@@ -110,11 +110,11 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Empleado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ventas</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ingresos</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-emerald-700 pb-2 border-b border-white/5">Efectivo</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-700 pb-2 border-b border-white/5">Tarjeta / Bizum</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Empleado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ventas</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-emerald-400 pb-2 border-b border-white/5">Efectivo</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-400 pb-2 border-b border-white/5">Tarjeta / Bizum</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,9 +140,9 @@
             <table class="w-full">
                 <thead>
                     <tr>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Servicio</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Uds.</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ingresos</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Servicio</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Uds.</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,9 +164,9 @@
             <table class="w-full">
                 <thead>
                     <tr>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Producto</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Uds.</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Ingresos</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Producto</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Uds.</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -196,22 +196,22 @@
             <?php endif; ?>
             <div class="grid grid-cols-3 gap-3 mb-4">
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editServicio['nombre'] ?? '') ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Precio (€)</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Precio (€)</label>
                     <input type="number" name="precio" step="0.01" min="0" required value="<?= $editServicio['precio'] ?? '' ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Duración (min)</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Duración (min)</label>
                     <input type="number" name="duracion" min="0" required value="<?= $editServicio['duracion'] ?? '' ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Tipo</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Tipo</label>
                     <select name="especialidad"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                         <?php foreach (['peluqueria' => 'Peluquería', 'trenzas' => 'Trenzas', 'unas' => 'Uñas', 'bono' => 'Bono'] as $val => $label): ?>
@@ -248,11 +248,11 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Precio</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Duración</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Precio</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Duración</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -293,17 +293,17 @@
             <?php endif; ?>
             <div class="grid grid-cols-3 gap-3 mb-4">
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editProducto['nombre'] ?? '') ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Precio (€)</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Precio (€)</label>
                     <input type="number" name="precio" step="0.01" min="0" required value="<?= $editProducto['precio'] ?? '' ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Stock</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Stock</label>
                     <input type="number" name="stock" min="0" required value="<?= $editProducto['stock'] ?? '' ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
@@ -324,11 +324,11 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Precio</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Stock</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Precio</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Stock</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -370,24 +370,24 @@
             <?php endif; ?>
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editEmpleado['nombre'] ?? '') ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Email</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Email</label>
                     <input type="email" name="email" required value="<?= htmlspecialchars($editEmpleado['email'] ?? '') ?>"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">
                         <?= $editEmpleado ? 'Nueva contraseña (vacío = no cambiar)' : 'Contraseña' ?>
                     </label>
                     <input type="password" name="password" <?= $editEmpleado ? '' : 'required' ?> placeholder="••••••••"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition placeholder-zinc-600">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-600 uppercase tracking-widest mb-1.5">Especialidad</label>
+                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Especialidad</label>
                     <select name="especialidad"
                         class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
                         <?php foreach (['peluqueria', 'trenzas', 'unas', 'todas'] as $esp): ?>
@@ -423,11 +423,11 @@
         <table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Email</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Especialidad</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-600 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Email</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Especialidad</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -447,7 +447,7 @@
                         <a href="#" onclick="abrirConfirm('¿Desactivar este empleado? Podrás eliminarlo definitivamente cuando esté inactivo.', 'index.php?page=admin_eliminar_empleado&id=<?= $emp['id_usuario'] ?>', 'Desactivar empleado')" class="text-xs font-light text-amber-500/70 hover:text-amber-400 transition">Desactivar</a>
                         <?php else: ?>
                         <a href="index.php?page=admin_activar_empleado&id=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
-                        <a href="#" onclick="abrirConfirm('¿Eliminar definitivamente este empleado? Esta acción no se puede deshacer. Solo es posible si no tiene ventas registradas.', 'index.php?page=admin_eliminar_definitivo_empleado&id=<?= $emp['id_usuario'] ?>', 'Eliminar definitivamente')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar definitivo</a>
+                        <a href="#" onclick="abrirConfirm('¿Eliminar definitivamente este empleado? Esta acción no se puede deshacer. Solo es posible si no tiene ventas registradas.', 'index.php?page=admin_eliminar_definitivo_empleado&id=<?= $emp['id_usuario'] ?>', 'Eliminar definitivamente')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar definitivamente</a>
                         <?php endif; ?>
                     </td>
                 </tr>

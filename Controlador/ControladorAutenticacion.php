@@ -42,8 +42,14 @@ class ControladorAutenticacion
 
         $usuario = $this->model->buscarPorEmail($email);
 
-        if (!$usuario || $password !== $usuario['password'] || !$usuario['activo']) {
+        if (!$usuario || $password !== $usuario['password']) {
             $_SESSION['login_error'] = 'Email o contraseña incorrectos.';
+            header('Location: index.php?page=login');
+            exit;
+        }
+
+        if (!$usuario['activo']) {
+            $_SESSION['login_error'] = 'Esta cuenta está desactivada. Contacta con el administrador.';
             header('Location: index.php?page=login');
             exit;
         }

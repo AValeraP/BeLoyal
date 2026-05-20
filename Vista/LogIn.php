@@ -26,9 +26,9 @@
             <p class="text-xs text-zinc-500 tracking-widest uppercase">Accede a tu cuenta</p>
         </div>
 
-        <?php if (!empty($mensajeerror)): ?>
-            <p class="text-sm text-red-400 mb-6 text-center"><?= htmlspecialchars($mensajeerror) ?></p>
-        <?php endif; ?>
+        <p class="text-xs text-red-400 mb-4 text-center min-h-[1rem]">
+            <?= !empty($mensajeerror) ? htmlspecialchars($mensajeerror) : '' ?>
+        </p>
 
         <form method="POST" action="index.php?page=login_post">
 
