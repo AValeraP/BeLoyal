@@ -54,7 +54,7 @@ class ModeloProductos
         return $this->pdo->query(
             "SELECT id_servicio AS id, nombre, precio
              FROM servicios
-             WHERE activo = 1 AND especialidad = 'unas'
+             WHERE activo = 1 AND especialidad = 'uñas'
              ORDER BY nombre"
         )->fetchAll(PDO::FETCH_ASSOC);
     }

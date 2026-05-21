@@ -41,7 +41,7 @@ class ControladorEmpleado
         } elseif ($especialidad === 'trenzas') {
             $servicios     = $modeloProductos->obtenerServiciosTrenzas();
             $seccionTitulo = 'Trenzas';
-        } elseif ($especialidad === 'unas') {
+        } elseif ($especialidad === 'uñas') {
             $servicios     = $modeloProductos->obtenerServiciosUnas();
             $seccionTitulo = 'Uñas';
         } else {

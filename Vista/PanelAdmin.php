@@ -223,7 +223,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Tipo</label>
-                    <?php $optsS = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','unas'=>'Uñas','bono'=>'Bono']; $selS = $editServicio['especialidad'] ?? 'peluqueria'; ?>
+                    <?php $optsS = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','uñas'=>'Uñas','bono'=>'Bono']; $selS = $editServicio['especialidad'] ?? 'peluqueria'; ?>
                     <div class="custom-select relative">
                         <input type="hidden" name="especialidad" value="<?= $selS ?>">
                         <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">
@@ -250,7 +250,7 @@
     </div>
 
     <?php
-    $grupos = ['peluqueria' => 'Peluquería', 'trenzas' => 'Trenzas', 'unas' => ' Uñas', 'bono' => 'Bonos'];
+    $grupos = ['peluqueria' => 'Peluquería', 'trenzas' => 'Trenzas', 'uñas' => ' Uñas', 'bono' => 'Bonos'];
     $serviciosPorGrupo = [];
     foreach ($servicios as $s) {
         $esp = $s['especialidad'] ?? 'peluqueria';
@@ -404,7 +404,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Especialidad</label>
-                    <?php $optsE = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','unas'=>'Uñas']; $selE = $editEmpleado['especialidad'] ?? 'peluqueria'; ?>
+                    <?php $optsE = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','uñas'=>'Uñas']; $selE = $editEmpleado['especialidad'] ?? 'peluqueria'; ?>
                     <div class="custom-select relative">
                         <input type="hidden" name="especialidad" value="<?= $selE ?>">
                         <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">

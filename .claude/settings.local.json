@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:/xampp/mysql/bin/mysqldump.exe\" -u root -P 3307 --no-data --skip-comments be_loyal)",
+      "Bash(ls C:/ 2>nul | grep -iE \"phpdesktop|beloyal\" ; ls \"C:/Users/\" 2>nul)",
+      "Bash(find \"C:/Users/aleja\" -maxdepth 4 -iname \"phpdesktop-chrome.exe\" 2>nul ; find \"C:/\" -maxdepth 3 -iname \"phpdesktop-chrome.exe\" 2>nul)",
+      "Bash(\"C:/Users/aleja/BeLoyalDesktop/phpdesktop-chrome-130.1-php-8.3/php/php.exe\" -m)"
+    ]
+  }
+}
