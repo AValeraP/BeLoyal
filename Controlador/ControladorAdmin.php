@@ -65,7 +65,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloServicio($this->pdo);
         $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['duracion'], trim($_POST['especialidad'] ?? 'peluqueria'));
-        $_SESSION['admin_msg'] = '✓ Servicio creado correctamente.';
+        $_SESSION['admin_msg'] = 'Servicio creado correctamente.';
         header('Location: index.php?page=admin&seccion=servicios');
         exit;
     }
@@ -74,7 +74,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloServicio($this->pdo);
         $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['duracion'], trim($_POST['especialidad'] ?? 'peluqueria'));
-        $_SESSION['admin_msg'] = '✓ Servicio actualizado correctamente.';
+        $_SESSION['admin_msg'] = 'Servicio actualizado correctamente.';
         header('Location: index.php?page=admin&seccion=servicios');
         exit;
     }
@@ -83,7 +83,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloServicio($this->pdo);
         $modelo->eliminar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = '✓ Servicio eliminado.';
+        $_SESSION['admin_msg'] = 'Servicio eliminado.';
         header('Location: index.php?page=admin&seccion=servicios');
         exit;
     }
@@ -92,7 +92,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloServicio($this->pdo);
         $modelo->activar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = '✓ Servicio activado.';
+        $_SESSION['admin_msg'] = 'Servicio activado.';
         header('Location: index.php?page=admin&seccion=servicios');
         exit;
     }
@@ -103,7 +103,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
-        $_SESSION['admin_msg'] = '✓ Producto creado correctamente.';
+        $_SESSION['admin_msg'] = 'Producto creado correctamente.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -112,7 +112,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
-        $_SESSION['admin_msg'] = '✓ Producto actualizado correctamente.';
+        $_SESSION['admin_msg'] = 'Producto actualizado correctamente.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -121,7 +121,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->eliminar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = '✓ Producto eliminado.';
+        $_SESSION['admin_msg'] = 'Producto eliminado.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -130,7 +130,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->activar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = '✓ Producto activado.';
+        $_SESSION['admin_msg'] = 'Producto activado.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -148,11 +148,33 @@ class ControladorAdmin
 
     public function actualizarEmpleado(): void
     {
+        $id     = (int)$_POST['id'];
         $modelo = new ModeloTrabajador($this->pdo);
-        $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), trim($_POST['email']), trim($_POST['especialidad']), isset($_POST['activo']));
+        $modelo->actualizar($id, trim($_POST['nombre']), trim($_POST['email']), trim($_POST['especialidad']), isset($_POST['activo']));
         if (!empty(trim($_POST['password']))) {
-            $modelo->actualizarPassword((int)$_POST['id'], trim($_POST['password']));
+            $modelo->actualizarPassword($id, trim($_POST['password']));
         }
+
+        // Quitar foto
+        if (!empty($_POST['quitar_foto'])) {
+            $emp = $modelo->obtenerPorId($id);
+            if (!empty($emp['logo'])) {
+                @unlink(__DIR__ . '/../public/img/logos/' . $emp['logo']);
+            }
+            $modelo->actualizarLogo($id, null);
+        } elseif (isset($_FILES['foto_empleado']) && $_FILES['foto_empleado']['error'] === UPLOAD_ERR_OK) {
+            $ext  = strtolower(pathinfo($_FILES['foto_empleado']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                $emp  = $modelo->obtenerPorId($id);
+                if (!empty($emp['logo'])) {
+                    @unlink(__DIR__ . '/../public/img/logos/' . $emp['logo']);
+                }
+                $filename = 'emp_' . $id . '_' . time() . '.' . $ext;
+                move_uploaded_file($_FILES['foto_empleado']['tmp_name'], __DIR__ . '/../public/img/logos/' . $filename);
+                $modelo->actualizarLogo($id, $filename);
+            }
+        }
+
         $_SESSION['admin_msg'] = 'Empleado actualizado correctamente.';
         header('Location: index.php?page=admin&seccion=empleados');
         exit;
@@ -162,7 +184,7 @@ class ControladorAdmin
     {
         $modelo = new ModeloTrabajador($this->pdo);
         $modelo->activar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = '✓ Empleado activado.';
+        $_SESSION['admin_msg'] = 'Empleado activado.';
         header('Location: index.php?page=admin&seccion=empleados');
         exit;
     }
@@ -182,23 +204,39 @@ class ControladorAdmin
         $id     = (int)$_GET['id'];
 
         if ($modelo->tieneVentas($id)) {
-            $_SESSION['admin_msg'] = '⚠ No se puede eliminar: el empleado tiene ventas registradas.';
+            $_SESSION['admin_msg'] = 'No se puede eliminar: el empleado tiene ventas registradas.';
             header('Location: index.php?page=admin&seccion=empleados');
             exit;
         }
 
         $modelo->eliminarDefinitivamente($id);
-        $_SESSION['admin_msg'] = '✓ Empleado eliminado definitivamente.';
+        $_SESSION['admin_msg'] = 'Empleado eliminado definitivamente.';
         header('Location: index.php?page=admin&seccion=empleados');
         exit;
     }
 
     public function resetearVentas(): void
     {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?page=admin&seccion=dashboard');
+            exit;
+        }
+
+        $passwordIntroducida = $_POST['password_confirm'] ?? '';
+        $stmt = $this->pdo->prepare("SELECT password FROM usuarios WHERE email = :email AND rol = 'admin' LIMIT 1");
+        $stmt->execute([':email' => $_SESSION['usuario']['email']]);
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$admin || $passwordIntroducida !== $admin['password']) {
+            $_SESSION['admin_msg'] = 'Contraseña incorrecta. No se han eliminado las ventas.';
+            header('Location: index.php?page=admin&seccion=dashboard');
+            exit;
+        }
+
         $this->pdo->exec("DELETE FROM detalle_servicio");
         $this->pdo->exec("DELETE FROM detalle_producto");
         $this->pdo->exec("DELETE FROM ventas");
-        $_SESSION['admin_msg'] = '✓ Todas las ventas han sido eliminadas.';
+        $_SESSION['admin_msg'] = 'Todas las ventas han sido eliminadas.';
         header('Location: index.php?page=admin&seccion=dashboard');
         exit;
     }

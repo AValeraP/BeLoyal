@@ -12,10 +12,19 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Scrollbar — sin equivalente en Tailwind */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
+
+        /* Custom select dropdown */
+        .custom-select-dropdown { transition: opacity .15s, transform .15s; transform-origin: top; }
+        .custom-select-dropdown.hidden { opacity: 0; pointer-events: none; transform: scaleY(.96); }
+        .custom-select-dropdown:not(.hidden) { opacity: 1; transform: scaleY(1); }
+
+        /* Ocultar flechas de inputs numéricos */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
 <body class="font-inter flex min-h-screen text-white"
@@ -63,8 +72,10 @@
         <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest">Dashboard</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="#"
-               onclick="abrirConfirm('Esta acción eliminará TODAS las ventas y no se puede deshacer.', 'index.php?page=admin_resetear_ventas', 'Resetear ventas')" class="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-900/30 hover:border-red-500/60 transition">Resetear ventas</a>
+            <button onclick="abrirResetModal()"
+                    class="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-900/30 hover:border-red-500/60 transition">
+                Resetear ventas
+            </button>
             <div class="flex gap-1.5">
             <?php foreach (['todo' => 'Todo', 'dia' => 'Hoy', 'semana' => 'Semana', 'mes' => 'Mes', 'ano' => 'Año'] as $val => $label): ?>
             <a href="index.php?page=admin&seccion=dashboard&periodo=<?= $val ?>"
@@ -212,14 +223,19 @@
                 </div>
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Tipo</label>
-                    <select name="especialidad"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
-                        <?php foreach (['peluqueria' => 'Peluquería', 'trenzas' => 'Trenzas', 'unas' => 'Uñas', 'bono' => 'Bono'] as $val => $label): ?>
-                        <option value="<?= $val ?>" <?= ($editServicio['especialidad'] ?? 'peluqueria') === $val ? 'selected' : '' ?>>
-                            <?= $label ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php $optsS = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','unas'=>'Uñas','bono'=>'Bono']; $selS = $editServicio['especialidad'] ?? 'peluqueria'; ?>
+                    <div class="custom-select relative">
+                        <input type="hidden" name="especialidad" value="<?= $selS ?>">
+                        <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">
+                            <span class="custom-select-label"><?= $optsS[$selS] ?></span>
+                            <svg class="w-3.5 h-3.5 text-zinc-500" style="transition:transform .2s" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
+                            <?php foreach ($optsS as $v => $l): ?>
+                            <div class="custom-select-option px-3 py-2 text-xs font-light cursor-pointer transition <?= $v === $selS ? 'text-white bg-white/5' : 'text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200' ?>" data-value="<?= $v ?>"><?= $l ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -364,7 +380,7 @@
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4"><?= $editEmpleado ? 'Editar empleado' : 'Nuevo empleado' ?></p>
-        <form method="POST" action="index.php?page=<?= $editEmpleado ? 'admin_actualizar_empleado' : 'admin_crear_empleado' ?>">
+        <form method="POST" enctype="multipart/form-data" action="index.php?page=<?= $editEmpleado ? 'admin_actualizar_empleado' : 'admin_crear_empleado' ?>">
             <?php if ($editEmpleado): ?>
             <input type="hidden" name="id" value="<?= $editEmpleado['id_usuario'] ?>">
             <?php endif; ?>
@@ -388,23 +404,45 @@
                 </div>
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Especialidad</label>
-                    <select name="especialidad"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
-                        <?php foreach (['peluqueria', 'trenzas', 'unas', 'todas'] as $esp): ?>
-                        <option value="<?= $esp ?>" <?= ($editEmpleado['especialidad'] ?? '') === $esp ? 'selected' : '' ?>>
-                            <?= ucfirst($esp) ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php $optsE = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','unas'=>'Uñas']; $selE = $editEmpleado['especialidad'] ?? 'peluqueria'; ?>
+                    <div class="custom-select relative">
+                        <input type="hidden" name="especialidad" value="<?= $selE ?>">
+                        <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">
+                            <span class="custom-select-label"><?= $optsE[$selE] ?></span>
+                            <svg class="w-3.5 h-3.5 text-zinc-500" style="transition:transform .2s" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
+                            <?php foreach ($optsE as $v => $l): ?>
+                            <div class="custom-select-option px-3 py-2 text-xs font-light cursor-pointer transition <?= $v === $selE ? 'text-white bg-white/5' : 'text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200' ?>" data-value="<?= $v ?>"><?= $l ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
             <?php if ($editEmpleado): ?>
-            <div class="mb-4">
+            <div class="mb-3">
                 <label class="flex items-center gap-2 text-xs font-light text-zinc-500 cursor-pointer">
                     <input type="checkbox" name="activo" value="1" <?= $editEmpleado['activo'] ? 'checked' : '' ?>
                         class="rounded border-zinc-700 bg-zinc-800">
                     Empleado activo
                 </label>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-2">Foto del empleado</label>
+                <?php if (!empty($editEmpleado['logo'])): ?>
+                <div class="flex items-center gap-3 mb-2">
+                    <img src="public/img/logos/<?= htmlspecialchars($editEmpleado['logo']) ?>"
+                         class="w-12 h-12 rounded-full object-cover border border-white/10"
+                         onerror="this.style.display='none'">
+                    <label class="flex items-center gap-2 text-xs font-light text-zinc-500 cursor-pointer">
+                        <input type="checkbox" name="quitar_foto" value="1" class="rounded border-zinc-700 bg-zinc-800">
+                        Quitar foto actual
+                    </label>
+                </div>
+                <?php endif; ?>
+                <input type="file" name="foto_empleado" accept="image/*"
+                       class="block w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-zinc-700 file:text-zinc-200 hover:file:bg-zinc-600 cursor-pointer">
+                <p class="text-[0.7rem] text-zinc-600 mt-1">JPG, PNG, WEBP — se muestra en la cabecera del panel del empleado.</p>
             </div>
             <?php endif; ?>
             <div class="flex gap-2">
@@ -423,6 +461,7 @@
         <table class="w-full">
             <thead>
                 <tr>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5 w-8"></th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Email</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Especialidad</th>
@@ -433,6 +472,17 @@
             <tbody>
                 <?php foreach ($empleados as $emp): ?>
                 <tr class="border-b border-white/5 last:border-0">
+                    <td class="py-2.5">
+                        <?php if (!empty($emp['logo'])): ?>
+                        <img src="public/img/logos/<?= htmlspecialchars($emp['logo']) ?>"
+                             class="w-7 h-7 rounded-full object-cover border border-white/10"
+                             onerror="this.style.display='none'">
+                        <?php else: ?>
+                        <div class="w-7 h-7 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] font-semibold text-zinc-500">
+                            <?= mb_strtoupper(mb_substr($emp['nombre'], 0, 1)) ?>
+                        </div>
+                        <?php endif; ?>
+                    </td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($emp['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($emp['email']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= ucfirst(htmlspecialchars($emp['especialidad'])) ?></td>
@@ -464,7 +514,7 @@
 </main>
 
 
-<!-- MODAL CONFIRMACIÓN -->
+<!-- MODAL CONFIRMACIÓN GENÉRICO -->
 <div id="confirm-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
     <div class="bg-zinc-900 border border-white/10 rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
         <p class="text-base font-semibold text-white mb-1" id="confirm-title">¿Estás seguro?</p>
@@ -480,6 +530,34 @@
     </div>
 </div>
 
+<!-- MODAL RESETEAR VENTAS (con contraseña) -->
+<div id="reset-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
+        <p class="text-base font-semibold text-white mb-1">Resetear ventas</p>
+        <p class="text-xs text-zinc-500 mb-5">Esta acción eliminará <strong class="text-red-400">TODAS</strong> las ventas y no se puede deshacer. Introduce tu contraseña para confirmar.</p>
+        <form method="POST" action="index.php?page=admin_resetear_ventas">
+            <input type="password" name="password_confirm" id="reset-pw-input"
+                   placeholder="Tu contraseña de administrador"
+                   autocomplete="current-password"
+                   class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-red-500/50 transition mb-4 placeholder-zinc-600">
+            <div class="flex gap-3">
+                <button type="button" onclick="cerrarResetModal()" class="flex-1 border border-white/10 text-xs text-zinc-400 py-3 rounded-xl hover:text-white hover:border-white/30 transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 bg-red-600 text-white text-xs font-semibold py-3 rounded-xl hover:bg-red-500 transition">
+                    Confirmar y eliminar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CONTADOR DE INACTIVIDAD -->
+<div id="inactivity-badge" style="display:none;"
+     class="fixed bottom-4 right-4 z-50 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-500 shadow-lg select-none">
+    Sesión expira en <span id="inactivity-secs" class="text-white font-medium"></span>s
+</div>
+
 <script>
 function abrirConfirm(msg, url, titulo) {
     document.getElementById('confirm-title').textContent = titulo || '¿Estás seguro?';
@@ -493,6 +571,124 @@ function cerrarConfirm() {
 document.getElementById('confirm-modal').addEventListener('click', function(e) {
     if (e.target === this) cerrarConfirm();
 });
+
+function abrirResetModal() {
+    document.getElementById('reset-pw-input').value = '';
+    document.getElementById('reset-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('reset-pw-input').focus(), 50);
+}
+function cerrarResetModal() {
+    document.getElementById('reset-modal').style.display = 'none';
+}
+document.getElementById('reset-modal').addEventListener('click', function(e) {
+    if (e.target === this) cerrarResetModal();
+});
+
+// ── Custom selects ──────────────────────────────────────────────────────────
+(function () {
+    function findPanel(el) {
+        var node = el.parentElement;
+        while (node && node !== document.body) {
+            if (node.classList && node.classList.contains('rounded-2xl') && node.classList.contains('backdrop-blur-sm')) {
+                return node;
+            }
+            node = node.parentElement;
+        }
+        return null;
+    }
+
+    function closeAll() {
+        document.querySelectorAll('.custom-select-dropdown').forEach(function(d) {
+            d.classList.add('hidden');
+        });
+        document.querySelectorAll('.custom-select-btn svg').forEach(function(s) {
+            s.style.transform = '';
+        });
+        document.querySelectorAll('[data-cs-bumped]').forEach(function(p) {
+            p.style.zIndex = '';
+            p.style.position = '';
+            p.removeAttribute('data-cs-bumped');
+        });
+    }
+
+    document.querySelectorAll('.custom-select').forEach(function(wrap) {
+        var btn      = wrap.querySelector('.custom-select-btn');
+        var dropdown = wrap.querySelector('.custom-select-dropdown');
+        var hidden   = wrap.querySelector('input[type=hidden]');
+        var label    = wrap.querySelector('.custom-select-label');
+        var chevron  = btn.querySelector('svg');
+
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = !dropdown.classList.contains('hidden');
+            closeAll();
+            if (!isOpen) {
+                var panel = findPanel(wrap);
+                if (panel) {
+                    panel.style.position = 'relative';
+                    panel.style.zIndex = '40';
+                    panel.setAttribute('data-cs-bumped', '1');
+                }
+                dropdown.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        wrap.querySelectorAll('.custom-select-option').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                hidden.value = opt.dataset.value;
+                label.textContent = opt.textContent.trim();
+                wrap.querySelectorAll('.custom-select-option').forEach(function(o) {
+                    o.classList.remove('text-white', 'bg-white/5');
+                    o.classList.add('text-zinc-400');
+                    o.classList.remove('hover:bg-zinc-700/50', 'hover:text-zinc-200');
+                });
+                opt.classList.add('text-white', 'bg-white/5');
+                opt.classList.remove('text-zinc-400');
+                dropdown.classList.add('hidden');
+                chevron.style.transform = '';
+            });
+        });
+    });
+
+    document.addEventListener('click', closeAll);
+})();
+
+// ── Contador de inactividad ──────────────────────────────────────────────────
+(function () {
+    const TIMEOUT   = 300;
+    const WARN_AT   = 60;
+    const badge     = document.getElementById('inactivity-badge');
+    const secsEl    = document.getElementById('inactivity-secs');
+    let remaining   = TIMEOUT;
+    let interval;
+
+    function resetTimer() {
+        remaining = TIMEOUT;
+        badge.style.display = 'none';
+    }
+
+    function tick() {
+        remaining--;
+        if (remaining <= 0) {
+            clearInterval(interval);
+            window.location.href = 'index.php?page=logout';
+            return;
+        }
+        if (remaining <= WARN_AT) {
+            badge.style.display = 'block';
+            secsEl.textContent  = remaining;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function(evt) {
+        document.addEventListener(evt, resetTimer, true);
+    });
+
+    interval = setInterval(tick, 1000);
+})();
 </script>
 
 </body>

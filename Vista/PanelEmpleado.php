@@ -214,7 +214,7 @@ async function registrarVenta(metodoPago) {
         const data = await res.json();
         if (data.ok) {
             limpiarCarrito();
-            mostrarToast('✓ Venta registrada correctamente');
+            mostrarToast('Venta registrada correctamente');
             return data;
         } else {
             mostrarToast('Error: ' + data.error, 'err');

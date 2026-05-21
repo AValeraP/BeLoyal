@@ -16,12 +16,33 @@
 .pago-o-sep::before { left: 0; }
 .pago-o-sep::after  { right: 0; }
 
-/* Focus en el elemento Stripe Card */
-.stripe-card-box:focus-within { border-color: #fff; }
+/* Focus en los campos de tarjeta */
+.stripe-field-box:focus-within { border-color: rgba(255,255,255,0.35); }
+
+/* Overlay solo sobre el campo de número para tapar el botón Link de Stripe
+   (se inyecta dentro del iframe cross-origin, inaccesible por CSS normal) */
+.stripe-number-box { position: relative; }
+.stripe-number-box::after {
+    content: '';
+    position: absolute;
+    right: 1px; top: 1px; bottom: 1px;
+    width: 148px;
+    background: #1a1a1a;
+    border-radius: 0 10px 10px 0;
+    z-index: 2;
+    pointer-events: all;
+    cursor: text;
+}
+
 
 /* Herencia de fuente en elementos de formulario */
 #pago-overlay button,
 #pago-overlay input { font-family: inherit; }
+
+/* Ocultar flechas de inputs numéricos en la pasarela */
+#pago-overlay input[type=number]::-webkit-inner-spin-button,
+#pago-overlay input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+#pago-overlay input[type=number] { -moz-appearance: textfield; }
 </style>
 
 <div id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago"
@@ -45,17 +66,12 @@
         <!-- Paso 1: Selector de método -->
         <div id="step-metodo" class="px-[1.4rem] pt-[1.2rem]">
             <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Elige el método de pago</p>
-            <div id="pago-request-btn-wrapper" class="mb-[0.2rem]">
-                <div id="pago-request-btn" class="min-h-[44px]"></div>
-                <p id="pago-o" class="hidden text-center my-[0.8rem] text-[0.78rem] text-[#555] pago-o-sep"><span>o</span></p>
-            </div>
             <button id="btn-ir-tarjeta"
                     class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
                 Pagar con tarjeta
             </button>
             <button id="btn-ir-bizum"
-                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left flex items-center gap-[0.55rem] hover:border-bizum hover:text-bizum-light hover:bg-bizum/[0.07]">
-                <span class="inline-flex items-center justify-center w-[22px] h-[22px] bg-bizum text-white rounded-[6px] text-[0.75rem] font-extrabold flex-shrink-0">B</span>
+                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-bizum hover:text-bizum-light hover:bg-bizum/[0.07]">
                 Pagar con Bizum
             </button>
             <button id="btn-ir-efectivo"
@@ -69,10 +85,6 @@
             <button id="btn-volver-bizum"
                     class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
             <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Pagar con Bizum</p>
-            <div class="flex items-center gap-[0.6rem] bg-bizum/[0.08] border border-bizum/20 rounded-xl px-4 py-[0.8rem] mb-4">
-                <span class="inline-flex items-center justify-center w-9 h-9 bg-bizum text-white rounded-[10px] text-[1.1rem] font-extrabold">B</span>
-                <span class="text-bizum-light font-bold text-[1rem] tracking-[0.02em]">Bizum</span>
-            </div>
             <div class="mb-[0.7rem]">
                 <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Teléfono del cliente</label>
                 <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
@@ -95,8 +107,14 @@
             <button id="btn-volver-metodo"
                     class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
             <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Datos de la tarjeta</p>
-            <div id="stripe-card-element"
-                 class="stripe-card-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.7rem] bg-white/[0.03] transition-colors duration-200"></div>
+            <div id="stripe-card-number-el"
+                 class="stripe-field-box stripe-number-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.55rem] bg-white/[0.03] transition-colors duration-200"></div>
+            <div class="flex gap-3 mb-[0.7rem]">
+                <div id="stripe-card-expiry-el"
+                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-white/[0.03] transition-colors duration-200"></div>
+                <div id="stripe-card-cvc-el"
+                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-white/[0.03] transition-colors duration-200"></div>
+            </div>
             <div id="stripe-card-error" class="text-[#f87171] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]" role="alert"></div>
             <button id="btn-pagar-tarjeta"
                     class="w-full py-[0.85rem] rounded-xl border-0 bg-white text-black text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center gap-2 hover:bg-[#e5e5e5] active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
@@ -134,7 +152,9 @@
 
         <!-- Paso 4: Éxito -->
         <div id="step-exito" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <div class="exito-pop w-[60px] h-[60px] bg-[#34d399]/10 border border-[#34d399] text-[#34d399] rounded-full flex items-center justify-center text-[1.6rem] font-bold mx-auto mb-4">✓</div>
+            <div class="exito-pop w-[60px] h-[60px] bg-[#34d399]/10 border border-[#34d399] text-[#34d399] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
             <p class="text-center text-[1.2rem] font-semibold text-white">Cobro realizado</p>
             <p id="exito-metodo-label" class="text-center text-[#666] text-[0.82rem] mt-[0.3rem]">Pago completado</p>
             <p id="exito-importe-label" class="text-center text-[1.6rem] font-light text-white mt-[0.4rem]"></p>
@@ -167,7 +187,7 @@
     const STRIPE_PUBLIC_KEY = '<?= htmlspecialchars($stripePublicKey ?? 'pk_test_51TUYfWBLLZWK8N7qmlmzbvfPdsNrRUdoCNEmJi0JLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK', ENT_QUOTES) ?>';
     const URL_CREAR_INTENT  = 'index.php?page=pago_crear_intent';
 
-    let stripe, elements, cardElement, paymentRequest;
+    let stripe, elements, cardNumberEl, cardExpiryEl, cardCvcEl;
     let carritoActual = {};
     let totalCents = 0;
     let yaRegistrado = false;
@@ -209,60 +229,30 @@
 
     function initStripe() {
         if (stripe) return;
-        stripe   = Stripe(STRIPE_PUBLIC_KEY, { betas: ['bizum_pm_beta_1'] });
+        stripe   = Stripe(STRIPE_PUBLIC_KEY);
         elements = stripe.elements({ locale: 'es' });
-        cardElement = elements.create('card', {
-            style: {
-                base: {
-                    fontFamily: "'DM Sans', Arial, sans-serif",
-                    fontSize: '16px',
-                    color: '#fff',
-                    '::placeholder': { color: '#555' },
-                },
-                invalid: { color: '#f87171' },
-            },
-            hidePostalCode: true,
-        });
-        cardElement.mount('#stripe-card-element');
-        cardElement.on('change', e => { cardError.textContent = e.error ? e.error.message : ''; });
-    }
 
-    async function setupPaymentRequest() {
-        if (!stripe) return;
-        document.getElementById('pago-request-btn').innerHTML = '';
-        paymentRequest = stripe.paymentRequest({
-            country: 'ES', currency: 'eur',
-            total: { label: 'BeLoyal TPV', amount: totalCents },
-            requestPayerName: false, requestPayerEmail: false,
+        const fieldStyle = {
+            base: {
+                fontFamily: "'DM Sans', Arial, sans-serif",
+                fontSize: '16px',
+                color: '#fff',
+                '::placeholder': { color: '#555' },
+            },
+            invalid: { color: '#f87171' },
+        };
+
+        cardNumberEl = elements.create('cardNumber', { style: fieldStyle });
+        cardExpiryEl = elements.create('cardExpiry', { style: fieldStyle });
+        cardCvcEl    = elements.create('cardCvc',    { style: fieldStyle });
+
+        cardNumberEl.mount('#stripe-card-number-el');
+        cardExpiryEl.mount('#stripe-card-expiry-el');
+        cardCvcEl.mount('#stripe-card-cvc-el');
+
+        [cardNumberEl, cardExpiryEl, cardCvcEl].forEach(el => {
+            el.on('change', e => { cardError.textContent = e.error ? e.error.message : ''; });
         });
-        const canMake = await paymentRequest.canMakePayment();
-        const wrapper = document.getElementById('pago-request-btn-wrapper');
-        if (canMake) {
-            const prBtn = elements.create('paymentRequestButton', {
-                paymentRequest,
-                style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '48px' } },
-            });
-            prBtn.mount('#pago-request-btn');
-            wrapper.style.display = 'block';
-            document.getElementById('pago-o').classList.remove('hidden');
-            paymentRequest.on('paymentmethod', async ev => {
-                try {
-                    const { clientSecret } = await crearIntent();
-                    const { paymentIntent, error } = await stripe.confirmCardPayment(
-                        clientSecret, { payment_method: ev.paymentMethod.id }, { handleActions: false }
-                    );
-                    if (error) { ev.complete('fail'); return; }
-                    if (paymentIntent.status === 'requires_action') {
-                        const { error: e2 } = await stripe.confirmCardPayment(clientSecret);
-                        if (e2) { ev.complete('fail'); return; }
-                    }
-                    ev.complete('success');
-                    await finalizarCobro(paymentIntent.id, 'tarjeta');
-                } catch (err) { ev.complete('fail'); }
-            });
-        } else {
-            wrapper.style.display = 'none';
-        }
     }
 
     async function procesarTarjeta() {
@@ -271,7 +261,7 @@
         try {
             const { clientSecret } = await crearIntent();
             const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: { card: cardElement },
+                payment_method: { card: cardNumberEl },
             });
             if (error) { cardError.textContent = error.message; setLoadingTarjeta(false); return; }
             await finalizarCobro(paymentIntent.id, 'tarjeta');
@@ -379,7 +369,6 @@
         initStripe();
         irStep(stepMetodo);
         abrirOverlay();
-        await setupPaymentRequest();
     };
 
     btnCerrar.addEventListener('click', cerrarOverlay);
@@ -478,7 +467,7 @@
             });
             const data = await res.json();
             if (data.ok) {
-                feedback.textContent = '✓ Ticket enviado a ' + email;
+                feedback.textContent = 'Ticket enviado a ' + email;
                 feedback.className   = clsBase + ' text-[#34d399]';
                 emailInput.value     = '';
                 btnEnviar.disabled   = false;

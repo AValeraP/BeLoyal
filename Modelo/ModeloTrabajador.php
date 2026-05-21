@@ -111,4 +111,12 @@ class ModeloTrabajador
         );
         $stmt->execute([':id' => $id]);
     }
+
+    public function actualizarLogo(int $id, ?string $logo): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE usuarios SET logo = :logo WHERE id_usuario = :id AND rol = 'empleado'"
+        );
+        $stmt->execute([':logo' => $logo, ':id' => $id]);
+    }
 }
