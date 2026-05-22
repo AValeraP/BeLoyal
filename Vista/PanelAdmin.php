@@ -27,11 +27,11 @@
         input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="font-inter flex min-h-screen text-white"
+<body class="font-inter flex h-screen overflow-hidden text-white"
       style="background-color:#262626;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(220,220,220,.05) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.05) 20px,rgba(255,255,255,.05) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.025) 45px,rgba(255,255,255,.025) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.03) 35px,rgba(255,255,255,.03) 36px)">
 
 <!-- SIDEBAR -->
-<aside class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 min-h-screen">
+<aside class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 h-screen sticky top-0 overflow-y-auto">
 
     <div class="px-5 py-5 border-b border-white/10">
         <img src="public/img/logos/beloyallogo.png" alt="Be Loyal" class="w-12 h-12 object-contain mb-2">

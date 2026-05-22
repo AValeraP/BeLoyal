@@ -110,7 +110,7 @@
                 <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Entrega el cliente</label>
                 <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
                     <span class="px-[0.7rem] text-[#555] text-[1rem]">€</span>
-                    <input type="number" id="efectivo-entrega" min="0" step="0.01" placeholder="0,00"
+                    <input type="number" id="efectivo-entrega" min="0" max="1000" step="0.01" placeholder="0,00"
                            class="flex-1 border-0 outline-none text-[1.2rem] font-medium py-[0.55rem] px-[0.4rem] bg-transparent text-white placeholder-[#555]">
                 </div>
                 <div class="flex justify-between mt-[0.7rem] text-[0.88rem] text-[#888]">
@@ -365,6 +365,10 @@
     btnPagarTar.addEventListener('click', procesarTarjeta);
 
     efectivoEntrega.addEventListener('input', () => {
+        const MAX_EFECTIVO = 1000;
+        if (parseFloat(efectivoEntrega.value) > MAX_EFECTIVO) {
+            efectivoEntrega.value = MAX_EFECTIVO;
+        }
         const entrega = parseFloat(efectivoEntrega.value) || 0;
         const cambio  = entrega - totalCents / 100;
         efectivoCambio.textContent = fmt(Math.max(0, cambio));
