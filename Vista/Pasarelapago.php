@@ -159,7 +159,7 @@
             <p id="error-msg-label" class="text-center text-[#f87171] text-[0.82rem] mt-[0.3rem] px-2"></p>
             <button id="btn-reintentar"
                     class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-6 hover:bg-white/10 active:scale-[0.98]">
-                Volver a intentar
+                Volver al carrito
             </button>
         </div>
 
@@ -292,10 +292,10 @@
 
         if (typeof registrarVenta === 'function') {
             const resultado = await registrarVenta(metodo);
-            if (!resultado) {
+            if (!resultado || resultado.ok === false) {
                 yaRegistrado = false;
                 setLoadingTarjeta(false);
-                mostrarError();
+                mostrarError(resultado ? resultado.error : null);
                 return;
             }
             if (resultado.id_venta) {
@@ -440,7 +440,7 @@
     });
 
     document.getElementById('btn-reintentar').addEventListener('click', () => {
-        irStep(stepMetodo);
+        cerrarOverlay();
     });
 })();
 </script>

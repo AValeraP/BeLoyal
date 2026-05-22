@@ -243,12 +243,11 @@ async function registrarVenta(metodoPago) {
             mostrarToast('Venta registrada correctamente');
             return data;
         } else {
-            mostrarToast('Error: ' + data.error, 'err');
+            return { ok: false, error: data.error || 'Error al registrar la venta' };
         }
     } catch (e) {
-        mostrarToast('Error de conexión', 'err');
+        return { ok: false, error: 'Error de conexión' };
     }
-    return null;
 }
 </script>
 
