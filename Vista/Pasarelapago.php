@@ -48,7 +48,7 @@
 <div id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago"
      class="hidden fixed inset-0 bg-black/75 backdrop-blur-[6px] z-[9999] items-center justify-center font-dm">
 
-    <div class="pago-modal bg-[#111] border border-white/[0.08] rounded-3xl w-[400px] max-w-[96vw] pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)] overflow-hidden">
+    <div class="pago-modal bg-[#111] border border-white/[0.08] rounded-3xl w-[400px] max-w-[94vw] max-h-[94vh] overflow-y-auto pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
 
         <!-- Cabecera -->
         <div class="flex items-center justify-between px-[1.4rem] py-[0.9rem] bg-black border-b border-white/[0.06]">

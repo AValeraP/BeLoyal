@@ -12,7 +12,7 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
 
@@ -25,13 +25,34 @@
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+
+        /* Tablas con scroll horizontal en móvil */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-wrap table { min-width: 500px; }
+
+        /* Sidebar móvil */
+        @media (max-width: 767px) {
+            #sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); transition: transform .25s ease; z-index: 60; }
+            #sidebar.open { transform: translateX(0); }
+            #sidebar-backdrop { display: none; }
+            #sidebar-backdrop.open { display: block; }
+        }
     </style>
 </head>
 <body class="font-inter flex h-screen overflow-hidden text-white"
       style="background-color:#262626;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(220,220,220,.05) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.05) 20px,rgba(255,255,255,.05) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.025) 45px,rgba(255,255,255,.025) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.03) 35px,rgba(255,255,255,.03) 36px)">
 
+<!-- MOBILE HAMBURGER -->
+<button id="sidebar-toggle" aria-label="Menú"
+        class="md:hidden fixed top-3 left-3 z-50 w-10 h-10 rounded-xl bg-black/70 border border-white/10 flex items-center justify-center text-white">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+
+<!-- BACKDROP MÓVIL -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-50 md:hidden"></div>
+
 <!-- SIDEBAR -->
-<aside class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 h-screen sticky top-0 overflow-y-auto">
+<aside id="sidebar" class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 h-screen md:sticky md:top-0 overflow-y-auto">
 
     <div class="px-5 py-5 border-b border-white/10">
         <img src="public/img/logos/beloyallogo.png" alt="Be Loyal" class="w-12 h-12 object-contain mb-2">
@@ -57,7 +78,7 @@
 </aside>
 
 <!-- CONTENT -->
-<main class="flex-1 p-7 overflow-y-auto">
+<main class="flex-1 p-4 sm:p-7 overflow-y-auto pt-16 md:pt-7">
 
     <?php if ($mensaje): ?>
     <div class="text-xs font-light text-emerald-400 bg-emerald-900/30 border border-emerald-800/50 rounded-xl px-4 py-2.5 mb-5">
@@ -67,16 +88,16 @@
 
     <?php if ($seccion === 'dashboard'): ?>
     <!-- DASHBOARD -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div class="flex items-center gap-3">
         <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest">Dashboard</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
             <button onclick="abrirResetModal()"
                     class="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-900/30 hover:border-red-500/60 transition">
                 Resetear ventas
             </button>
-            <div class="flex gap-1.5">
+            <div class="flex flex-wrap gap-1.5">
             <?php foreach (['todo' => 'Todo', 'dia' => 'Hoy', 'semana' => 'Semana', 'mes' => 'Mes', 'ano' => 'Año'] as $val => $label): ?>
             <a href="index.php?page=admin&seccion=dashboard&periodo=<?= $val ?>"
                class="px-3 py-1.5 text-xs rounded-lg transition <?= $periodo === $val ? 'bg-white text-zinc-900 font-semibold' : 'border border-white/10 text-zinc-500 hover:text-white' ?>">
@@ -87,7 +108,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-6 gap-3 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Total ventas</p>
             <p class="text-3xl font-light text-white"><?= $resumen['total_ventas'] ?></p>
@@ -118,7 +139,7 @@
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4">Ventas por empleado</p>
-        <table class="w-full">
+        <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Empleado</th>
@@ -142,13 +163,13 @@
                 <tr><td colspan="5" class="py-4 text-center text-xs font-light text-zinc-600">Sin datos</td></tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light text-zinc-500 mb-4">Servicios más vendidos</p>
-            <table class="w-full">
+            <div class="table-wrap"><table class="w-full">
                 <thead>
                     <tr>
                         <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Servicio</th>
@@ -168,11 +189,11 @@
                     <tr><td colspan="3" class="py-4 text-center text-xs font-light text-zinc-600">Sin datos</td></tr>
                     <?php endif; ?>
                 </tbody>
-            </table>
+            </table></div>
         </div>
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
             <p class="text-xs font-light text-zinc-500 mb-4">Productos más vendidos</p>
-            <table class="w-full">
+            <div class="table-wrap"><table class="w-full">
                 <thead>
                     <tr>
                         <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Producto</th>
@@ -192,13 +213,13 @@
                     <tr><td colspan="3" class="py-4 text-center text-xs font-light text-zinc-600">Sin datos</td></tr>
                     <?php endif; ?>
                 </tbody>
-            </table>
+            </table></div>
         </div>
     </div>
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mt-3">
         <p class="text-xs font-light text-zinc-500 mb-4">Ventas recientes</p>
-        <table class="w-full">
+        <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">#</th>
@@ -226,7 +247,7 @@
                 <tr><td colspan="6" class="py-4 text-center text-xs font-light text-zinc-600">Sin ventas registradas</td></tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 
     <?php elseif ($seccion === 'servicios'): ?>
@@ -239,7 +260,7 @@
             <?php if ($editServicio): ?>
             <input type="hidden" name="id" value="<?= $editServicio['id_servicio'] ?>">
             <?php endif; ?>
-            <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editServicio['nombre'] ?? '') ?>"
@@ -295,7 +316,7 @@
     <?php if (!empty($serviciosPorGrupo[$esp])): ?>
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4"><?= $titulo ?></p>
-        <table class="w-full">
+        <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
@@ -327,7 +348,7 @@
                 </tr>
                 <?php endforeach; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
     <?php endif; ?>
     <?php endforeach; ?>
@@ -342,7 +363,7 @@
             <?php if ($editProducto): ?>
             <input type="hidden" name="id" value="<?= $editProducto['id_producto'] ?>">
             <?php endif; ?>
-            <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editProducto['nombre'] ?? '') ?>"
@@ -372,7 +393,7 @@
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
         <p class="text-xs font-light text-zinc-500 mb-4">Todos los productos</p>
-        <table class="w-full">
+        <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
@@ -407,7 +428,7 @@
                 <tr><td colspan="5" class="py-4 text-center text-xs font-light text-zinc-600">No hay productos</td></tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 
     <?php elseif ($seccion === 'empleados'): ?>
@@ -420,7 +441,7 @@
             <?php if ($editEmpleado): ?>
             <input type="hidden" name="id" value="<?= $editEmpleado['id_usuario'] ?>">
             <?php endif; ?>
-            <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div>
                     <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editEmpleado['nombre'] ?? '') ?>"
@@ -494,7 +515,7 @@
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
         <p class="text-xs font-light text-zinc-500 mb-4">Todos los empleados</p>
-        <table class="w-full">
+        <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5 w-8"></th>
@@ -542,7 +563,7 @@
                 <tr><td colspan="5" class="py-4 text-center text-xs font-light text-zinc-600">No hay empleados</td></tr>
                 <?php endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 
     <?php endif; ?>
@@ -596,6 +617,20 @@
 </div>
 
 <script>
+// ── Sidebar móvil ────────────────────────────────────────────────────────────
+(function () {
+    const sidebar  = document.getElementById('sidebar');
+    const toggle   = document.getElementById('sidebar-toggle');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebar || !toggle || !backdrop) return;
+    backdrop.classList.remove('open');
+    function open()  { sidebar.classList.add('open');    backdrop.classList.add('open');    }
+    function close() { sidebar.classList.remove('open'); backdrop.classList.remove('open'); }
+    toggle.addEventListener('click', open);
+    backdrop.addEventListener('click', close);
+    sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+})();
+
 function abrirConfirm(msg, url, titulo) {
     document.getElementById('confirm-title').textContent = titulo || '¿Estás seguro?';
     document.getElementById('confirm-msg').textContent = msg;

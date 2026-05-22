@@ -137,6 +137,6 @@ switch ($page) {
 
     default:
         http_response_code(404);
-        echo "Página no encontrada.";
+        require_once __DIR__ . '/Vista/Error404.php';
         break;
 }

@@ -23,13 +23,21 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
+
+        /* Carrito móvil */
+        @media (max-width: 767px) {
+            #carrito-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 88%; max-width: 320px; transform: translateX(100%); transition: transform .25s ease; z-index: 60; }
+            #carrito-panel.open { transform: translateX(0); }
+            #carrito-backdrop { display: none; }
+            #carrito-backdrop.open { display: block; }
+        }
     </style>
 </head>
 <body class="font-inter flex flex-col h-screen overflow-hidden text-white"
       style="background-color:#1a1a1a;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.03) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(200,200,200,.02) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.015) 20px,rgba(255,255,255,.015) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.008) 45px,rgba(255,255,255,.008) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.01) 35px,rgba(255,255,255,.01) 36px)">
 
 <!-- HEADER -->
-<header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-6 flex-shrink-0">
+<header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
     <p class="text-sm font-semibold tracking-widest uppercase text-white">Be Loyal</p>
     <div class="flex items-center gap-3">
         <span class="text-xs text-zinc-400"><?= htmlspecialchars($trabajador['nombre']) ?></span>
@@ -48,7 +56,7 @@
 </header>
 
 <!-- WORKER BAR -->
-<div class="bg-black/40 backdrop-blur-sm border-b border-white/10 px-6 py-3 flex-shrink-0 flex items-center gap-3">
+<div class="bg-black/40 backdrop-blur-sm border-b border-white/10 px-4 sm:px-6 py-3 flex-shrink-0 flex items-center gap-3">
     <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
     <p class="text-sm font-medium text-white"><?= htmlspecialchars($trabajador['nombre']) ?></p>
     <span class="text-xs text-zinc-500">·</span>
@@ -59,10 +67,10 @@
 <div class="flex flex-1 overflow-hidden">
 
     <!-- SERVICIOS -->
-    <div class="flex-1 overflow-y-auto p-6">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6">
 
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= htmlspecialchars($seccionTitulo) ?></p>
-        <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($servicios as $s): ?>
             <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
                  data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$s['id'] ?>"
@@ -75,7 +83,7 @@
 
         <?php if ($mostrarBonos && !empty($bonos)): ?>
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bonos</p>
-        <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($bonos as $b): ?>
             <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
                  data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$b['id'] ?>"
@@ -102,11 +110,18 @@
 
     </div>
 
+    <!-- BACKDROP CARRITO MÓVIL -->
+    <div id="carrito-backdrop" class="fixed inset-0 bg-black/60 z-50 md:hidden"></div>
+
     <!-- CARRITO -->
-    <div class="w-72 bg-black/50 backdrop-blur-sm border-l border-white/10 flex flex-col flex-shrink-0">
-        <div class="px-5 py-4 border-b border-white/10">
-            <p class="text-sm font-medium text-white">Carrito</p>
-            <p class="text-xs text-zinc-500 mt-0.5"><?= htmlspecialchars($usuario['nombre']) ?></p>
+    <div id="carrito-panel" class="w-72 bg-black/90 md:bg-black/50 backdrop-blur-sm border-l border-white/10 flex flex-col flex-shrink-0">
+        <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-white">Carrito</p>
+                <p class="text-xs text-zinc-500 mt-0.5"><?= htmlspecialchars($usuario['nombre']) ?></p>
+            </div>
+            <button id="carrito-cerrar" aria-label="Cerrar carrito"
+                    class="md:hidden w-7 h-7 rounded-full bg-white/[0.06] text-zinc-400 hover:text-white flex items-center justify-center text-base">×</button>
         </div>
         <div class="flex-1 overflow-y-auto px-5 py-3" id="carrito-items">
             <div class="h-full flex items-center justify-center text-zinc-600 text-xs">Carrito vacío</div>
@@ -128,6 +143,13 @@
 
 </div>
 
+<!-- BOTÓN FLOTANTE CARRITO (móvil) -->
+<button id="carrito-abrir" aria-label="Abrir carrito"
+        class="md:hidden fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-white text-zinc-900 shadow-lg shadow-black/40 flex items-center justify-center font-semibold">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 1.293A1 1 0 006.414 16H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    <span id="carrito-badge" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center hidden">0</span>
+</button>
+
 <!-- TOAST -->
 <div id="toast"
      class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 bg-[#18181b] border border-white/10 text-white px-[1.4rem] py-[0.65rem] rounded-full text-[0.82rem] font-medium shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-[99999] pointer-events-none whitespace-nowrap transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
@@ -136,6 +158,21 @@
 <?php include __DIR__ . '/Pasarelapago.php'; ?>
 
 <script>
+// ── Carrito móvil ────────────────────────────────────────────────────────────
+(function () {
+    const panel    = document.getElementById('carrito-panel');
+    const backdrop = document.getElementById('carrito-backdrop');
+    const abrir    = document.getElementById('carrito-abrir');
+    const cerrar   = document.getElementById('carrito-cerrar');
+    if (!panel || !backdrop || !abrir || !cerrar) return;
+    backdrop.classList.remove('open');
+    function open()  { panel.classList.add('open');    backdrop.classList.add('open');    }
+    function close() { panel.classList.remove('open'); backdrop.classList.remove('open'); }
+    abrir.addEventListener('click', open);
+    cerrar.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+})();
+
 const carrito = {};
 
 // Delegación de clic en tarjetas de servicio/bono/bebida
@@ -178,6 +215,12 @@ function escapeHtml(str) {
 function renderizar() {
     const items = Object.entries(carrito);
     const el = document.getElementById('carrito-items');
+    const badge = document.getElementById('carrito-badge');
+    const totalCantidad = Object.values(carrito).reduce((a, i) => a + i.cantidad, 0);
+    if (badge) {
+        if (totalCantidad > 0) { badge.textContent = totalCantidad; badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+    }
     if (!items.length) {
         el.innerHTML = '<div class="h-full flex items-center justify-center text-zinc-600 text-xs">Carrito vacío</div>';
         document.getElementById('total').textContent = '€0,00';
