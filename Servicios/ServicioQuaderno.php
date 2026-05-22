@@ -21,20 +21,12 @@ class ServicioQuaderno
         try {
             $metodoPagoQ = $this->normalizarMetodoPago($metodoPago);
 
-            $itemsQ = [];
-            foreach ($items as $item) {
-                $precioConIva  = round((float) $item['precio'], 2);
-                $baseImponible = round($precioConIva / 1.21, 4);
-                $cuotaIva      = round($precioConIva - $baseImponible, 2);
-
-                $itemsQ[] = [
-                    'description' => $item['nombre'],
-                    'quantity'    => (int) ($item['cantidad'] ?? 1),
-                    'unit_price'  => $baseImponible,
-                    'tax_1_name'  => 'IVA',
-                    'tax_1_rate'  => 21,
-                ];
-            }
+            // ── Total exacto sin campos de IVA para evitar errores de redondeo ──
+            $itemsQ = [[
+                'description' => 'Venta #' . $idVenta . ' — BeLoyal TPV',
+                'quantity'    => 1,
+                'unit_price'  => round($total, 2),
+            ]];
 
             $partes   = explode(' ', trim($nombreCliente), 2);
             $customer = [
@@ -50,7 +42,7 @@ class ServicioQuaderno
                 'currency'       => 'EUR',
                 'date'           => date('Y-m-d'),
                 'payment_method' => $metodoPagoQ,
-                'notes'          => 'Ticket BeLoyal · Venta #' . $idVenta,
+                'notes'          => 'Ticket BeLoyal · Venta #' . $idVenta . ' · Precios con IVA (21%) incluido',
                 'contact'        => $customer,
                 'items'          => $itemsQ,
                 'po_number'      => 'venta_' . $idVenta . '_' . time(),
