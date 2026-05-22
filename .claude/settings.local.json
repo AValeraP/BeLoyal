@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.quaderno.io)",
+      "Bash(mv Controladorventa.php _tmp1.php)",
+      "Bash(mv _tmp1.php ControladorVenta.php)",
+      "Bash(mv Controladorpago.php _tmp2.php)",
+      "Bash(mv _tmp2.php ControladorPago.php)"
+    ]
+  }
+}

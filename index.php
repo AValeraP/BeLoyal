@@ -106,17 +106,17 @@ switch ($page) {
         break;
 
     case 'pago_crear_intent':
-        require_once 'Controlador/Controladorpago.php';
+        require_once 'Controlador/ControladorPago.php';
         (new ControladorPago())->crearIntent();
         break;
 
     case 'pago_verificar':
-        require_once 'Controlador/Controladorpago.php';
+        require_once 'Controlador/ControladorPago.php';
         (new ControladorPago())->verificar();
         break;
 
     case 'pago_registrar':
-        require_once 'Controlador/Controladorpago.php';
+        require_once 'Controlador/ControladorPago.php';
         (new ControladorPago())->registrarTicket();
         break;
 

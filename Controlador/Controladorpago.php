@@ -63,6 +63,15 @@ class ControladorPago
 
         $importeCents = (int) $input['importe_cents'];
 
+        // Validación de stock ANTES de crear el PaymentIntent (evita cobrar al cliente
+        // y que luego la venta falle por stock insuficiente).
+        $errorStock = $this->validarStock($input['items'] ?? []);
+        if ($errorStock !== null) {
+            http_response_code(400);
+            echo json_encode(['error' => $errorStock]);
+            return;
+        }
+
         try {
             \Stripe\Stripe::setApiKey($this->stripeSecretKey);
 
@@ -189,6 +198,32 @@ class ControladorPago
     }
 
     // ── Protección de sesión ─────────────────────────────────────────────────
+    /**
+     * Comprueba que hay stock suficiente para todos los productos del carrito.
+     * Devuelve null si todo OK, o un mensaje de error si algún producto no tiene stock.
+     */
+    private function validarStock(array $items): ?string
+    {
+        global $pdo;
+        if (!$pdo) return null;
+        foreach ($items as $item) {
+            if (($item['tipo'] ?? '') !== 'producto') continue;
+            $idRef    = (int) ($item['id'] ?? 0);
+            $cantidad = (int) ($item['cantidad'] ?? 0);
+            if ($idRef <= 0 || $cantidad <= 0) continue;
+            $stmt = $pdo->prepare("SELECT nombre, stock FROM productos WHERE id_producto = :id AND activo = 1");
+            $stmt->execute([':id' => $idRef]);
+            $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$producto) {
+                return 'Producto no disponible';
+            }
+            if ((int)$producto['stock'] < $cantidad) {
+                return "Stock insuficiente de \"{$producto['nombre']}\". Solo quedan {$producto['stock']} unidades.";
+            }
+        }
+        return null;
+    }
+
     private function proteger(string $rol): void
     {
         if (empty($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== $rol) {

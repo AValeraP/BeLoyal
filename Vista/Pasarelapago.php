@@ -222,6 +222,11 @@
     function cerrarOverlay() {
         overlay.classList.remove('open');
         overlay.classList.add('hidden');
+        // Cierra también el panel del carrito en móvil (si existe)
+        const carritoPanel    = document.getElementById('carrito-panel');
+        const carritoBackdrop = document.getElementById('carrito-backdrop');
+        if (carritoPanel)    carritoPanel.classList.remove('open');
+        if (carritoBackdrop) carritoBackdrop.classList.remove('open');
     }
 
     function initStripe() {
@@ -263,8 +268,10 @@
             if (error) { cardError.textContent = error.message; setLoadingTarjeta(false); return; }
             await finalizarCobro(paymentIntent.id, 'tarjeta');
         } catch (err) {
-            cardError.textContent = err.message || 'Error al procesar el pago';
+            // Errores del backend (p.ej. stock insuficiente) se muestran en el modal
+            // "Cobro fallido". El cliente NO ha sido cobrado porque pasa antes de Stripe.
             setLoadingTarjeta(false);
+            mostrarError(err.message || 'Error al procesar el pago');
         }
     }
 
@@ -274,7 +281,10 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 importe_cents: totalCents,
-                items: Object.values(carritoActual).map(i => ({ nombre: i.nombre, precio: i.precio, cantidad: i.cantidad })),
+                items: Object.values(carritoActual).map(i => ({
+                    nombre: i.nombre, precio: i.precio, cantidad: i.cantidad,
+                    tipo: i.tipo, id: i.idReal,
+                })),
             }),
         });
         const data = await res.json();
