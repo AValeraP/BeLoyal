@@ -1,0 +1,234 @@
+<?php
+/**
+ * ControladorPago.php
+ * Gestiona la pasarela de pago con Stripe (Google Pay / Apple Pay / Tarjeta)
+ *
+ * Requiere la librería oficial de Stripe:
+ *   composer require stripe/stripe-php
+ *
+ * Variables de entorno recomendadas (.env o config.php):
+ *   STRIPE_SECRET_KEY  → sk_test_...
+ *   STRIPE_PUBLIC_KEY  → pk_test_...
+ */
+
+require_once __DIR__ . '/../Conn/conexion.php';
+
+// Opción A: Composer (recomendado)
+ require_once __DIR__ . '/../vendor/autoload.php';
+
+
+class ControladorPago
+{
+    /** Clave pública Stripe (se envía al frontend) */
+    private string $stripePublicKey;
+
+    /** Clave secreta Stripe (solo backend) */
+    private string $stripeSecretKey;
+
+    public function __construct()
+    {
+        $this->proteger('empleado');
+
+        // Claves cargadas desde Conn/config.php (fuera del repo)
+        $config = file_exists(__DIR__ . '/../Conn/config.php')
+                ? require __DIR__ . '/../Conn/config.php'
+                : [];
+
+        $this->stripePublicKey = getenv('STRIPE_PUBLIC_KEY') ?: ($config['stripe_public_key'] ?? '');
+        $this->stripeSecretKey = getenv('STRIPE_SECRET_KEY') ?: ($config['stripe_secret_key'] ?? '');
+
+        if (empty($this->stripeSecretKey)) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Configuración Stripe no encontrada. Revisa Conn/config.php']);
+            exit;
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ENDPOINT 1: Crear PaymentIntent
+    // POST index.php?page=pago_crear_intent
+    // Body JSON: { "importe_cents": 1500, "items": [...] }
+    // ────────────────────────────────────────────────────────────────────────
+    public function crearIntent(): void
+    {
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($input['importe_cents']) || $input['importe_cents'] <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Importe inválido']);
+            return;
+        }
+
+        $importeCents = (int) $input['importe_cents'];
+
+        // Validación de stock ANTES de crear el PaymentIntent (evita cobrar al cliente
+        // y que luego la venta falle por stock insuficiente).
+        $errorStock = $this->validarStock($input['items'] ?? []);
+        if ($errorStock !== null) {
+            http_response_code(400);
+            echo json_encode(['error' => $errorStock]);
+            return;
+        }
+
+        try {
+            \Stripe\Stripe::setApiKey($this->stripeSecretKey);
+
+            $intentParams = [
+                'amount'   => $importeCents,
+                'currency' => 'eur',
+                'metadata' => [
+                    'empleado' => $_SESSION['usuario']['nombre'] ?? '',
+                    'items'    => json_encode($input['items'] ?? []),
+                ],
+            ];
+
+            $intentParams['automatic_payment_methods'] = ['enabled' => true];
+
+            $intent = \Stripe\PaymentIntent::create($intentParams);
+
+            echo json_encode([
+                'clientSecret' => $intent->client_secret,
+                'intentId'     => $intent->id,
+            ]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ENDPOINT 2: Verificar estado del pago
+    // POST index.php?page=pago_verificar
+    // Body JSON: { "payment_intent_id": "pi_..." }
+    // ────────────────────────────────────────────────────────────────────────
+    public function verificar(): void
+    {
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($input['payment_intent_id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de pago requerido']);
+            return;
+        }
+
+        try {
+            \Stripe\Stripe::setApiKey($this->stripeSecretKey);
+
+            $intent = \Stripe\PaymentIntent::retrieve($input['payment_intent_id']);
+
+            echo json_encode([
+                'status'    => $intent->status,   // 'succeeded' | 'processing' | 'requires_payment_method'
+                'amount'    => $intent->amount,
+                'currency'  => $intent->currency,
+                'intentId'  => $intent->id,
+            ]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // ENDPOINT 3: Registrar ticket en BD tras pago exitoso (opcional)
+    // POST index.php?page=pago_registrar
+    // Body JSON: { "intent_id": "pi_...", "items": [...], "total": 15.00 }
+    // ────────────────────────────────────────────────────────────────────────
+    public function registrarTicket(): void
+    {
+        header('Content-Type: application/json');
+
+        global $pdo;
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($input['intent_id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Datos insuficientes']);
+            return;
+        }
+
+        try {
+            // Verifica de nuevo con Stripe para garantizar que el pago fue correcto
+            \Stripe\Stripe::setApiKey($this->stripeSecretKey);
+            $intent = \Stripe\PaymentIntent::retrieve($input['intent_id']);
+
+            if ($intent->status !== 'succeeded') {
+                http_response_code(402);
+                echo json_encode(['error' => 'El pago no está completado: ' . $intent->status]);
+                return;
+            }
+
+            /*
+             * ── Aquí puedes guardar el ticket en tu BD ──────────────────────
+             * Ejemplo (descomenta y adapta a tu esquema):
+             *
+             * $stmt = $pdo->prepare("
+             *     INSERT INTO tickets (empleado_id, importe, stripe_intent, items, fecha_pago)
+             *     VALUES (:empleado, :importe, :intent, :items, NOW())
+             * ");
+             * $stmt->execute([
+             *     ':empleado' => $_SESSION['usuario']['id'],
+             *     ':importe'  => $input['total'],
+             *     ':intent'   => $input['intent_id'],
+             *     ':items'    => json_encode($input['items'] ?? []),
+             * ]);
+             */
+
+            echo json_encode([
+                'ok'       => true,
+                'intentId' => $intent->id,
+                'importe'  => $intent->amount / 100,
+            ]);
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // VISTA: Modal de pasarela (renderiza el HTML con la clave pública)
+    // Llamado desde PanelEmpleado.php vía include
+    // ────────────────────────────────────────────────────────────────────────
+    public function stripePublicKey(): string
+    {
+        return htmlspecialchars($this->stripePublicKey, ENT_QUOTES);
+    }
+
+    // ── Protección de sesión ─────────────────────────────────────────────────
+    /**
+     * Comprueba que hay stock suficiente para todos los productos del carrito.
+     * Devuelve null si todo OK, o un mensaje de error si algún producto no tiene stock.
+     */
+    private function validarStock(array $items): ?string
+    {
+        global $pdo;
+        if (!$pdo) return null;
+        foreach ($items as $item) {
+            if (($item['tipo'] ?? '') !== 'producto') continue;
+            $idRef    = (int) ($item['id'] ?? 0);
+            $cantidad = (int) ($item['cantidad'] ?? 0);
+            if ($idRef <= 0 || $cantidad <= 0) continue;
+            $stmt = $pdo->prepare("SELECT nombre, stock FROM productos WHERE id_producto = :id AND activo = 1");
+            $stmt->execute([':id' => $idRef]);
+            $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$producto) {
+                return 'Producto no disponible';
+            }
+            if ((int)$producto['stock'] < $cantidad) {
+                return "Stock insuficiente de \"{$producto['nombre']}\". Solo quedan {$producto['stock']} unidades.";
+            }
+        }
+        return null;
+    }
+
+    private function proteger(string $rol): void
+    {
+        if (empty($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== $rol) {
+            header('Location: index.php?page=login');
+            exit;
+        }
+    }
+}

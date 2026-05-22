@@ -2,36 +2,76 @@
 
 class ModeloProductos
 {
-    private string $dir;
+    private PDO $pdo;
 
-    public function __construct()
+    public function __construct(PDO $pdo)
     {
-        $this->dir = __DIR__ . '/../Data/';
+        $this->pdo = $pdo;
     }
 
     public function obtenerBonos(): array
     {
-        $data = json_decode(file_get_contents($this->dir . 'bonos.json'), true);
-        return $data['bonos'] ?? [];
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad = 'bono'
+             ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerBebidas(): array
     {
-        return json_decode(file_get_contents($this->dir . 'bebidas.json'), true) ?? [];
+        return $this->pdo->query(
+            "SELECT id_producto AS id, nombre, precio
+             FROM productos
+             WHERE activo = 1
+             ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerServiciosPeluqueros(): array
     {
-        return json_decode(file_get_contents($this->dir . 'servicios_peluqueros.json'), true) ?? [];
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad = 'peluqueria'
+             ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerServiciosTrenzas(): array
     {
-        return json_decode(file_get_contents($this->dir . 'servicios_trenzas.json'), true) ?? [];
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad = 'trenzas'
+             ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Nombre del método sin ñ porque PHP no permite ñ en identificadores antiguos;
+    // internamente la consulta sí busca 'uñas'.
     public function obtenerServiciosUnas(): array
     {
-        return json_decode(file_get_contents($this->dir . 'servicios_unas.json'), true) ?? [];
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad = 'uñas'
+             ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Devuelve todos los servicios activos que no son bonos.
+     * Se usa para empleados con especialidad 'todas'.
+     */
+    public function obtenerTodosLosServicios(): array
+    {
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad <> 'bono'
+             ORDER BY especialidad, nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 }

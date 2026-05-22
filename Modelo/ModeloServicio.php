@@ -11,7 +11,7 @@ class ModeloServicio
 
     public function obtenerTodos(): array
     {
-        return $this->pdo->query("SELECT * FROM servicios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
+        return $this->pdo->query("SELECT * FROM servicios ORDER BY especialidad, nombre")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function obtenerPorId(int $id): ?array
@@ -21,25 +21,32 @@ class ModeloServicio
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public function crear(string $nombre, float $precio, int $duracion): void
+    public function crear(string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria'): void
     {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO servicios (nombre, precio, duracion, activo) VALUES (:nombre, :precio, :duracion, 1)"
+            "INSERT INTO servicios (nombre, precio, duracion, activo, especialidad) VALUES (:nombre, :precio, :duracion, 1, :especialidad)"
         );
-        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion]);
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad]);
     }
 
-    public function actualizar(int $id, string $nombre, float $precio, int $duracion): void
+    public function actualizar(int $id, string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria'): void
     {
+        // No se toca 'activo': usa activar()/eliminar() para cambiar el estado
         $stmt = $this->pdo->prepare(
-            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion WHERE id_servicio = :id"
+            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion, especialidad = :especialidad WHERE id_servicio = :id"
         );
-        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':id' => $id]);
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad, ':id' => $id]);
     }
 
     public function eliminar(int $id): void
     {
         $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 0 WHERE id_servicio = :id");
+        $stmt->execute([':id' => $id]);
+    }
+
+    public function activar(int $id): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 1 WHERE id_servicio = :id");
         $stmt->execute([':id' => $id]);
     }
 }

@@ -1,187 +1,195 @@
-<?php
-$twJson = json_encode(
-    ['id' => $usuario['id'], 'nombre' => $usuario['nombre'], 'rol' => $usuario['rol']],
-    JSON_UNESCAPED_UNICODE
-);
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TPV – <?= htmlspecialchars($usuario['nombre']) ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    inter: ['Inter', 'sans-serif'],
+                    dm: ["'DM Sans'", 'Arial', 'sans-serif'],
+                },
+            }
+        }
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        /* Scrollbar — sin equivalente en Tailwind */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
 
-        .header { background: #222; color: #fff; padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-        .header h1 { font-size: 1.1rem; }
-        .header-user { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: #ccc; }
-        .header a { color: #ccc; text-decoration: none; }
-        .header a:hover { color: #fff; }
-
-        .worker-bar { background: #333; padding: 0.8rem 1.5rem; border-bottom: 2px solid #d4a017; }
-        .worker-bar h2 { color: #d4a017; font-size: 1rem; }
-        .worker-bar span { color: #999; font-size: 0.85rem; }
-
-        .main { display: grid; grid-template-columns: 1fr 320px; height: calc(100vh - 100px); }
-
-        .servicios { overflow-y: auto; padding: 1.2rem; }
-        .seccion-titulo { font-size: 0.78rem; font-weight: bold; text-transform: uppercase; color: #888; letter-spacing: 0.08em; border-bottom: 1px solid #ddd; padding-bottom: 0.3rem; margin-bottom: 0.7rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.6rem; margin-bottom: 1.5rem; }
-
-        .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 0.8rem; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; user-select: none; }
-        .card:hover { border-color: #d4a017; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .card:active { transform: scale(0.97); }
-        .card-nombre { font-weight: bold; font-size: 0.88rem; margin-bottom: 0.25rem; }
-        .card-precio { color: #d4a017; font-weight: bold; font-size: 0.95rem; }
-        .card.bono { background: #2a2a2a; border-color: #d4a017; }
-        .card.bono .card-nombre { color: #f0d080; }
-        .card.bono .card-precio { color: #d4a017; }
-        .card.bebida { border-left: 3px solid #4a90d9; }
-        .card.bebida .card-precio { color: #4a90d9; }
-
-        .carrito { background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; height: 100%; }
-        .carrito-header { padding: 1rem; border-bottom: 1px solid #eee; background: #fafafa; }
-        .carrito-header h2 { font-size: 1rem; }
-        .carrito-worker { font-size: 0.82rem; color: #888; margin-top: 0.2rem; }
-        .carrito-items { flex: 1; overflow-y: auto; padding: 0.8rem 1rem; }
-        .carrito-vacio { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; font-size: 0.9rem; gap: 0.4rem; }
-
-        .item { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; }
-        .item:last-child { border-bottom: none; }
-        .item-info { flex: 1; }
-        .item-nombre { font-size: 0.87rem; font-weight: 600; }
-        .item-precio { font-size: 0.8rem; color: #aaa; }
-        .item-controles { display: flex; align-items: center; gap: 0.3rem; }
-        .btn-qty { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #ddd; background: #f5f5f5; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
-        .btn-qty:hover { background: #d4a017; border-color: #d4a017; color: #fff; }
-        .item-qty { font-weight: bold; min-width: 18px; text-align: center; font-size: 0.9rem; }
-        .item-total { font-weight: bold; font-size: 0.88rem; min-width: 46px; text-align: right; }
-
-        .carrito-footer { padding: 1rem; border-top: 2px solid #eee; background: #fafafa; }
-        .total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.8rem; }
-        .total-label { font-size: 1rem; font-weight: bold; }
-        .total-importe { font-size: 1.6rem; font-weight: bold; }
-        .btn-cobrar { width: 100%; background: #d4a017; color: #000; border: none; padding: 0.8rem; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 0.4rem; }
-        .btn-cobrar:hover { background: #b8880f; }
-        .btn-limpiar { width: 100%; background: transparent; border: 1px solid #ddd; color: #999; padding: 0.4rem; border-radius: 6px; font-size: 0.82rem; cursor: pointer; }
-        .btn-limpiar:hover { border-color: #c00; color: #c00; }
-
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
-        .modal-overlay.open { display: flex; }
-        .modal { background: #fff; border-radius: 12px; padding: 1.8rem; width: 360px; max-width: 95vw; }
-        .modal h2 { font-size: 1.2rem; margin-bottom: 0.3rem; }
-        .modal-sub { color: #888; font-size: 0.85rem; margin-bottom: 1.2rem; }
-        .modal-importe { background: #f5f5f5; border-radius: 8px; padding: 1rem; text-align: center; margin-bottom: 1.2rem; }
-        .modal-importe-label { font-size: 0.8rem; color: #888; text-transform: uppercase; }
-        .modal-importe-num { font-size: 2.2rem; font-weight: bold; color: #d4a017; }
-        .modal-btns { display: flex; gap: 0.6rem; }
-        .btn-cancelar { flex: 1; padding: 0.7rem; border: 1px solid #ddd; background: transparent; border-radius: 8px; cursor: pointer; }
-        .btn-confirmar { flex: 2; padding: 0.7rem; border: none; background: #27ae60; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        /* Carrito móvil */
+        @media (max-width: 767px) {
+            #carrito-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 88%; max-width: 320px; transform: translateX(100%); transition: transform .25s ease; z-index: 60; }
+            #carrito-panel.open { transform: translateX(0); }
+            #carrito-backdrop { display: none; }
+            #carrito-backdrop.open { display: block; }
+        }
     </style>
 </head>
-<body>
+<body class="font-inter flex flex-col h-screen overflow-hidden text-white"
+      style="background-color:#1a1a1a;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.04) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.03) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(200,200,200,.02) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.015) 20px,rgba(255,255,255,.015) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.008) 45px,rgba(255,255,255,.008) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.01) 35px,rgba(255,255,255,.01) 36px)">
 
-<div class="header">
-    <h1>✂️ TPV Peluquería</h1>
-    <div class="header-user">
-        <span>👤 <?= htmlspecialchars($usuario['nombre']) ?></span>
-        <a href="index.php?page=logout">Cerrar sesión</a>
+<!-- HEADER -->
+<header class="bg-black/60 backdrop-blur-sm border-b border-white/10 h-14 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+    <p class="text-sm font-semibold tracking-widest uppercase text-white">Be Loyal</p>
+    <div class="flex items-center gap-3">
+        <span class="text-xs text-zinc-400"><?= htmlspecialchars($trabajador['nombre']) ?></span>
+        <?php if (!empty($trabajador['logo'])): ?>
+        <img src="public/img/logos/<?= htmlspecialchars($trabajador['logo']) ?>"
+             alt="<?= htmlspecialchars($trabajador['nombre']) ?>"
+             class="w-7 h-7 rounded-full object-cover border border-white/20"
+             onerror="this.style.display='none'">
+        <?php else: ?>
+        <div class="w-7 h-7 rounded-full bg-zinc-700 border border-white/20 flex items-center justify-center text-xs font-semibold text-zinc-300">
+            <?= mb_strtoupper(mb_substr($trabajador['nombre'], 0, 1)) ?>
+        </div>
+        <?php endif; ?>
+        <a href="index.php?page=logout" class="text-xs text-zinc-500 hover:text-white transition">Cerrar sesión</a>
     </div>
+</header>
+
+<!-- WORKER BAR -->
+<div class="bg-black/40 backdrop-blur-sm border-b border-white/10 px-4 sm:px-6 py-3 flex-shrink-0 flex items-center gap-3">
+    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+    <p class="text-sm font-medium text-white"><?= htmlspecialchars($trabajador['nombre']) ?></p>
+    <span class="text-xs text-zinc-500">·</span>
+    <p class="text-xs text-zinc-400"><?= htmlspecialchars(ucfirst($especialidad)) ?></p>
 </div>
 
-<div class="worker-bar">
-    <h2><?= htmlspecialchars($usuario['nombre']) ?></h2>
-    <span><?= htmlspecialchars(ucfirst($especialidad)) ?></span>
-</div>
+<!-- MAIN -->
+<div class="flex flex-1 overflow-hidden">
 
-<div class="main">
+    <!-- SERVICIOS -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6">
 
-    <div class="servicios">
-
-        <!-- Servicios propios -->
-        <div class="seccion-titulo"><?= $seccionTitulo ?></div>
-        <div class="grid">
+        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= htmlspecialchars($seccionTitulo) ?></p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($servicios as $s): ?>
-            <div class="card" onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>)">
-                <div class="card-nombre"><?= htmlspecialchars($s['nombre']) ?></div>
-                <div class="card-precio">€<?= $s['precio'] ?></div>
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$s['id'] ?>"
+                 data-precio="<?= (float)$s['precio'] ?>" data-nombre="<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>">
+                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($s['nombre']) ?></p>
+                <p class="text-lg font-light text-zinc-300">€<?= number_format($s['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
         </div>
 
-        <!-- Bonos solo para peluqueros -->
         <?php if ($mostrarBonos && !empty($bonos)): ?>
-        <div class="seccion-titulo">🎟 Bonos</div>
-        <div class="grid">
-            <?php foreach ($bonos as $bi => $b): ?>
-            <div class="card bono" onclick="anadir('bono_<?= $bi ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
-                <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
-                <div class="card-precio">€<?= $b['precio'] ?></div>
+        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bonos</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
+            <?php foreach ($bonos as $b): ?>
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$b['id'] ?>"
+                 data-precio="<?= (float)$b['precio'] ?>" data-nombre="<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>">
+                <p class="text-xs text-zinc-500 mb-1">Bono</p>
+                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
+                <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
 
-        <!-- Bebidas para todos -->
-        <div class="seccion-titulo">☕ Bebidas</div>
-        <div class="grid">
+        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Productos</p>
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] auto-rows-fr gap-3">
             <?php foreach ($bebidas as $b): ?>
-            <div class="card bebida" onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>)">
-                <div class="card-nombre"><?= htmlspecialchars($b['nombre']) ?></div>
-                <div class="card-precio">€<?= $b['precio'] ?></div>
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="beb" data-tipo="producto" data-id="<?= (int)$b['id'] ?>"
+                 data-precio="<?= (float)$b['precio'] ?>" data-nombre="<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>">
+                <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
+                <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
             </div>
             <?php endforeach; ?>
         </div>
 
     </div>
 
-    <div class="carrito">
-        <div class="carrito-header">
-            <h2>🛒 Carrito</h2>
-            <div class="carrito-worker"><?= htmlspecialchars($usuario['nombre']) ?></div>
-        </div>
-        <div class="carrito-items" id="carrito-items">
-            <div class="carrito-vacio">
-                <span style="font-size:2rem">🛒</span>
-                <span>Carrito vacío</span>
+    <!-- BACKDROP CARRITO MÓVIL -->
+    <div id="carrito-backdrop" class="fixed inset-0 bg-black/60 z-50 md:hidden"></div>
+
+    <!-- CARRITO -->
+    <div id="carrito-panel" class="w-72 bg-black/90 md:bg-black/50 backdrop-blur-sm border-l border-white/10 flex flex-col flex-shrink-0">
+        <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-white">Carrito</p>
+                <p class="text-xs text-zinc-500 mt-0.5"><?= htmlspecialchars($usuario['nombre']) ?></p>
             </div>
+            <button id="carrito-cerrar" aria-label="Cerrar carrito"
+                    class="md:hidden w-7 h-7 rounded-full bg-white/[0.06] text-zinc-400 hover:text-white flex items-center justify-center text-base">×</button>
         </div>
-        <div class="carrito-footer">
-            <div class="total-row">
-                <span class="total-label">Total</span>
-                <span class="total-importe" id="total">€0,00</span>
+        <div class="flex-1 overflow-y-auto px-5 py-3" id="carrito-items">
+            <div class="h-full flex items-center justify-center text-zinc-600 text-xs">Carrito vacío</div>
+        </div>
+        <div class="px-5 py-4 border-t border-white/10">
+            <div class="flex justify-between items-baseline mb-4">
+                <span class="text-xs text-zinc-500">Total</span>
+                <span class="text-2xl font-light text-white" id="total">€0,00</span>
             </div>
-            <button class="btn-cobrar" onclick="abrirModal()">Cobrar</button>
-            <button class="btn-limpiar" onclick="limpiarCarrito()">✕ Limpiar</button>
+            <button onclick="abrirPasarela(Object.assign({}, carrito), Object.values(carrito).reduce((a,i) => a + i.precio * i.cantidad, 0))"
+                    class="w-full bg-white text-zinc-900 text-sm font-semibold py-3 rounded-xl hover:bg-zinc-100 transition mb-2">
+                Cobrar
+            </button>
+            <button onclick="limpiarCarrito()" class="w-full border border-white/10 text-zinc-600 text-xs py-2 rounded-xl hover:text-red-400 hover:border-red-900/50 transition">
+                Limpiar
+            </button>
         </div>
     </div>
 
 </div>
 
-<div class="modal-overlay" id="modal">
-    <div class="modal">
-        <h2>Confirmar cobro</h2>
-        <div class="modal-sub"><?= htmlspecialchars($usuario['nombre']) ?></div>
-        <div class="modal-importe">
-            <div class="modal-importe-label">Total</div>
-            <div class="modal-importe-num" id="modal-total">€0,00</div>
-        </div>
-        <div class="modal-btns">
-            <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-confirmar" onclick="confirmarCobro()">✓ Confirmar</button>
-        </div>
-    </div>
+<!-- BOTÓN FLOTANTE CARRITO (móvil) -->
+<button id="carrito-abrir" aria-label="Abrir carrito"
+        class="md:hidden fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-white text-zinc-900 shadow-lg shadow-black/40 flex items-center justify-center font-semibold">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 1.293A1 1 0 006.414 16H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    <span id="carrito-badge" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center hidden">0</span>
+</button>
+
+<!-- TOAST -->
+<div id="toast"
+     class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 bg-[#18181b] border border-white/10 text-white px-[1.4rem] py-[0.65rem] rounded-full text-[0.82rem] font-medium shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-[99999] pointer-events-none whitespace-nowrap transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
 </div>
+
+<?php include __DIR__ . '/Pasarelapago.php'; ?>
 
 <script>
+// ── Carrito móvil ────────────────────────────────────────────────────────────
+(function () {
+    const panel    = document.getElementById('carrito-panel');
+    const backdrop = document.getElementById('carrito-backdrop');
+    const abrir    = document.getElementById('carrito-abrir');
+    const cerrar   = document.getElementById('carrito-cerrar');
+    if (!panel || !backdrop || !abrir || !cerrar) return;
+    backdrop.classList.remove('open');
+    function open()  { panel.classList.add('open');    backdrop.classList.add('open');    }
+    function close() { panel.classList.remove('open'); backdrop.classList.remove('open'); }
+    abrir.addEventListener('click', open);
+    cerrar.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+})();
+
 const carrito = {};
 
-function anadir(itemId, nombre, precio) {
-    if (!carrito[itemId]) {
-        carrito[itemId] = { nombre: nombre, precio: parseFloat(precio) || 0, cantidad: 0 };
-    }
+// Delegación de clic en tarjetas de servicio/bono/bebida
+document.querySelectorAll('.item-card').forEach(card => {
+    card.addEventListener('click', () => {
+        anadir(
+            card.dataset.prefix + '_' + card.dataset.id,
+            card.dataset.nombre,
+            parseFloat(card.dataset.precio),
+            card.dataset.tipo,
+            parseInt(card.dataset.id, 10)
+        );
+    });
+});
+
+function anadir(itemId, nombre, precio, tipo, idReal) {
+    if (!carrito[itemId]) carrito[itemId] = { nombre, precio: parseFloat(precio) || 0, cantidad: 0, tipo, idReal };
     carrito[itemId].cantidad++;
     renderizar();
 }
@@ -198,53 +206,93 @@ function limpiarCarrito() {
     renderizar();
 }
 
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    })[c]);
+}
+
 function renderizar() {
     const items = Object.entries(carrito);
     const el = document.getElementById('carrito-items');
+    const badge = document.getElementById('carrito-badge');
+    const totalCantidad = Object.values(carrito).reduce((a, i) => a + i.cantidad, 0);
+    if (badge) {
+        if (totalCantidad > 0) { badge.textContent = totalCantidad; badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+    }
     if (!items.length) {
-        el.innerHTML = '<div class="carrito-vacio"><span style="font-size:2rem">🛒</span><span>Carrito vacío</span></div>';
+        el.innerHTML = '<div class="h-full flex items-center justify-center text-zinc-600 text-xs">Carrito vacío</div>';
         document.getElementById('total').textContent = '€0,00';
         return;
     }
-    let total = 0, html = '';
+    let total = 0;
+    el.innerHTML = '';
     items.forEach(([id, item]) => {
         const sub = item.precio * item.cantidad;
         total += sub;
-        html += '<div class="item">'
-            + '<div class="item-info">'
-            + '<div class="item-nombre">' + item.nombre + '</div>'
-            + '<div class="item-precio">€' + item.precio.toFixed(2) + ' c/u</div>'
-            + '</div>'
-            + '<div class="item-controles">'
-            + '<button class="btn-qty" onclick="quitar(\'' + id + '\')">−</button>'
-            + '<span class="item-qty">' + item.cantidad + '</span>'
-            + '<button class="btn-qty" onclick="anadir(\'' + id + '\', \'' + item.nombre + '\', ' + item.precio + ')">+</button>'
-            + '</div>'
-            + '<div class="item-total">€' + sub.toFixed(2) + '</div>'
-            + '</div>';
+        // Construimos por DOM en vez de innerHTML para evitar inyección de HTML
+        const fila = document.createElement('div');
+        fila.className = 'flex items-center gap-2 py-3 border-b border-white/5 last:border-0';
+        fila.innerHTML = `
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-white truncate"></p>
+                <p class="text-xs text-zinc-500 mt-0.5">€${item.precio.toFixed(2)} c/u</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button data-act="quitar" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">−</button>
+                <span class="text-xs font-medium text-white min-w-[16px] text-center">${item.cantidad}</span>
+                <button data-act="anadir" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">+</button>
+            </div>
+            <span class="text-xs font-medium text-white min-w-[40px] text-right">€${sub.toFixed(2)}</span>`;
+        fila.querySelector('p.truncate').textContent = item.nombre;
+        fila.querySelector('[data-act="quitar"]').addEventListener('click', () => quitar(id));
+        fila.querySelector('[data-act="anadir"]').addEventListener('click',
+            () => anadir(id, item.nombre, item.precio, item.tipo, item.idReal));
+        el.appendChild(fila);
     });
-    el.innerHTML = html;
     document.getElementById('total').textContent = '€' + total.toFixed(2);
 }
 
-function abrirModal() {
-    const items = Object.values(carrito);
-    if (!items.length) { alert('El carrito está vacío'); return; }
+function mostrarToast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('translate-y-20', 'opacity-0', 'border-[#34d399]', 'text-[#34d399]', 'border-[#f87171]', 'text-[#f87171]', 'border-white/10', 'text-white');
+    t.classList.add('translate-y-0', 'opacity-100');
+    if (tipo === 'ok') t.classList.add('border-[#34d399]', 'text-[#34d399]');
+    else               t.classList.add('border-[#f87171]', 'text-[#f87171]');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+        t.classList.remove('translate-y-0', 'opacity-100', 'border-[#34d399]', 'text-[#34d399]', 'border-[#f87171]', 'text-[#f87171]');
+        t.classList.add('translate-y-20', 'opacity-0', 'border-white/10', 'text-white');
+    }, 2800);
+}
+
+async function registrarVenta(metodoPago) {
+    const items = Object.values(carrito).map(i => ({
+        tipo: i.tipo, id: i.idReal, cantidad: i.cantidad, precio: i.precio,
+        nombre: i.nombre
+    }));
     const total = items.reduce((a, i) => a + i.precio * i.cantidad, 0);
-    document.getElementById('modal-total').textContent = '€' + total.toFixed(2);
-    document.getElementById('modal').classList.add('open');
+    try {
+        const res = await fetch('index.php?page=registrar_venta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, total: total.toFixed(2), metodo_pago: metodoPago }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+            limpiarCarrito();
+            mostrarToast('Venta registrada correctamente');
+            return data;
+        } else {
+            return { ok: false, error: data.error || 'Error al registrar la venta' };
+        }
+    } catch (e) {
+        return { ok: false, error: 'Error de conexión' };
+    }
 }
-
-function cerrarModal() { document.getElementById('modal').classList.remove('open'); }
-
-function confirmarCobro() {
-    cerrarModal();
-    limpiarCarrito();
-}
-
-document.getElementById('modal').addEventListener('click', function(e) {
-    if (e.target === this) cerrarModal();
-});
 </script>
+
 </body>
 </html>

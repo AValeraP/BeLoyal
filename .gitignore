@@ -1,0 +1,24 @@
+# Configuración local con claves API (NO subir)
+Conn/config.php
+
+# Base de datos local SQLite (PHP Desktop)
+Data/*.sqlite
+Data/*.sqlite-journal
+Data/*.sqlite-wal
+Data/*.sqlite-shm
+
+# Composer dependencies
+vendor/
+
+# Sistema
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.code-workspace
+prueba.txt
+
+# Uploads (mantener carpeta, no contenido del usuario)
+public/img/logos/emp_*
