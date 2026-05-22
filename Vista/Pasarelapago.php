@@ -29,7 +29,7 @@
     width: 148px;
     background: #1a1a1a;
     border-radius: 0 10px 10px 0;
-    z-index: 2;
+    z-index: 10;
     pointer-events: all;
     cursor: text;
 }
@@ -224,9 +224,9 @@
             invalid: { color: '#f87171' },
         };
 
-        cardNumberEl = elements.create('cardNumber', { style: fieldStyle });
+        cardNumberEl = elements.create('cardNumber', { style: fieldStyle, disableLink: true });
         cardExpiryEl = elements.create('cardExpiry', { style: fieldStyle });
-        cardCvcEl    = elements.create('cardCvc',    { style: fieldStyle });
+        cardCvcEl    = elements.create('cardCvc',    { style: fieldStyle, placeholder: 'CVV' });
 
         cardNumberEl.mount('#stripe-card-number-el');
         cardExpiryEl.mount('#stripe-card-expiry-el');
@@ -321,6 +321,8 @@
         efectivoCambio.textContent = '€0,00';
         btnConfEfe.disabled        = true;
         cardError.textContent      = '';
+        setLoadingTarjeta(false);
+        if (cardNumberEl) { cardNumberEl.clear(); cardExpiryEl.clear(); cardCvcEl.clear(); }
 
         actualizarBotonesConexion();
         if (navigator.onLine) initStripe();

@@ -88,7 +88,7 @@
         </div>
         <?php endif; ?>
 
-        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bebidas</p>
+        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Productos</p>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] auto-rows-fr gap-3">
             <?php foreach ($bebidas as $b): ?>
             <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"

@@ -33,7 +33,7 @@ class ModeloTrabajador
         return $result ?: null;
     }
 
-    public function crear(string $nombre, string $email, string $password, string $especialidad): void
+    public function crear(string $nombre, string $email, string $password, string $especialidad): int
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO usuarios (nombre, email, password, rol, activo, especialidad)
@@ -45,6 +45,7 @@ class ModeloTrabajador
             ':password'     => password_hash($password, PASSWORD_BCRYPT),
             ':especialidad' => $especialidad,
         ]);
+        return (int) $this->pdo->lastInsertId();
     }
 
     public function actualizar(int $id, string $nombre, string $email, string $especialidad, bool $activo): void

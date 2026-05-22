@@ -61,7 +61,7 @@
 
         <div class="mt-8 pt-6 border-t border-white/10">
             <p class="text-xs font-light text-zinc-600 mb-1.5">Usuarios de prueba</p>
-            <p class="text-xs font-light text-zinc-500">Admin: alejandro@peluqueria.com | 123</p>
+            <p class="text-xs font-light text-zinc-500">Admin: samuel@beloyal.com | 123</p>
             <p class="text-xs font-light text-zinc-500">Empleado: luis@beloyal.com | 123</p>
         </div>
 

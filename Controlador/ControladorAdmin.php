@@ -146,7 +146,26 @@ class ControladorAdmin
     {
         csrf_check();
         $modelo = new ModeloTrabajador($this->pdo);
-        $modelo->crear(trim($_POST['nombre']), trim($_POST['email']), trim($_POST['password']), trim($_POST['especialidad']));
+
+        try {
+            $id = $modelo->crear(trim($_POST['nombre']), trim($_POST['email']), trim($_POST['password']), trim($_POST['especialidad']));
+        } catch (PDOException $e) {
+            $_SESSION['admin_msg'] = (str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE'))
+                ? 'Ya existe un empleado con ese email.'
+                : 'No se pudo crear el empleado: ' . $e->getMessage();
+            header('Location: index.php?page=admin&seccion=empleados');
+            exit;
+        }
+
+        if (isset($_FILES['foto_empleado']) && $_FILES['foto_empleado']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['foto_empleado']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                $filename = 'emp_' . $id . '_' . time() . '.' . $ext;
+                move_uploaded_file($_FILES['foto_empleado']['tmp_name'], __DIR__ . '/../public/img/logos/' . $filename);
+                $modelo->actualizarLogo($id, $filename);
+            }
+        }
+
         $_SESSION['admin_msg'] = 'Empleado creado correctamente.';
         header('Location: index.php?page=admin&seccion=empleados');
         exit;
@@ -157,7 +176,17 @@ class ControladorAdmin
         csrf_check();
         $id     = (int)$_POST['id'];
         $modelo = new ModeloTrabajador($this->pdo);
-        $modelo->actualizar($id, trim($_POST['nombre']), trim($_POST['email']), trim($_POST['especialidad']), isset($_POST['activo']));
+
+        try {
+            $modelo->actualizar($id, trim($_POST['nombre']), trim($_POST['email']), trim($_POST['especialidad']), isset($_POST['activo']));
+        } catch (PDOException $e) {
+            $_SESSION['admin_msg'] = (str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE'))
+                ? 'Ya existe otro empleado con ese email.'
+                : 'No se pudo actualizar el empleado: ' . $e->getMessage();
+            header('Location: index.php?page=admin&seccion=empleados&editar=' . $id);
+            exit;
+        }
+
         if (!empty(trim($_POST['password']))) {
             $modelo->actualizarPassword($id, trim($_POST['password']));
         }
