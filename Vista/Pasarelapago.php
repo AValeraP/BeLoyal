@@ -150,6 +150,19 @@
             </button>
         </div>
 
+        <!-- Paso 5: Error -->
+        <div id="step-error" class="hidden px-[1.4rem] pt-[1.2rem] pb-2">
+            <div class="exito-pop w-[60px] h-[60px] bg-[#f87171]/10 border border-[#f87171] text-[#f87171] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <p class="text-center text-[1.2rem] font-semibold text-white">Cobro fallido</p>
+            <p id="error-msg-label" class="text-center text-[#f87171] text-[0.82rem] mt-[0.3rem] px-2"></p>
+            <button id="btn-reintentar"
+                    class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-6 hover:bg-white/10 active:scale-[0.98]">
+                Volver a intentar
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -187,8 +200,10 @@
     const efectivoTotal   = document.getElementById('efectivo-total');
     const btnConfEfe      = document.getElementById('btn-confirmar-efectivo');
     const btnNuevoCobro   = document.getElementById('btn-nuevo-cobro');
+    const stepError       = document.getElementById('step-error');
     const exitoMetLbl     = document.getElementById('exito-metodo-label');
     const exitoImpLbl     = document.getElementById('exito-importe-label');
+    const errorMsgLbl     = document.getElementById('error-msg-label');
 
     // ── Detección de conexión: sin internet solo efectivo ───────────────────
     function actualizarBotonesConexion() {
@@ -277,7 +292,13 @@
 
         if (typeof registrarVenta === 'function') {
             const resultado = await registrarVenta(metodo);
-            if (resultado && resultado.id_venta) {
+            if (!resultado) {
+                yaRegistrado = false;
+                setLoadingTarjeta(false);
+                mostrarError();
+                return;
+            }
+            if (resultado.id_venta) {
                 ultimoIdVenta = resultado.id_venta;
             }
         }
@@ -286,7 +307,7 @@
     }
 
     function irStep(step) {
-        [stepMetodo, stepTarjeta, stepEfectivo, stepExito].forEach(s => s.classList.add('hidden'));
+        [stepMetodo, stepTarjeta, stepEfectivo, stepExito, stepError].forEach(s => s.classList.add('hidden'));
         step.classList.remove('hidden');
     }
 
@@ -300,6 +321,11 @@
         exitoMetLbl.textContent = metodo.charAt(0).toUpperCase() + metodo.slice(1);
         exitoImpLbl.textContent = '€' + importe.toFixed(2).replace('.', ',');
         irStep(stepExito);
+    }
+
+    function mostrarError(msg) {
+        errorMsgLbl.textContent = msg || 'No se pudo registrar la venta. Comprueba el stock disponible.';
+        irStep(stepError);
     }
 
     function fmt(eur) { return '€' + eur.toFixed(2).replace('.', ','); }
@@ -411,6 +437,10 @@
         document.getElementById('email-ticket-feedback').textContent = '';
         document.getElementById('btn-enviar-ticket').disabled = false;
         if (typeof limpiarCarrito === 'function') limpiarCarrito();
+    });
+
+    document.getElementById('btn-reintentar').addEventListener('click', () => {
+        irStep(stepMetodo);
     });
 })();
 </script>
