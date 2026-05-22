@@ -35,7 +35,10 @@ class ControladorEmpleado
         $mostrarBonos = in_array($especialidad, ['peluqueria', 'todas']);
         $bonos        = $mostrarBonos ? $modeloProductos->obtenerBonos() : [];
 
-        if ($especialidad === 'peluqueria' || $especialidad === 'todas') {
+        if ($especialidad === 'todas') {
+            $servicios     = $modeloProductos->obtenerTodosLosServicios();
+            $seccionTitulo = 'Todos los servicios';
+        } elseif ($especialidad === 'peluqueria') {
             $servicios     = $modeloProductos->obtenerServiciosPeluqueros();
             $seccionTitulo = 'Servicios';
         } elseif ($especialidad === 'trenzas') {
@@ -49,7 +52,11 @@ class ControladorEmpleado
             $seccionTitulo = 'Servicios';
         }
 
-        $stripePublicKey = 'pk_test_51TUYfWBLLZWK8N7qmlmzbvfPdsNrRUdoCNEmJi0JLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK'; 
+        $config = file_exists(__DIR__ . '/../Conn/config.php')
+                ? require __DIR__ . '/../Conn/config.php'
+                : [];
+        $stripePublicKey = $config['stripe_public_key'] ?? '';
+
         require_once __DIR__ . '/../Vista/PanelEmpleado.php';
     }
 

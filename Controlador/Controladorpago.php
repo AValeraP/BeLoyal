@@ -29,10 +29,19 @@ class ControladorPago
     {
         $this->proteger('empleado');
 
-        // ── Configura aquí tus claves Stripe ────────────────────────────────
-        // En producción usa variables de entorno o un archivo de config seguro.
-        $this->stripePublicKey  = getenv('STRIPE_PUBLIC_KEY')  ?: 'pk_test_51TUYfWBLLZWK8N7qmlmzLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK';
-        $this->stripeSecretKey  = getenv('STRIPE_SECRET_KEY')  ?: 'sk_test_51TUYfWBLLZWK8N7qL0vyRb9xfJOP7w34ajwQp6Bxv5OjYjUIZTwLx0J4IahagHv25UbxFJ0jDEfabMxwmF8GClAb00InE8NGF2';
+        // Claves cargadas desde Conn/config.php (fuera del repo)
+        $config = file_exists(__DIR__ . '/../Conn/config.php')
+                ? require __DIR__ . '/../Conn/config.php'
+                : [];
+
+        $this->stripePublicKey = getenv('STRIPE_PUBLIC_KEY') ?: ($config['stripe_public_key'] ?? '');
+        $this->stripeSecretKey = getenv('STRIPE_SECRET_KEY') ?: ($config['stripe_secret_key'] ?? '');
+
+        if (empty($this->stripeSecretKey)) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Configuración Stripe no encontrada. Revisa Conn/config.php']);
+            exit;
+        }
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -53,7 +62,6 @@ class ControladorPago
         }
 
         $importeCents = (int) $input['importe_cents'];
-        $metodo       = $input['metodo'] ?? null;
 
         try {
             \Stripe\Stripe::setApiKey($this->stripeSecretKey);
@@ -67,11 +75,7 @@ class ControladorPago
                 ],
             ];
 
-            if ($metodo === 'bizum') {
-                $intentParams['payment_method_types'] = ['bizum'];
-            } else {
-                $intentParams['automatic_payment_methods'] = ['enabled' => true];
-            }
+            $intentParams['automatic_payment_methods'] = ['enabled' => true];
 
             $intent = \Stripe\PaymentIntent::create($intentParams);
 

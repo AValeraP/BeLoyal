@@ -29,12 +29,13 @@ class ModeloServicio
         $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad]);
     }
 
-    public function actualizar(int $id, string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria', bool $activo = true): void
+    public function actualizar(int $id, string $nombre, float $precio, int $duracion, string $especialidad = 'peluqueria'): void
     {
+        // No se toca 'activo': usa activar()/eliminar() para cambiar el estado
         $stmt = $this->pdo->prepare(
-            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion, especialidad = :especialidad, activo = :activo WHERE id_servicio = :id"
+            "UPDATE servicios SET nombre = :nombre, precio = :precio, duracion = :duracion, especialidad = :especialidad WHERE id_servicio = :id"
         );
-        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad, ':activo' => (int)$activo, ':id' => $id]);
+        $stmt->execute([':nombre' => $nombre, ':precio' => $precio, ':duracion' => $duracion, ':especialidad' => $especialidad, ':id' => $id]);
     }
 
     public function eliminar(int $id): void

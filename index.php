@@ -1,8 +1,16 @@
 <?php
+// Cookies de sesión seguras (mitiga CSRF y session hijacking)
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'httponly' => true,
+    'samesite' => 'Strict',
+]);
 session_start();
 error_reporting(E_ALL);
 
 require_once 'Conn/conexion.php';
+require_once 'Conn/csrf.php';
 
 $page = $_GET['page'] ?? 'login';
 
@@ -70,16 +78,6 @@ switch ($page) {
     case 'admin_crear_empleado':
         require_once 'Controlador/ControladorAdmin.php';
         (new ControladorAdmin())->crearEmpleado();
-        break;
-
-    case 'admin_alta_empleado':
-        require_once 'Controlador/ControladorAdmin.php';
-        (new ControladorAdmin())->darDeAlta();
-        break;
-
-    case 'admin_baja_empleado':
-        require_once 'Controlador/ControladorAdmin.php';
-        (new ControladorAdmin())->darDeBaja();
         break;
 
     case 'registrar_venta':

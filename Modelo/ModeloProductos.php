@@ -49,6 +49,8 @@ class ModeloProductos
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Nombre del método sin ñ porque PHP no permite ñ en identificadores antiguos;
+    // internamente la consulta sí busca 'uñas'.
     public function obtenerServiciosUnas(): array
     {
         return $this->pdo->query(
@@ -56,6 +58,20 @@ class ModeloProductos
              FROM servicios
              WHERE activo = 1 AND especialidad = 'uñas'
              ORDER BY nombre"
+        )->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Devuelve todos los servicios activos que no son bonos.
+     * Se usa para empleados con especialidad 'todas'.
+     */
+    public function obtenerTodosLosServicios(): array
+    {
+        return $this->pdo->query(
+            "SELECT id_servicio AS id, nombre, precio
+             FROM servicios
+             WHERE activo = 1 AND especialidad <> 'bono'
+             ORDER BY especialidad, nombre"
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 }

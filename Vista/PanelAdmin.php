@@ -102,7 +102,7 @@
             <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['efectivo']['ventas'] ?> ventas</p>
         </div>
         <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-blue-900/40">
-            <p class="text-xs font-light uppercase tracking-widest text-blue-700 mb-2">Tarjeta / Bizum</p>
+            <p class="text-xs font-light uppercase tracking-widest text-blue-700 mb-2">Tarjeta</p>
             <p class="text-3xl font-light text-blue-400">€<?= number_format($porMetodo['tarjeta']['ingresos'], 2) ?></p>
             <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['tarjeta']['ventas'] ?> ventas</p>
         </div>
@@ -125,7 +125,7 @@
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ventas</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
                     <th class="text-left text-xs font-light uppercase tracking-widest text-emerald-400 pb-2 border-b border-white/5">Efectivo</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-400 pb-2 border-b border-white/5">Tarjeta / Bizum</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-400 pb-2 border-b border-white/5">Tarjeta</th>
                 </tr>
             </thead>
             <tbody>
@@ -196,12 +196,46 @@
         </div>
     </div>
 
+    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mt-3">
+        <p class="text-xs font-light text-zinc-500 mb-4">Ventas recientes</p>
+        <table class="w-full">
+            <thead>
+                <tr>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">#</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Fecha</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Hora</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Empleado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Método</th>
+                    <th class="text-right text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($ventasRecientes as $v):
+                    $dt = new DateTime($v['fecha']);
+                ?>
+                <tr class="border-b border-white/5 last:border-0">
+                    <td class="py-2 text-xs font-light text-zinc-600">#<?= $v['id_venta'] ?></td>
+                    <td class="py-2 text-xs font-light text-zinc-400"><?= $dt->format('d/m/Y') ?></td>
+                    <td class="py-2 text-xs font-light text-zinc-400"><?= $dt->format('H:i') ?></td>
+                    <td class="py-2 text-xs font-light text-zinc-400"><?= htmlspecialchars($v['empleado'] ?? '—') ?></td>
+                    <td class="py-2 text-xs font-light text-zinc-400"><?= htmlspecialchars(ucfirst($v['metodo_pago'] ?? '—')) ?></td>
+                    <td class="py-2 text-xs font-light text-white text-right">€<?= number_format($v['total'], 2) ?></td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if (empty($ventasRecientes)): ?>
+                <tr><td colspan="6" class="py-4 text-center text-xs font-light text-zinc-600">Sin ventas registradas</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
     <?php elseif ($seccion === 'servicios'): ?>
     <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-6">Servicios</p>
 
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4"><?= $editServicio ? 'Editar servicio' : 'Nuevo servicio' ?></p>
         <form method="POST" action="index.php?page=<?= $editServicio ? 'admin_actualizar_servicio' : 'admin_crear_servicio' ?>">
+            <?= csrf_field() ?>
             <?php if ($editServicio): ?>
             <input type="hidden" name="id" value="<?= $editServicio['id_servicio'] ?>">
             <?php endif; ?>
@@ -304,6 +338,7 @@
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4"><?= $editProducto ? 'Editar producto' : 'Nuevo producto' ?></p>
         <form method="POST" action="index.php?page=<?= $editProducto ? 'admin_actualizar_producto' : 'admin_crear_producto' ?>">
+            <?= csrf_field() ?>
             <?php if ($editProducto): ?>
             <input type="hidden" name="id" value="<?= $editProducto['id_producto'] ?>">
             <?php endif; ?>
@@ -381,6 +416,7 @@
     <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
         <p class="text-xs font-light text-zinc-500 mb-4"><?= $editEmpleado ? 'Editar empleado' : 'Nuevo empleado' ?></p>
         <form method="POST" enctype="multipart/form-data" action="index.php?page=<?= $editEmpleado ? 'admin_actualizar_empleado' : 'admin_crear_empleado' ?>">
+            <?= csrf_field() ?>
             <?php if ($editEmpleado): ?>
             <input type="hidden" name="id" value="<?= $editEmpleado['id_usuario'] ?>">
             <?php endif; ?>
@@ -536,6 +572,7 @@
         <p class="text-base font-semibold text-white mb-1">Resetear ventas</p>
         <p class="text-xs text-zinc-500 mb-5">Esta acción eliminará <strong class="text-red-400">TODAS</strong> las ventas y no se puede deshacer. Introduce tu contraseña para confirmar.</p>
         <form method="POST" action="index.php?page=admin_resetear_ventas">
+            <?= csrf_field() ?>
             <input type="password" name="password_confirm" id="reset-pw-input"
                    placeholder="Tu contraseña de administrador"
                    autocomplete="current-password"

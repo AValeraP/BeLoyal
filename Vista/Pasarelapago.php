@@ -70,35 +70,9 @@
                     class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
                 Pagar con tarjeta
             </button>
-            <button id="btn-ir-bizum"
-                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-bizum hover:text-bizum-light hover:bg-bizum/[0.07]">
-                Pagar con Bizum
-            </button>
             <button id="btn-ir-efectivo"
                     class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-[#34d399] hover:text-[#34d399] hover:bg-[#34d399]/[0.06]">
                 Cobrar en efectivo
-            </button>
-        </div>
-
-        <!-- Paso 2b: Bizum -->
-        <div id="step-bizum" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <button id="btn-volver-bizum"
-                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
-            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Pagar con Bizum</p>
-            <div class="mb-[0.7rem]">
-                <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Teléfono del cliente</label>
-                <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
-                    <span class="px-[0.7rem] text-[#555] text-[1rem]">+34</span>
-                    <input type="tel" id="bizum-telefono" maxlength="9" placeholder="612 345 678"
-                           class="flex-1 border-0 outline-none text-[1.2rem] font-medium py-[0.55rem] px-[0.4rem] bg-transparent text-white placeholder-[#555]">
-                </div>
-                <p class="text-[0.72rem] text-[#555] mt-[0.45rem]">El cliente recibirá una solicitud en su app Bizum</p>
-            </div>
-            <div id="bizum-error" class="text-[#f87171] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]"></div>
-            <button id="btn-pagar-bizum"
-                    class="w-full py-[0.85rem] rounded-xl border-0 bg-bizum text-white text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center gap-2 hover:bg-bizum-dark active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
-                <span id="btn-bizum-label">Enviar solicitud Bizum</span>
-                <span id="btn-bizum-spinner" class="hidden w-[18px] h-[18px] border-2 border-white/20 border-t-white rounded-full spin-anim"></span>
             </button>
         </div>
 
@@ -184,7 +158,7 @@
 (function () {
     'use strict';
 
-    const STRIPE_PUBLIC_KEY = '<?= htmlspecialchars($stripePublicKey ?? 'pk_test_51TUYfWBLLZWK8N7qmlmzbvfPdsNrRUdoCNEmJi0JLsIkBgZJyOFvNsPMD8uErBYJZSZvo6fByQaEfZ2lmDN3BpRG00FQIMyBKK', ENT_QUOTES) ?>';
+    const STRIPE_PUBLIC_KEY = '<?= htmlspecialchars($stripePublicKey ?? '', ENT_QUOTES) ?>';
     const URL_CREAR_INTENT  = 'index.php?page=pago_crear_intent';
 
     let stripe, elements, cardNumberEl, cardExpiryEl, cardCvcEl;
@@ -197,7 +171,6 @@
     const totalDisplay    = document.getElementById('pago-total-display');
     const stepMetodo      = document.getElementById('step-metodo');
     const stepTarjeta     = document.getElementById('step-tarjeta');
-    const stepBizum       = document.getElementById('step-bizum');
     const stepEfectivo    = document.getElementById('step-efectivo');
     const stepExito       = document.getElementById('step-exito');
     const btnIrTarjeta    = document.getElementById('btn-ir-tarjeta');
@@ -216,6 +189,15 @@
     const btnNuevoCobro   = document.getElementById('btn-nuevo-cobro');
     const exitoMetLbl     = document.getElementById('exito-metodo-label');
     const exitoImpLbl     = document.getElementById('exito-importe-label');
+
+    // ── Detección de conexión: sin internet solo efectivo ───────────────────
+    function actualizarBotonesConexion() {
+        const online = navigator.onLine;
+        btnIrTarjeta.style.display = online ? '' : 'none';
+    }
+    actualizarBotonesConexion();
+    window.addEventListener('online',  actualizarBotonesConexion);
+    window.addEventListener('offline', actualizarBotonesConexion);
 
     function abrirOverlay() {
         overlay.classList.remove('hidden');
@@ -271,44 +253,18 @@
         }
     }
 
-    async function crearIntent(metodo = null) {
+    async function crearIntent() {
         const res = await fetch(URL_CREAR_INTENT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 importe_cents: totalCents,
-                metodo: metodo,
                 items: Object.values(carritoActual).map(i => ({ nombre: i.nombre, precio: i.precio, cantidad: i.cantidad })),
             }),
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         return data;
-    }
-
-    function setLoadingBizum(loading) {
-        const btn = document.getElementById('btn-pagar-bizum');
-        btn.disabled = loading;
-        document.getElementById('btn-bizum-label').classList.toggle('hidden', loading);
-        document.getElementById('btn-bizum-spinner').classList.toggle('hidden', !loading);
-    }
-
-    async function procesarBizum() {
-        const telefonoInput = document.getElementById('bizum-telefono');
-        const bizumError    = document.getElementById('bizum-error');
-        const telefono = telefonoInput.value.replace(/\s/g, '');
-
-        if (!/^[6-9]\d{8}$/.test(telefono)) {
-            bizumError.textContent = 'Introduce un número español válido (9 dígitos, empieza por 6, 7, 8 o 9)';
-            return;
-        }
-
-        setLoadingBizum(true);
-        bizumError.textContent = '';
-
-        // Simulación de envío para demos — sustituir por integración real en producción
-        await new Promise(r => setTimeout(r, 1500));
-        await finalizarCobro(null, 'Bizum');
     }
 
     let ultimoIdVenta = null;
@@ -330,7 +286,7 @@
     }
 
     function irStep(step) {
-        [stepMetodo, stepTarjeta, stepBizum, stepEfectivo, stepExito].forEach(s => s.classList.add('hidden'));
+        [stepMetodo, stepTarjeta, stepEfectivo, stepExito].forEach(s => s.classList.add('hidden'));
         step.classList.remove('hidden');
     }
 
@@ -366,7 +322,8 @@
         btnConfEfe.disabled        = true;
         cardError.textContent      = '';
 
-        initStripe();
+        actualizarBotonesConexion();
+        if (navigator.onLine) initStripe();
         irStep(stepMetodo);
         abrirOverlay();
     };
@@ -374,47 +331,10 @@
     btnCerrar.addEventListener('click', cerrarOverlay);
     overlay.addEventListener('click', e => { if (e.target === overlay) cerrarOverlay(); });
     btnIrTarjeta.addEventListener('click', () => irStep(stepTarjeta));
-    document.getElementById('btn-ir-bizum').addEventListener('click', () => {
-        document.getElementById('bizum-telefono').value = '';
-        document.getElementById('bizum-error').textContent = '';
-        irStep(stepBizum);
-    });
     btnIrEfectivo.addEventListener('click', () => irStep(stepEfectivo));
     btnVolverMet.addEventListener('click', () => irStep(stepMetodo));
     btnVolverEfe.addEventListener('click', () => irStep(stepMetodo));
-    document.getElementById('btn-volver-bizum').addEventListener('click', () => irStep(stepMetodo));
     btnPagarTar.addEventListener('click', procesarTarjeta);
-    document.getElementById('btn-pagar-bizum').addEventListener('click', procesarBizum);
-
-    // ── Retorno tras redirect de Bizum ──────────────────────────────────────
-    (async function manejarRetornoBizum() {
-        const params = new URLSearchParams(window.location.search);
-        if (!params.get('bizum_return')) return;
-
-        const redirectStatus  = params.get('redirect_status');
-        const carritoGuardado = sessionStorage.getItem('biz_carrito');
-        const centsGuardado   = sessionStorage.getItem('biz_cents');
-        sessionStorage.removeItem('biz_carrito');
-        sessionStorage.removeItem('biz_cents');
-
-        const urlLimpia = window.location.href.split('?')[0] + '?page=empleado';
-        history.replaceState(null, '', urlLimpia);
-
-        if (redirectStatus !== 'succeeded' || !carritoGuardado || !centsGuardado) return;
-
-        carritoActual = JSON.parse(carritoGuardado);
-        totalCents    = parseInt(centsGuardado, 10);
-        yaRegistrado  = false;
-
-        const totalFmt = fmt(totalCents / 100);
-        totalDisplay.textContent = totalFmt;
-        btnPagarImp.textContent  = totalFmt;
-
-        initStripe();
-        abrirOverlay();
-        irStep(stepExito);
-        await finalizarCobro(params.get('payment_intent'), 'Bizum');
-    })();
 
     efectivoEntrega.addEventListener('input', () => {
         const entrega = parseFloat(efectivoEntrega.value) || 0;
@@ -424,7 +344,7 @@
     });
 
     btnConfEfe.addEventListener('click', async () => {
-        await finalizarCobro(null, 'Efectivo');
+        await finalizarCobro(null, 'efectivo');
     });
 
     // ── Enviar ticket por email ──────────────────────────────────────────────

@@ -23,4 +23,14 @@ class ModeloUsuario
         $stmt->execute([':email' => $email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Actualiza el hash de contraseña de un usuario.
+     * Usado para migrar contraseñas legacy en texto plano a bcrypt.
+     */
+    public function actualizarHash(int $idUsuario, string $hash): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE usuarios SET password = :p WHERE id_usuario = :id");
+        $stmt->execute([':p' => $hash, ':id' => $idUsuario]);
+    }
 }

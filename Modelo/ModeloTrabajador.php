@@ -42,7 +42,7 @@ class ModeloTrabajador
         $stmt->execute([
             ':nombre'       => $nombre,
             ':email'        => $email,
-            ':password'     => $password,
+            ':password'     => password_hash($password, PASSWORD_BCRYPT),
             ':especialidad' => $especialidad,
         ]);
     }
@@ -68,7 +68,10 @@ class ModeloTrabajador
         $stmt = $this->pdo->prepare(
             "UPDATE usuarios SET password = :password WHERE id_usuario = :id"
         );
-        $stmt->execute([':password' => $password, ':id' => $id]);
+        $stmt->execute([
+            ':password' => password_hash($password, PASSWORD_BCRYPT),
+            ':id'       => $id,
+        ]);
     }
 
     public function activar(int $id): void

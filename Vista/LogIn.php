@@ -30,8 +30,9 @@
         </p>
 
         <form method="POST" action="index.php?page=login_post">
+            <?= csrf_field() ?>
 
-       
+
                              <div class="mb-5">
                 <label class="block text-xs tracking-wide text-zinc-500 mb-2">Email</label>
                 <input type="email" name="email" placeholder="nombre@beloyal.com"

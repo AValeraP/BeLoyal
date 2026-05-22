@@ -40,7 +40,8 @@ class ControladorAdmin
         $prodVendidos = $modeloInforme->productosMasVendidos($periodo);
         $porEmpleado  = $modeloInforme->ventasPorEmpleado($periodo);
         $porDia       = $modeloInforme->ventasPorDia($periodo);
-        $porMetodo    = $modeloInforme->ingresosPorMetodo($periodo);
+        $porMetodo        = $modeloInforme->ingresosPorMetodo($periodo);
+        $ventasRecientes  = $modeloInforme->ventasRecientes(25);
 
         $editServicio = null;
         $editProducto = null;
@@ -63,6 +64,7 @@ class ControladorAdmin
 
     public function crearServicio(): void
     {
+        csrf_check();
         $modelo = new ModeloServicio($this->pdo);
         $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['duracion'], trim($_POST['especialidad'] ?? 'peluqueria'));
         $_SESSION['admin_msg'] = 'Servicio creado correctamente.';
@@ -72,6 +74,7 @@ class ControladorAdmin
 
     public function actualizarServicio(): void
     {
+        csrf_check();
         $modelo = new ModeloServicio($this->pdo);
         $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['duracion'], trim($_POST['especialidad'] ?? 'peluqueria'));
         $_SESSION['admin_msg'] = 'Servicio actualizado correctamente.';
@@ -101,6 +104,7 @@ class ControladorAdmin
 
     public function crearProducto(): void
     {
+        csrf_check();
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
         $_SESSION['admin_msg'] = 'Producto creado correctamente.';
@@ -110,6 +114,7 @@ class ControladorAdmin
 
     public function actualizarProducto(): void
     {
+        csrf_check();
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
         $_SESSION['admin_msg'] = 'Producto actualizado correctamente.';
@@ -139,6 +144,7 @@ class ControladorAdmin
 
     public function crearEmpleado(): void
     {
+        csrf_check();
         $modelo = new ModeloTrabajador($this->pdo);
         $modelo->crear(trim($_POST['nombre']), trim($_POST['email']), trim($_POST['password']), trim($_POST['especialidad']));
         $_SESSION['admin_msg'] = 'Empleado creado correctamente.';
@@ -148,6 +154,7 @@ class ControladorAdmin
 
     public function actualizarEmpleado(): void
     {
+        csrf_check();
         $id     = (int)$_POST['id'];
         $modelo = new ModeloTrabajador($this->pdo);
         $modelo->actualizar($id, trim($_POST['nombre']), trim($_POST['email']), trim($_POST['especialidad']), isset($_POST['activo']));
@@ -221,13 +228,30 @@ class ControladorAdmin
             header('Location: index.php?page=admin&seccion=dashboard');
             exit;
         }
+        csrf_check();
 
         $passwordIntroducida = $_POST['password_confirm'] ?? '';
-        $stmt = $this->pdo->prepare("SELECT password FROM usuarios WHERE email = :email AND rol = 'admin' LIMIT 1");
+        $stmt = $this->pdo->prepare("SELECT id_usuario, password FROM usuarios WHERE email = :email AND rol = 'admin' LIMIT 1");
         $stmt->execute([':email' => $_SESSION['usuario']['email']]);
         $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$admin || $passwordIntroducida !== $admin['password']) {
+        // Soporta hashes bcrypt y, transitoriamente, texto plano (legacy)
+        $passwordOk = false;
+        if ($admin) {
+            if (preg_match('/^\$2[ayb]\$/', $admin['password'])) {
+                $passwordOk = password_verify($passwordIntroducida, $admin['password']);
+            } elseif (hash_equals((string)$admin['password'], $passwordIntroducida)) {
+                $passwordOk = true;
+                // Migración silenciosa a bcrypt
+                $upd = $this->pdo->prepare("UPDATE usuarios SET password = :p WHERE id_usuario = :id");
+                $upd->execute([
+                    ':p'  => password_hash($passwordIntroducida, PASSWORD_BCRYPT),
+                    ':id' => $admin['id_usuario'],
+                ]);
+            }
+        }
+
+        if (!$passwordOk) {
             $_SESSION['admin_msg'] = 'Contraseña incorrecta. No se han eliminado las ventas.';
             header('Location: index.php?page=admin&seccion=dashboard');
             exit;

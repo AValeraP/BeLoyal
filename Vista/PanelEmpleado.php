@@ -13,9 +13,6 @@
                     inter: ['Inter', 'sans-serif'],
                     dm: ["'DM Sans'", 'Arial', 'sans-serif'],
                 },
-                colors: {
-                    bizum: { DEFAULT: '#0040e5', light: '#5b8fff', dark: '#0033b8' },
-                }
             }
         }
     }
@@ -64,11 +61,12 @@
     <!-- SERVICIOS -->
     <div class="flex-1 overflow-y-auto p-6">
 
-        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= $seccionTitulo ?></p>
+        <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4"><?= htmlspecialchars($seccionTitulo) ?></p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($servicios as $s): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
-                 onclick="anadir('svc_<?= $s['id'] ?>', '<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>', <?= $s['precio'] ?>, 'servicio', <?= $s['id'] ?>)">
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$s['id'] ?>"
+                 data-precio="<?= (float)$s['precio'] ?>" data-nombre="<?= htmlspecialchars($s['nombre'], ENT_QUOTES) ?>">
                 <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($s['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($s['precio'], 2) ?></p>
             </div>
@@ -79,8 +77,9 @@
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bonos</p>
         <div class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8">
             <?php foreach ($bonos as $b): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
-                 onclick="anadir('svc_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'servicio', <?= $b['id'] ?>)">
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="svc" data-tipo="servicio" data-id="<?= (int)$b['id'] ?>"
+                 data-precio="<?= (float)$b['precio'] ?>" data-nombre="<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>">
                 <p class="text-xs text-zinc-500 mb-1">Bono</p>
                 <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
@@ -92,8 +91,9 @@
         <p class="text-xs font-medium uppercase tracking-widest text-zinc-400 mb-4">Bebidas</p>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] auto-rows-fr gap-3">
             <?php foreach ($bebidas as $b): ?>
-            <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
-                 onclick="anadir('beb_<?= $b['id'] ?>', '<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>', <?= $b['precio'] ?>, 'producto', <?= $b['id'] ?>)">
+            <div class="item-card bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 cursor-pointer hover:bg-zinc-800/90 hover:border-white/20 transition-all duration-200 select-none active:scale-95 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/40 flex flex-col justify-between min-h-[100px]"
+                 data-prefix="beb" data-tipo="producto" data-id="<?= (int)$b['id'] ?>"
+                 data-precio="<?= (float)$b['precio'] ?>" data-nombre="<?= htmlspecialchars($b['nombre'], ENT_QUOTES) ?>">
                 <p class="text-sm font-semibold text-white mb-3 leading-tight"><?= htmlspecialchars($b['nombre']) ?></p>
                 <p class="text-lg font-light text-zinc-300">€<?= number_format($b['precio'], 2) ?></p>
             </div>
@@ -138,6 +138,19 @@
 <script>
 const carrito = {};
 
+// Delegación de clic en tarjetas de servicio/bono/bebida
+document.querySelectorAll('.item-card').forEach(card => {
+    card.addEventListener('click', () => {
+        anadir(
+            card.dataset.prefix + '_' + card.dataset.id,
+            card.dataset.nombre,
+            parseFloat(card.dataset.precio),
+            card.dataset.tipo,
+            parseInt(card.dataset.id, 10)
+        );
+    });
+});
+
 function anadir(itemId, nombre, precio, tipo, idReal) {
     if (!carrito[itemId]) carrito[itemId] = { nombre, precio: parseFloat(precio) || 0, cantidad: 0, tipo, idReal };
     carrito[itemId].cantidad++;
@@ -156,6 +169,12 @@ function limpiarCarrito() {
     renderizar();
 }
 
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    })[c]);
+}
+
 function renderizar() {
     const items = Object.entries(carrito);
     const el = document.getElementById('carrito-items');
@@ -164,24 +183,31 @@ function renderizar() {
         document.getElementById('total').textContent = '€0,00';
         return;
     }
-    let total = 0, html = '';
+    let total = 0;
+    el.innerHTML = '';
     items.forEach(([id, item]) => {
         const sub = item.precio * item.cantidad;
         total += sub;
-        html += `<div class="flex items-center gap-2 py-3 border-b border-white/5 last:border-0">
+        // Construimos por DOM en vez de innerHTML para evitar inyección de HTML
+        const fila = document.createElement('div');
+        fila.className = 'flex items-center gap-2 py-3 border-b border-white/5 last:border-0';
+        fila.innerHTML = `
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-white truncate">${item.nombre}</p>
+                <p class="text-xs font-medium text-white truncate"></p>
                 <p class="text-xs text-zinc-500 mt-0.5">€${item.precio.toFixed(2)} c/u</p>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="quitar('${id}')" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">−</button>
+                <button data-act="quitar" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">−</button>
                 <span class="text-xs font-medium text-white min-w-[16px] text-center">${item.cantidad}</span>
-                <button onclick="anadir('${id}', '${item.nombre.replace(/'/g,"\\'")}', ${item.precio}, '${item.tipo}', ${item.idReal})" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">+</button>
+                <button data-act="anadir" class="w-6 h-6 rounded-full border border-white/10 text-zinc-400 hover:border-white/30 hover:text-white flex items-center justify-center transition text-sm">+</button>
             </div>
-            <span class="text-xs font-medium text-white min-w-[40px] text-right">€${sub.toFixed(2)}</span>
-        </div>`;
+            <span class="text-xs font-medium text-white min-w-[40px] text-right">€${sub.toFixed(2)}</span>`;
+        fila.querySelector('p.truncate').textContent = item.nombre;
+        fila.querySelector('[data-act="quitar"]').addEventListener('click', () => quitar(id));
+        fila.querySelector('[data-act="anadir"]').addEventListener('click',
+            () => anadir(id, item.nombre, item.precio, item.tipo, item.idReal));
+        el.appendChild(fila);
     });
-    el.innerHTML = html;
     document.getElementById('total').textContent = '€' + total.toFixed(2);
 }
 

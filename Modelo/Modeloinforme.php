@@ -113,11 +113,24 @@ class ModeloInforme
         return $rows;
     }
 
+    public function ventasRecientes(int $limite = 25): array
+    {
+        return $this->pdo->query(
+            "SELECT v.id_venta, v.fecha, v.total, v.metodo_pago, u.nombre AS empleado
+             FROM ventas v
+             LEFT JOIN usuarios u ON u.id_usuario = v.id_empleado
+             ORDER BY v.fecha DESC
+             LIMIT $limite"
+        )->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function ventasPorDia(string $periodo = 'todo'): array
     {
         $filtro = $this->filtroFecha($periodo);
         if ($periodo === 'todo') {
-            $filtro = "AND fecha >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+            // Últimos 30 días: usamos un parámetro PHP para evitar SQL específico
+            $desde  = (new DateTime('-30 days'))->format('Y-m-d 00:00:00');
+            $filtro = "AND fecha >= " . $this->pdo->quote($desde);
         }
         return $this->pdo->query(
             "SELECT DATE(fecha) as dia, COUNT(*) as ventas, SUM(total) as ingresos
