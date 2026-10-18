@@ -21,6 +21,9 @@ class ControladorAutenticacion
         $mensajeerror = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
 
+        // Email guardado con "Recordarme"
+        $emailRecordado = $_COOKIE['beloyal_email'] ?? '';
+
         require_once __DIR__ . '/../Vista/LogIn.php';
     }
 
@@ -54,6 +57,8 @@ class ControladorAutenticacion
             header('Location: index.php?page=login');
             exit;
         }
+
+        $this->recordarEmail($email, !empty($_POST['recordarme']));
 
         // Mitiga session fixation
         session_regenerate_id(true);
@@ -108,6 +113,20 @@ class ControladorAutenticacion
         }
 
         return false;
+    }
+
+    /**
+     * "Recordarme": guarda el email 30 días para rellenarlo en el próximo login.
+     * Solo el email, nunca la contraseña.
+     */
+    private function recordarEmail(string $email, bool $recordar): void
+    {
+        setcookie('beloyal_email', $recordar ? $email : '', [
+            'expires'  => $recordar ? time() + 60 * 60 * 24 * 30 : time() - 3600,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
     }
 
     private function redirigirSegunRol(string $rol): void
