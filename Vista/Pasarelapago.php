@@ -27,7 +27,7 @@
     position: absolute;
     right: 1px; top: 1px; bottom: 1px;
     width: 148px;
-    background: #1a1a1a;
+    background: #0f0f0f;
     border-radius: 0 10px 10px 0;
     z-index: 10;
     pointer-events: all;
@@ -48,11 +48,14 @@
 <div id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago"
      class="hidden fixed inset-0 bg-black/75 backdrop-blur-[6px] z-[9999] items-center justify-center font-dm">
 
-    <div class="pago-modal bg-[#111] border border-white/[0.08] rounded-3xl w-[400px] max-w-[94vw] max-h-[94vh] overflow-y-auto pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
+    <div class="pago-modal bl-glow relative bg-[#171717] border border-[#2a2a2a] rounded-3xl w-[400px] max-w-[94vw] max-h-[94vh] overflow-y-auto pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
 
         <!-- Cabecera -->
-        <div class="flex items-center justify-between px-[1.4rem] py-[0.9rem] bg-black border-b border-white/[0.06]">
-            <span class="text-white font-bold text-[0.95rem] tracking-[0.03em]">BeLoyal</span>
+        <div class="flex items-center justify-between px-[1.4rem] py-[0.9rem] bg-[#0d0d0d] border-b border-[#2a2a2a] rounded-t-3xl">
+            <span class="flex items-center gap-2.5">
+                <img src="public/img/logos/beloyal-logo.svg" alt="" class="logo-glow h-8 w-auto select-none" draggable="false">
+                <span class="glow-title text-[#f5f5f5] font-semibold text-[0.9rem] tracking-[0.12em] uppercase">Be Loyal</span>
+            </span>
             <button id="pago-cerrar" aria-label="Cerrar"
                     class="bg-white/[0.06] border-0 text-[#888] text-[1rem] cursor-pointer w-7 h-7 rounded-full flex items-center justify-center transition-all duration-150 hover:bg-white/[0.12] hover:text-white">×</button>
         </div>
@@ -60,7 +63,7 @@
         <!-- Importe -->
         <div class="flex flex-col items-center px-[1.4rem] pt-[1.6rem] pb-4 border-b border-white/[0.06]">
             <span class="text-[0.72rem] uppercase tracking-[0.1em] text-[#666] mb-[0.4rem]">Total a cobrar</span>
-            <span id="pago-total-display" class="text-[2.8rem] font-light text-white tracking-[-0.02em]">0,00</span>
+            <span id="pago-total-display" class="glow-title text-[2.8rem] font-light text-[#f5f5f5] tracking-[-0.02em]">0,00</span>
         </div>
 
         <!-- Paso 1: Selector de método -->
@@ -71,7 +74,7 @@
                 Pagar con tarjeta
             </button>
             <button id="btn-ir-efectivo"
-                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-[#34d399] hover:text-[#34d399] hover:bg-[#34d399]/[0.06]">
+                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
                 Cobrar en efectivo
             </button>
         </div>
@@ -82,16 +85,16 @@
                     class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
             <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Datos de la tarjeta</p>
             <div id="stripe-card-number-el"
-                 class="stripe-field-box stripe-number-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.55rem] bg-white/[0.03] transition-colors duration-200"></div>
+                 class="stripe-field-box stripe-number-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.55rem] bg-[#0f0f0f] transition-colors duration-200"></div>
             <div class="flex gap-3 mb-[0.7rem]">
                 <div id="stripe-card-expiry-el"
-                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-white/[0.03] transition-colors duration-200"></div>
+                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-[#0f0f0f] transition-colors duration-200"></div>
                 <div id="stripe-card-cvc-el"
-                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-white/[0.03] transition-colors duration-200"></div>
+                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-[#0f0f0f] transition-colors duration-200"></div>
             </div>
-            <div id="stripe-card-error" class="text-[#f87171] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]" role="alert"></div>
+            <div id="stripe-card-error" class="text-[#d9a3a3] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]" role="alert"></div>
             <button id="btn-pagar-tarjeta"
-                    class="w-full py-[0.85rem] rounded-xl border-0 bg-white text-black text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center gap-2 hover:bg-[#e5e5e5] active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
+                    class="btn-glow w-full py-[0.85rem] rounded-xl border-0 bg-[#d4d4d4] text-[#0a0a0a] text-[0.95rem] font-bold cursor-pointer flex items-center justify-center gap-2 hover:bg-white active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
                 <span id="btn-pagar-label">Pagar <strong id="btn-pagar-importe"></strong></span>
                 <span id="btn-pagar-spinner" class="hidden w-[18px] h-[18px] border-2 border-black/20 border-t-black rounded-full spin-anim"></span>
             </button>
@@ -104,7 +107,7 @@
             <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Cobro en efectivo</p>
             <div class="flex justify-between items-baseline bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
                 <span class="text-[0.78rem] text-[#666]">Total</span>
-                <span id="efectivo-total" class="text-[1.8rem] font-light text-white">0,00</span>
+                <span id="efectivo-total" class="glow-title text-[1.8rem] font-light text-[#f5f5f5]">0,00</span>
             </div>
             <div class="bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
                 <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Entrega el cliente</label>
@@ -115,23 +118,23 @@
                 </div>
                 <div class="flex justify-between mt-[0.7rem] text-[0.88rem] text-[#888]">
                     <span>Cambio</span>
-                    <span id="efectivo-cambio" class="font-semibold text-[#34d399]">€0,00</span>
+                    <span id="efectivo-cambio" class="glow-text font-semibold text-[#f5f5f5]">€0,00</span>
                 </div>
             </div>
             <button id="btn-confirmar-efectivo"
-                    class="w-full py-[0.85rem] rounded-xl bg-transparent border border-[#34d399] text-[#34d399] text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center hover:bg-[#34d399]/[0.08] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="btn-glow w-full py-[0.85rem] rounded-xl bg-[#d4d4d4] text-[#0a0a0a] text-[0.95rem] font-bold cursor-pointer flex items-center justify-center hover:bg-white active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#d4d4d4]">
                 Confirmar cobro
             </button>
         </div>
 
         <!-- Paso 4: Éxito -->
         <div id="step-exito" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <div class="exito-pop w-[60px] h-[60px] bg-[#34d399]/10 border border-[#34d399] text-[#34d399] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="exito-pop w-[60px] h-[60px] bg-white/[0.06] border border-[#d4d4d4] text-[#f5f5f5] shadow-[0_0_24px_rgba(255,255,255,0.18)] rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <p class="text-center text-[1.2rem] font-semibold text-white">Cobro realizado</p>
+            <p class="glow-title text-center text-[1.2rem] font-semibold text-[#f5f5f5]">Cobro realizado</p>
             <p id="exito-metodo-label" class="text-center text-[#666] text-[0.82rem] mt-[0.3rem]">Pago completado</p>
-            <p id="exito-importe-label" class="text-center text-[1.6rem] font-light text-white mt-[0.4rem]"></p>
+            <p id="exito-importe-label" class="glow-title text-center text-[1.6rem] font-light text-[#f5f5f5] mt-[0.4rem]"></p>
             <div id="email-ticket-box" class="my-4">
                 <p class="text-[0.78rem] text-[#666] text-center mb-[0.5rem]">¿Enviar ticket al cliente?</p>
                 <div class="flex gap-[0.4rem]">
@@ -142,7 +145,7 @@
                         Enviar
                     </button>
                 </div>
-                <p id="email-ticket-feedback" class="text-[0.78rem] text-center mt-[0.4rem] min-h-[1em] text-[#34d399]"></p>
+                <p id="email-ticket-feedback" class="text-[0.78rem] text-center mt-[0.4rem] min-h-[1em] text-[#d4d4d4]"></p>
             </div>
             <button id="btn-nuevo-cobro"
                     class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-4 hover:bg-white/10 active:scale-[0.98]">
@@ -152,11 +155,11 @@
 
         <!-- Paso 5: Error -->
         <div id="step-error" class="hidden px-[1.4rem] pt-[1.2rem] pb-2">
-            <div class="exito-pop w-[60px] h-[60px] bg-[#f87171]/10 border border-[#f87171] text-[#f87171] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div class="exito-pop w-[60px] h-[60px] bg-[#2a1717] border border-[#7a4343] text-[#d9a3a3] rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </div>
             <p class="text-center text-[1.2rem] font-semibold text-white">Cobro fallido</p>
-            <p id="error-msg-label" class="text-center text-[#f87171] text-[0.82rem] mt-[0.3rem] px-2"></p>
+            <p id="error-msg-label" class="text-center text-[#d9a3a3] text-[0.82rem] mt-[0.3rem] px-2"></p>
             <button id="btn-reintentar"
                     class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-6 hover:bg-white/10 active:scale-[0.98]">
                 Volver al carrito
@@ -241,7 +244,7 @@
                 color: '#fff',
                 '::placeholder': { color: '#555' },
             },
-            invalid: { color: '#f87171' },
+            invalid: { color: '#d9a3a3' },
         };
 
         cardNumberEl = elements.create('cardNumber', { style: fieldStyle, disableLink: true });
@@ -400,13 +403,13 @@
 
         if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
             feedback.textContent = 'Introduce un email válido';
-            feedback.className   = clsBase + ' text-[#f87171]';
+            feedback.className   = clsBase + ' text-[#d9a3a3]';
             return;
         }
 
         btnEnviar.disabled   = true;
         feedback.textContent = 'Enviando...';
-        feedback.className   = clsBase + ' text-[#34d399]';
+        feedback.className   = clsBase + ' text-[#d4d4d4]';
 
         try {
             const res = await fetch('index.php?page=enviar_ticket', {
@@ -430,17 +433,17 @@
             const data = await res.json();
             if (data.ok) {
                 feedback.textContent = 'Ticket enviado a ' + email;
-                feedback.className   = clsBase + ' text-[#34d399]';
+                feedback.className   = clsBase + ' text-[#d4d4d4]';
                 emailInput.value     = '';
                 btnEnviar.disabled   = false;
             } else {
                 feedback.textContent = 'Error: ' + (data.error || 'No se pudo enviar');
-                feedback.className   = clsBase + ' text-[#f87171]';
+                feedback.className   = clsBase + ' text-[#d9a3a3]';
                 btnEnviar.disabled   = false;
             }
         } catch (e) {
             feedback.textContent = 'Error de conexión';
-            feedback.className   = clsBase + ' text-[#f87171]';
+            feedback.className   = clsBase + ' text-[#d9a3a3]';
             btnEnviar.disabled   = false;
         }
     });

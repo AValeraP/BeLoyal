@@ -4,17 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin – Be Loyal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = {
-        theme: { extend: { fontFamily: { inter: ['Inter', 'sans-serif'] } } }
-    }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <?php include __DIR__ . '/partials/tema-head.php'; ?>
     <style>
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
 
         /* Custom select dropdown */
         .custom-select-dropdown { transition: opacity .15s, transform .15s; transform-origin: top; }
@@ -39,12 +30,13 @@
         }
     </style>
 </head>
-<body class="font-inter flex h-screen overflow-hidden text-white"
-      style="background-color:#262626;background-image:radial-gradient(ellipse at 10% 20%,rgba(255,255,255,.10) 0%,transparent 50%),radial-gradient(ellipse at 90% 80%,rgba(255,255,255,.07) 0%,transparent 50%),radial-gradient(ellipse at 60% 40%,rgba(220,220,220,.05) 0%,transparent 40%),repeating-linear-gradient(115deg,transparent 0px,transparent 20px,rgba(255,255,255,.05) 20px,rgba(255,255,255,.05) 21px,transparent 21px,transparent 45px,rgba(255,255,255,.025) 45px,rgba(255,255,255,.025) 46px),repeating-linear-gradient(68deg,transparent 0px,transparent 35px,rgba(255,255,255,.03) 35px,rgba(255,255,255,.03) 36px)">
+<body class="bl-body font-inter flex h-screen overflow-hidden text-[#e5e5e5]">
+
+<?php include __DIR__ . '/partials/tema-fondo.php'; ?>
 
 <!-- MOBILE HAMBURGER -->
 <button id="sidebar-toggle" aria-label="Menú"
-        class="md:hidden fixed top-3 left-3 z-50 w-10 h-10 rounded-xl bg-black/70 border border-white/10 flex items-center justify-center text-white">
+        class="md:hidden fixed top-3 left-3 z-50 w-10 h-10 rounded-xl bg-black/70 border border-[#2a2a2a] flex items-center justify-center text-white">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
 </button>
 
@@ -52,37 +44,38 @@
 <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-50 md:hidden"></div>
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="w-48 bg-black/50 backdrop-blur-sm border-r border-white/10 flex flex-col flex-shrink-0 h-screen md:sticky md:top-0 overflow-y-auto">
+<aside id="sidebar" class="z-10 w-52 bg-black/60 backdrop-blur-md border-r border-[#2a2a2a] flex flex-col flex-shrink-0 h-screen md:sticky md:top-0 overflow-y-auto">
 
-    <div class="px-5 py-5 border-b border-white/10">
-        <img src="public/img/logos/beloyallogo.png" alt="Be Loyal" class="w-12 h-12 object-contain mb-2">
-        <p class="text-xs font-light text-zinc-500">Admin</p>
+    <div class="px-5 pt-6 pb-5 border-b border-[#2a2a2a] flex flex-col items-center text-center">
+        <img src="public/img/logos/beloyal-logo.svg" alt="Be Loyal Barber" class="logo-glow w-[72px] h-auto mb-3 select-none" draggable="false">
+        <p class="glow-text text-[11px] font-medium uppercase tracking-[0.2em] text-[#a3a3a3]">Panel admin</p>
     </div>
 
-    <div class="px-5 py-4 border-b border-white/10">
-        <p class="text-xs font-medium text-white"><?= htmlspecialchars($usuario['nombre']) ?></p>
-        <p class="text-xs font-light text-zinc-600 mt-0.5">Administrador</p>
+    <div class="px-5 py-4 border-b border-[#2a2a2a]">
+        <p class="glow-text text-sm font-medium text-[#f5f5f5]"><?= htmlspecialchars($usuario['nombre']) ?></p>
+        <p class="text-xs font-light text-[#8a8a8a] mt-0.5">Administrador</p>
     </div>
 
     <nav class="flex-1 py-2">
-        <a href="index.php?page=admin&seccion=dashboard" class="block px-5 py-2.5 text-xs transition <?= $seccion === 'dashboard' ? 'text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 font-light' ?>">Dashboard</a>
-        <a href="index.php?page=admin&seccion=servicios"  class="block px-5 py-2.5 text-xs transition <?= $seccion === 'servicios'  ? 'text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 font-light' ?>">Servicios</a>
-        <a href="index.php?page=admin&seccion=productos"  class="block px-5 py-2.5 text-xs transition <?= $seccion === 'productos'  ? 'text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 font-light' ?>">Productos</a>
-        <a href="index.php?page=admin&seccion=empleados"  class="block px-5 py-2.5 text-xs transition <?= $seccion === 'empleados'  ? 'text-white font-medium' : 'text-zinc-500 hover:text-zinc-200 font-light' ?>">Empleados</a>
+        <a href="index.php?page=admin&seccion=dashboard" class="block px-5 py-3 text-sm transition <?= $seccion === 'dashboard' ? 'glow-title text-white font-medium bg-white/[0.06] border-l-2 border-[#e5e5e5]' : 'text-[#8a8a8a] hover:text-[#e5e5e5] hover:bg-white/[0.03] border-l-2 border-transparent font-light' ?>">Dashboard</a>
+        <a href="index.php?page=admin&seccion=servicios"  class="block px-5 py-3 text-sm transition <?= $seccion === 'servicios'  ? 'glow-title text-white font-medium bg-white/[0.06] border-l-2 border-[#e5e5e5]' : 'text-[#8a8a8a] hover:text-[#e5e5e5] hover:bg-white/[0.03] border-l-2 border-transparent font-light' ?>">Servicios</a>
+        <a href="index.php?page=admin&seccion=productos"  class="block px-5 py-3 text-sm transition <?= $seccion === 'productos'  ? 'glow-title text-white font-medium bg-white/[0.06] border-l-2 border-[#e5e5e5]' : 'text-[#8a8a8a] hover:text-[#e5e5e5] hover:bg-white/[0.03] border-l-2 border-transparent font-light' ?>">Productos</a>
+        <a href="index.php?page=admin&seccion=empleados"  class="block px-5 py-3 text-sm transition <?= $seccion === 'empleados'  ? 'glow-title text-white font-medium bg-white/[0.06] border-l-2 border-[#e5e5e5]' : 'text-[#8a8a8a] hover:text-[#e5e5e5] hover:bg-white/[0.03] border-l-2 border-transparent font-light' ?>">Empleados</a>
     </nav>
 
-    <div class="px-5 py-4 border-t border-white/10">
-        <a href="index.php?page=logout" class="text-xs font-light text-zinc-600 hover:text-white transition">Cerrar sesión</a>
+    <div class="px-5 py-4 border-t border-[#2a2a2a]">
+        <a href="index.php?page=logout" class="text-xs font-light text-[#8a8a8a] hover:text-white transition">Cerrar sesión</a>
     </div>
 
 </aside>
 
 <!-- CONTENT -->
-<main class="flex-1 p-4 sm:p-7 overflow-y-auto pt-16 md:pt-7">
+<main class="relative z-10 flex-1 p-4 sm:p-7 overflow-y-auto pt-16 md:pt-7">
 
     <?php if ($mensaje): ?>
-    <div class="text-xs font-light text-emerald-400 bg-emerald-900/30 border border-emerald-800/50 rounded-xl px-4 py-2.5 mb-5">
-        <?= htmlspecialchars($mensaje) ?>
+    <div role="status" class="reveal flex items-center gap-2.5 text-xs font-light text-[#e5e5e5] bg-[#1f1f1f] border border-[#404040] rounded-xl px-4 py-2.5 mb-5">
+        <svg class="h-4 w-4 shrink-0 text-[#a3a3a3]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        <span><?= htmlspecialchars($mensaje) ?></span>
     </div>
     <?php endif; ?>
 
@@ -90,17 +83,17 @@
     <!-- DASHBOARD -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div class="flex items-center gap-3">
-        <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest">Dashboard</p>
+        <h1 class="glow-title text-2xl font-medium tracking-tight text-[#f5f5f5]">Dashboard</h1>
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <button onclick="abrirResetModal()"
-                    class="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-900/30 hover:border-red-500/60 transition">
+                    class="px-3 py-1.5 text-xs rounded-lg border border-[#5a3434] text-[#c98b8b] hover:bg-[#2a1717] hover:border-[#7a4343] transition">
                 Resetear ventas
             </button>
             <div class="flex flex-wrap gap-1.5">
             <?php foreach (['todo' => 'Todo', 'dia' => 'Hoy', 'semana' => 'Semana', 'mes' => 'Mes', 'ano' => 'Año'] as $val => $label): ?>
             <a href="index.php?page=admin&seccion=dashboard&periodo=<?= $val ?>"
-               class="px-3 py-1.5 text-xs rounded-lg transition <?= $periodo === $val ? 'bg-white text-zinc-900 font-semibold' : 'border border-white/10 text-zinc-500 hover:text-white' ?>">
+               class="px-3 py-1.5 text-xs rounded-lg transition <?= $periodo === $val ? 'bg-[#d4d4d4] text-[#0a0a0a] font-semibold shadow-[0_0_14px_rgba(255,255,255,0.18)]' : 'border border-[#2a2a2a] text-[#8a8a8a] hover:text-white hover:border-[#404040]' ?>">
                 <?= $label ?>
             </a>
             <?php endforeach; ?>
@@ -108,55 +101,55 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Total ventas</p>
-            <p class="text-3xl font-light text-white"><?= $resumen['total_ventas'] ?></p>
+    <div class="reveal grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6" style="--d:.05s">
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="text-xs font-light uppercase tracking-widest text-[#8a8a8a] mb-2">Total ventas</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]"><?= $resumen['total_ventas'] ?></p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Ingresos</p>
-            <p class="text-3xl font-light text-white">€<?= number_format($resumen['ingresos_totales'], 2) ?></p>
+        <div class="bl-card bl-glow bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="text-xs font-light uppercase tracking-widest text-[#a3a3a3] mb-2">Ingresos</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]">€<?= number_format($resumen['ingresos_totales'], 2) ?></p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-emerald-900/40">
-            <p class="text-xs font-light uppercase tracking-widest text-emerald-700 mb-2">Efectivo</p>
-            <p class="text-3xl font-light text-emerald-400">€<?= number_format($porMetodo['efectivo']['ingresos'], 2) ?></p>
-            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['efectivo']['ventas'] ?> ventas</p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="flex items-center gap-1.5 text-xs font-light uppercase tracking-widest text-[#8a8a8a] mb-2"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Efectivo</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]">€<?= number_format($porMetodo['efectivo']['ingresos'], 2) ?></p>
+            <p class="text-xs font-light text-[#737373] mt-1"><?= $porMetodo['efectivo']['ventas'] ?> ventas</p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 border-blue-900/40">
-            <p class="text-xs font-light uppercase tracking-widest text-blue-700 mb-2">Tarjeta</p>
-            <p class="text-3xl font-light text-blue-400">€<?= number_format($porMetodo['tarjeta']['ingresos'], 2) ?></p>
-            <p class="text-xs font-light text-zinc-600 mt-1"><?= $porMetodo['tarjeta']['ventas'] ?> ventas</p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="flex items-center gap-1.5 text-xs font-light uppercase tracking-widest text-[#8a8a8a] mb-2"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Tarjeta</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]">€<?= number_format($porMetodo['tarjeta']['ingresos'], 2) ?></p>
+            <p class="text-xs font-light text-[#737373] mt-1"><?= $porMetodo['tarjeta']['ventas'] ?> ventas</p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Servicios activos</p>
-            <p class="text-3xl font-light text-white"><?= count($servicios) ?></p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="text-xs font-light uppercase tracking-widest text-[#8a8a8a] mb-2">Servicios activos</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]"><?= count($servicios) ?></p>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light uppercase tracking-widest text-zinc-600 mb-2">Productos activos</p>
-            <p class="text-3xl font-light text-white"><?= count($productos) ?></p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="text-xs font-light uppercase tracking-widest text-[#8a8a8a] mb-2">Productos activos</p>
+            <p class="glow-title text-3xl font-light text-[#f5f5f5]"><?= count($productos) ?></p>
         </div>
     </div>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
-        <p class="text-xs font-light text-zinc-500 mb-4">Ventas por empleado</p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mb-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Ventas por empleado</p>
         <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Empleado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ventas</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-emerald-400 pb-2 border-b border-white/5">Efectivo</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-blue-400 pb-2 border-b border-white/5">Tarjeta</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Empleado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Ventas</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Ingresos</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Efectivo</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Tarjeta</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($porEmpleado as $e): ?>
-                <tr class="border-b border-white/5 last:border-0">
+                <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($e['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= $e['ventas'] ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($e['ingresos'], 2) ?></td>
-                    <td class="py-2.5 text-xs font-light text-emerald-400">€<?= number_format($e['ingresos_efectivo'], 2) ?></td>
-                    <td class="py-2.5 text-xs font-light text-blue-400">€<?= number_format($e['ingresos_tarjeta'], 2) ?></td>
+                    <td class="py-2.5 text-xs font-light text-zinc-300">€<?= number_format($e['ingresos_efectivo'], 2) ?></td>
+                    <td class="py-2.5 text-xs font-light text-zinc-300">€<?= number_format($e['ingresos_tarjeta'], 2) ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($porEmpleado)): ?>
@@ -167,19 +160,19 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light text-zinc-500 mb-4">Servicios más vendidos</p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Servicios más vendidos</p>
             <div class="table-wrap"><table class="w-full">
                 <thead>
                     <tr>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Servicio</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Uds.</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Servicio</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Uds.</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Ingresos</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($svcVendidos as $s): ?>
-                    <tr class="border-b border-white/5 last:border-0">
+                    <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                         <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($s['nombre']) ?></td>
                         <td class="py-2.5 text-xs font-light text-zinc-400"><?= $s['unidades'] ?></td>
                         <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($s['ingresos'], 2) ?></td>
@@ -191,19 +184,19 @@
                 </tbody>
             </table></div>
         </div>
-        <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-            <p class="text-xs font-light text-zinc-500 mb-4">Productos más vendidos</p>
+        <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+            <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Productos más vendidos</p>
             <div class="table-wrap"><table class="w-full">
                 <thead>
                     <tr>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Producto</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Uds.</th>
-                        <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Ingresos</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Producto</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Uds.</th>
+                        <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Ingresos</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($prodVendidos as $p): ?>
-                    <tr class="border-b border-white/5 last:border-0">
+                    <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                         <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($p['nombre']) ?></td>
                         <td class="py-2.5 text-xs font-light text-zinc-400"><?= $p['unidades'] ?></td>
                         <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($p['ingresos'], 2) ?></td>
@@ -217,24 +210,24 @@
         </div>
     </div>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mt-3">
-        <p class="text-xs font-light text-zinc-500 mb-4">Ventas recientes</p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mt-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Ventas recientes</p>
         <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">#</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Fecha</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Hora</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Empleado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Método</th>
-                    <th class="text-right text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Total</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">#</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Fecha</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Hora</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Empleado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Método</th>
+                    <th class="text-right text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Total</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($ventasRecientes as $v):
                     $dt = new DateTime($v['fecha']);
                 ?>
-                <tr class="border-b border-white/5 last:border-0">
+                <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                     <td class="py-2 text-xs font-light text-zinc-600">#<?= $v['id_venta'] ?></td>
                     <td class="py-2 text-xs font-light text-zinc-400"><?= $dt->format('d/m/Y') ?></td>
                     <td class="py-2 text-xs font-light text-zinc-400"><?= $dt->format('H:i') ?></td>
@@ -251,10 +244,10 @@
     </div>
 
     <?php elseif ($seccion === 'servicios'): ?>
-    <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-6">Servicios</p>
+    <h1 class="reveal glow-title text-2xl font-medium tracking-tight text-[#f5f5f5] mb-6">Servicios</h1>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
-        <p class="text-xs font-light text-zinc-500 mb-4"><?= $editServicio ? 'Editar servicio' : 'Nuevo servicio' ?></p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mb-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4"><?= $editServicio ? 'Editar servicio' : 'Nuevo servicio' ?></p>
         <form method="POST" action="index.php?page=<?= $editServicio ? 'admin_actualizar_servicio' : 'admin_crear_servicio' ?>">
             <?= csrf_field() ?>
             <?php if ($editServicio): ?>
@@ -262,30 +255,30 @@
             <?php endif; ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editServicio['nombre'] ?? '') ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Precio (€)</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Precio (€)</label>
                     <input type="number" name="precio" step="0.01" min="0" required value="<?= $editServicio['precio'] ?? '' ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Duración (min)</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Duración (min)</label>
                     <input type="number" name="duracion" min="0" required value="<?= $editServicio['duracion'] ?? '' ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Tipo</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Tipo</label>
                     <?php $optsS = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','uñas'=>'Uñas','bono'=>'Bono']; $selS = $editServicio['especialidad'] ?? 'peluqueria'; ?>
                     <div class="custom-select relative">
                         <input type="hidden" name="especialidad" value="<?= $selS ?>">
-                        <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">
+                        <button type="button" class="custom-select-btn w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition flex items-center justify-between">
                             <span class="custom-select-label"><?= $optsS[$selS] ?></span>
                             <svg class="w-3.5 h-3.5 text-zinc-500" style="transition:transform .2s" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
+                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-[#141414] border border-[#333] rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
                             <?php foreach ($optsS as $v => $l): ?>
                             <div class="custom-select-option px-3 py-2 text-xs font-light cursor-pointer transition <?= $v === $selS ? 'text-white bg-white/5' : 'text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200' ?>" data-value="<?= $v ?>"><?= $l ?></div>
                             <?php endforeach; ?>
@@ -294,11 +287,11 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <button type="submit" class="px-5 py-2.5 bg-white text-zinc-900 text-xs font-semibold rounded-xl hover:bg-zinc-100 transition">
+                <button type="submit" class="btn-glow px-5 py-2.5 bg-[#d4d4d4] text-[#0a0a0a] text-xs font-semibold rounded-xl hover:bg-white">
                     <?= $editServicio ? 'Guardar cambios' : '+ Añadir servicio' ?>
                 </button>
                 <?php if ($editServicio): ?>
-                <a href="index.php?page=admin&seccion=servicios" class="px-5 py-2.5 border border-white/10 text-xs font-light text-zinc-500 rounded-xl hover:text-white transition">Cancelar</a>
+                <a href="index.php?page=admin&seccion=servicios" class="px-5 py-2.5 border border-[#333] text-xs font-light text-[#8a8a8a] rounded-xl hover:text-white hover:border-[#525252] transition">Cancelar</a>
                 <?php endif; ?>
             </div>
         </form>
@@ -314,35 +307,35 @@
     ?>
     <?php foreach ($grupos as $esp => $titulo): ?>
     <?php if (!empty($serviciosPorGrupo[$esp])): ?>
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
-        <p class="text-xs font-light text-zinc-500 mb-4"><?= $titulo ?></p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mb-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4"><?= $titulo ?></p>
         <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Precio</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Duración</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Precio</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Duración</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($serviciosPorGrupo[$esp] as $s): ?>
-                <tr class="border-b border-white/5 last:border-0">
+                <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($s['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($s['precio'], 2) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= $s['duracion'] ?> min</td>
                     <td class="py-2.5">
-                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $s['activo'] ? 'bg-emerald-900/40 text-emerald-400' : 'bg-zinc-800 text-zinc-500' ?>">
+                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $s['activo'] ? 'bl-pill-on' : 'bl-pill-off' ?>">
                             <?= $s['activo'] ? 'Activo' : 'Inactivo' ?>
                         </span>
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=servicios&editar=<?= $s['id_servicio'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
                         <?php if ($s['activo']): ?>
-                        <a href="#" onclick="abrirConfirm('¿Eliminar este servicio? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_servicio&id=<?= $s['id_servicio'] ?>', 'Eliminar servicio')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar</a>
+                        <a href="#" onclick="abrirConfirm('¿Eliminar este servicio? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_servicio&id=<?= $s['id_servicio'] ?>', 'Eliminar servicio')" class="text-xs font-light text-[#b07a7a] hover:text-[#d9a3a3] transition">Eliminar</a>
                         <?php else: ?>
-                        <a href="index.php?page=admin_activar_servicio&id=<?= $s['id_servicio'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
+                        <a href="index.php?page=admin_activar_servicio&id=<?= $s['id_servicio'] ?>" class="text-xs font-light text-[#d4d4d4] hover:text-white transition">Activar</a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -354,10 +347,10 @@
     <?php endforeach; ?>
 
     <?php elseif ($seccion === 'productos'): ?>
-    <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-6">Productos</p>
+    <h1 class="reveal glow-title text-2xl font-medium tracking-tight text-[#f5f5f5] mb-6">Productos</h1>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
-        <p class="text-xs font-light text-zinc-500 mb-4"><?= $editProducto ? 'Editar producto' : 'Nuevo producto' ?></p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mb-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4"><?= $editProducto ? 'Editar producto' : 'Nuevo producto' ?></p>
         <form method="POST" action="index.php?page=<?= $editProducto ? 'admin_actualizar_producto' : 'admin_crear_producto' ?>">
             <?= csrf_field() ?>
             <?php if ($editProducto): ?>
@@ -365,61 +358,61 @@
             <?php endif; ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editProducto['nombre'] ?? '') ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Precio (€)</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Precio (€)</label>
                     <input type="number" name="precio" step="0.01" min="0" required value="<?= $editProducto['precio'] ?? '' ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Stock</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Stock</label>
                     <input type="number" name="stock" min="0" required value="<?= $editProducto['stock'] ?? '' ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
             </div>
             <div class="flex gap-2">
-                <button type="submit" class="px-5 py-2.5 bg-white text-zinc-900 text-xs font-semibold rounded-xl hover:bg-zinc-100 transition">
+                <button type="submit" class="btn-glow px-5 py-2.5 bg-[#d4d4d4] text-[#0a0a0a] text-xs font-semibold rounded-xl hover:bg-white">
                     <?= $editProducto ? 'Guardar cambios' : '+ Añadir producto' ?>
                 </button>
                 <?php if ($editProducto): ?>
-                <a href="index.php?page=admin&seccion=productos" class="px-5 py-2.5 border border-white/10 text-xs font-light text-zinc-500 rounded-xl hover:text-white transition">Cancelar</a>
+                <a href="index.php?page=admin&seccion=productos" class="px-5 py-2.5 border border-[#333] text-xs font-light text-[#8a8a8a] rounded-xl hover:text-white hover:border-[#525252] transition">Cancelar</a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-        <p class="text-xs font-light text-zinc-500 mb-4">Todos los productos</p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Todos los productos</p>
         <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Precio</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Stock</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Precio</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Stock</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($productos as $p): ?>
-                <tr class="border-b border-white/5 last:border-0">
+                <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($p['nombre']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400">€<?= number_format($p['precio'], 2) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= $p['stock'] ?></td>
                     <td class="py-2.5">
-                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $p['activo'] ? 'bg-emerald-900/40 text-emerald-400' : 'bg-zinc-800 text-zinc-500' ?>">
+                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $p['activo'] ? 'bl-pill-on' : 'bl-pill-off' ?>">
                             <?= $p['activo'] ? 'Activo' : 'Inactivo' ?>
                         </span>
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=productos&editar=<?= $p['id_producto'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
                         <?php if ($p['activo']): ?>
-                        <a href="#" onclick="abrirConfirm('¿Eliminar este producto? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_producto&id=<?= $p['id_producto'] ?>', 'Eliminar producto')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar</a>
+                        <a href="#" onclick="abrirConfirm('¿Eliminar este producto? Esta acción no se puede deshacer.', 'index.php?page=admin_eliminar_producto&id=<?= $p['id_producto'] ?>', 'Eliminar producto')" class="text-xs font-light text-[#b07a7a] hover:text-[#d9a3a3] transition">Eliminar</a>
                         <?php else: ?>
-                        <a href="index.php?page=admin_activar_producto&id=<?= $p['id_producto'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
+                        <a href="index.php?page=admin_activar_producto&id=<?= $p['id_producto'] ?>" class="text-xs font-light text-[#d4d4d4] hover:text-white transition">Activar</a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -432,10 +425,10 @@
     </div>
 
     <?php elseif ($seccion === 'empleados'): ?>
-    <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-6">Empleados</p>
+    <h1 class="reveal glow-title text-2xl font-medium tracking-tight text-[#f5f5f5] mb-6">Empleados</h1>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-3">
-        <p class="text-xs font-light text-zinc-500 mb-4"><?= $editEmpleado ? 'Editar empleado' : 'Nuevo empleado' ?></p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5 mb-3">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4"><?= $editEmpleado ? 'Editar empleado' : 'Nuevo empleado' ?></p>
         <form method="POST" enctype="multipart/form-data" action="index.php?page=<?= $editEmpleado ? 'admin_actualizar_empleado' : 'admin_crear_empleado' ?>">
             <?= csrf_field() ?>
             <?php if ($editEmpleado): ?>
@@ -443,32 +436,32 @@
             <?php endif; ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Nombre</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Nombre</label>
                     <input type="text" name="nombre" required value="<?= htmlspecialchars($editEmpleado['nombre'] ?? '') ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Email</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Email</label>
                     <input type="email" name="email" required value="<?= htmlspecialchars($editEmpleado['email'] ?? '') ?>"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">
                         <?= $editEmpleado ? 'Nueva contraseña (vacío = no cambiar)' : 'Contraseña' ?>
                     </label>
                     <input type="password" name="password" <?= $editEmpleado ? '' : 'required' ?> placeholder="••••••••"
-                        class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition placeholder-zinc-600">
+                        class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition placeholder-zinc-600">
                 </div>
                 <div>
-                    <label class="block text-xs font-light text-zinc-400 uppercase tracking-widest mb-1.5">Especialidad</label>
+                    <label class="glow-text block text-xs font-light text-[#b5b5b5] uppercase tracking-widest mb-1.5">Especialidad</label>
                     <?php $optsE = ['peluqueria'=>'Peluquería','trenzas'=>'Trenzas','uñas'=>'Uñas']; $selE = $editEmpleado['especialidad'] ?? 'peluqueria'; ?>
                     <div class="custom-select relative">
                         <input type="hidden" name="especialidad" value="<?= $selE ?>">
-                        <button type="button" class="custom-select-btn w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-white/30 transition flex items-center justify-between">
+                        <button type="button" class="custom-select-btn w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#737373] focus:ring-2 focus:ring-[#737373]/30 transition flex items-center justify-between">
                             <span class="custom-select-label"><?= $optsE[$selE] ?></span>
                             <svg class="w-3.5 h-3.5 text-zinc-500" style="transition:transform .2s" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-zinc-800 border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
+                        <div class="custom-select-dropdown hidden absolute top-full left-0 right-0 mt-1 bg-[#141414] border border-[#333] rounded-xl overflow-hidden z-50 shadow-xl shadow-black/40 py-1">
                             <?php foreach ($optsE as $v => $l): ?>
                             <div class="custom-select-option px-3 py-2 text-xs font-light cursor-pointer transition <?= $v === $selE ? 'text-white bg-white/5' : 'text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-200' ?>" data-value="<?= $v ?>"><?= $l ?></div>
                             <?php endforeach; ?>
@@ -498,37 +491,37 @@
                 </div>
                 <?php endif; ?>
                 <input type="file" name="foto_empleado" accept="image/*"
-                       class="block w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-zinc-700 file:text-zinc-200 hover:file:bg-zinc-600 cursor-pointer">
+                       class="block w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-[#262626] file:text-[#e5e5e5] hover:file:bg-[#333] cursor-pointer">
                 <p class="text-[0.7rem] text-zinc-600 mt-1">JPG, PNG, WEBP — se muestra en la cabecera del panel del empleado.</p>
             </div>
             <?php endif; ?>
             <div class="flex gap-2">
-                <button type="submit" class="px-5 py-2.5 bg-white text-zinc-900 text-xs font-semibold rounded-xl hover:bg-zinc-100 transition">
+                <button type="submit" class="btn-glow px-5 py-2.5 bg-[#d4d4d4] text-[#0a0a0a] text-xs font-semibold rounded-xl hover:bg-white">
                     <?= $editEmpleado ? 'Guardar cambios' : '+ Añadir empleado' ?>
                 </button>
                 <?php if ($editEmpleado): ?>
-                <a href="index.php?page=admin&seccion=empleados" class="px-5 py-2.5 border border-white/10 text-xs font-light text-zinc-500 rounded-xl hover:text-white transition">Cancelar</a>
+                <a href="index.php?page=admin&seccion=empleados" class="px-5 py-2.5 border border-[#333] text-xs font-light text-[#8a8a8a] rounded-xl hover:text-white hover:border-[#525252] transition">Cancelar</a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
 
-    <div class="bg-zinc-900/80 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
-        <p class="text-xs font-light text-zinc-500 mb-4">Todos los empleados</p>
+    <div class="bl-card bg-[#171717]/90 backdrop-blur-sm border border-[#2a2a2a] rounded-2xl p-5">
+        <p class="glow-text text-xs font-medium uppercase tracking-widest text-[#b5b5b5] mb-4">Todos los empleados</p>
         <div class="table-wrap"><table class="w-full">
             <thead>
                 <tr>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5 w-8"></th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Nombre</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Email</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Especialidad</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Estado</th>
-                    <th class="text-left text-xs font-light uppercase tracking-widest text-zinc-400 pb-2 border-b border-white/5">Acciones</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a] w-8"></th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Nombre</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Email</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Especialidad</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Estado</th>
+                    <th class="text-left text-xs font-light uppercase tracking-widest text-[#8a8a8a] pb-2 border-b border-[#2a2a2a]">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($empleados as $emp): ?>
-                <tr class="border-b border-white/5 last:border-0">
+                <tr class="border-b border-[#222] last:border-0 transition-colors hover:bg-white/[0.025]">
                     <td class="py-2.5">
                         <?php if (!empty($emp['logo'])): ?>
                         <img src="public/img/logos/<?= htmlspecialchars($emp['logo']) ?>"
@@ -544,17 +537,17 @@
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= htmlspecialchars($emp['email']) ?></td>
                     <td class="py-2.5 text-xs font-light text-zinc-400"><?= ucfirst(htmlspecialchars($emp['especialidad'])) ?></td>
                     <td class="py-2.5">
-                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $emp['activo'] ? 'bg-emerald-900/40 text-emerald-400' : 'bg-zinc-800 text-zinc-500' ?>">
+                        <span class="text-xs font-light px-2 py-0.5 rounded-full <?= $emp['activo'] ? 'bl-pill-on' : 'bl-pill-off' ?>">
                             <?= $emp['activo'] ? 'Activo' : 'Inactivo' ?>
                         </span>
                     </td>
                     <td class="py-2.5 flex gap-3">
                         <a href="index.php?page=admin&seccion=empleados&editar=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-zinc-500 hover:text-white transition">Editar</a>
                         <?php if ($emp['activo']): ?>
-                        <a href="#" onclick="abrirConfirm('¿Desactivar este empleado? Podrás eliminarlo definitivamente cuando esté inactivo.', 'index.php?page=admin_eliminar_empleado&id=<?= $emp['id_usuario'] ?>', 'Desactivar empleado')" class="text-xs font-light text-amber-500/70 hover:text-amber-400 transition">Desactivar</a>
+                        <a href="#" onclick="abrirConfirm('¿Desactivar este empleado? Podrás eliminarlo definitivamente cuando esté inactivo.', 'index.php?page=admin_eliminar_empleado&id=<?= $emp['id_usuario'] ?>', 'Desactivar empleado')" class="text-xs font-light text-[#a3a3a3] hover:text-white transition">Desactivar</a>
                         <?php else: ?>
-                        <a href="index.php?page=admin_activar_empleado&id=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-emerald-500/70 hover:text-emerald-400 transition">Activar</a>
-                        <a href="#" onclick="abrirConfirm('¿Eliminar definitivamente este empleado? Esta acción no se puede deshacer. Solo es posible si no tiene ventas registradas.', 'index.php?page=admin_eliminar_definitivo_empleado&id=<?= $emp['id_usuario'] ?>', 'Eliminar definitivamente')" class="text-xs font-light text-red-500/60 hover:text-red-400 transition">Eliminar definitivamente</a>
+                        <a href="index.php?page=admin_activar_empleado&id=<?= $emp['id_usuario'] ?>" class="text-xs font-light text-[#d4d4d4] hover:text-white transition">Activar</a>
+                        <a href="#" onclick="abrirConfirm('¿Eliminar definitivamente este empleado? Esta acción no se puede deshacer. Solo es posible si no tiene ventas registradas.', 'index.php?page=admin_eliminar_definitivo_empleado&id=<?= $emp['id_usuario'] ?>', 'Eliminar definitivamente')" class="text-xs font-light text-[#b07a7a] hover:text-[#d9a3a3] transition">Eliminar definitivamente</a>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -573,14 +566,14 @@
 
 <!-- MODAL CONFIRMACIÓN GENÉRICO -->
 <div id="confirm-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
-        <p class="text-base font-semibold text-white mb-1" id="confirm-title">¿Estás seguro?</p>
+    <div class="bl-glow relative bg-[#171717] border border-[#2a2a2a] rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
+        <p class="glow-title text-base font-semibold text-[#f5f5f5] mb-1" id="confirm-title">¿Estás seguro?</p>
         <p class="text-xs text-zinc-500 mb-6" id="confirm-msg"></p>
         <div class="flex gap-3">
             <button onclick="cerrarConfirm()" class="flex-1 border border-white/10 text-xs text-zinc-400 py-3 rounded-xl hover:text-white hover:border-white/30 transition">
                 Cancelar
             </button>
-            <a id="confirm-btn" href="#" class="flex-1 text-center bg-red-600 text-white text-xs font-semibold py-3 rounded-xl hover:bg-red-500 transition">
+            <a id="confirm-btn" href="#" class="flex-1 text-center bg-[#6b2a2a] text-[#f5e6e6] text-xs font-semibold py-3 rounded-xl hover:bg-[#843333] transition">
                 Confirmar
             </a>
         </div>
@@ -589,20 +582,20 @@
 
 <!-- MODAL RESETEAR VENTAS (con contraseña) -->
 <div id="reset-modal" style="display:none;" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div class="bg-zinc-900 border border-white/10 rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
-        <p class="text-base font-semibold text-white mb-1">Resetear ventas</p>
-        <p class="text-xs text-zinc-500 mb-5">Esta acción eliminará <strong class="text-red-400">TODAS</strong> las ventas y no se puede deshacer. Introduce tu contraseña para confirmar.</p>
+    <div class="bl-glow relative bg-[#171717] border border-[#2a2a2a] rounded-2xl p-7 w-80 max-w-full mx-4 shadow-2xl">
+        <p class="glow-title text-base font-semibold text-[#f5f5f5] mb-1">Resetear ventas</p>
+        <p class="text-xs text-zinc-500 mb-5">Esta acción eliminará <strong class="text-[#d9a3a3]">TODAS</strong> las ventas y no se puede deshacer. Introduce tu contraseña para confirmar.</p>
         <form method="POST" action="index.php?page=admin_resetear_ventas">
             <?= csrf_field() ?>
             <input type="password" name="password_confirm" id="reset-pw-input"
                    placeholder="Tu contraseña de administrador"
                    autocomplete="current-password"
-                   class="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-red-500/50 transition mb-4 placeholder-zinc-600">
+                   class="w-full bg-[#0f0f0f] border border-[#333] rounded-xl px-3 py-2.5 text-xs font-light text-zinc-200 focus:outline-none focus:border-[#7a4343] transition mb-4 placeholder-zinc-600">
             <div class="flex gap-3">
                 <button type="button" onclick="cerrarResetModal()" class="flex-1 border border-white/10 text-xs text-zinc-400 py-3 rounded-xl hover:text-white hover:border-white/30 transition">
                     Cancelar
                 </button>
-                <button type="submit" class="flex-1 bg-red-600 text-white text-xs font-semibold py-3 rounded-xl hover:bg-red-500 transition">
+                <button type="submit" class="flex-1 bg-[#6b2a2a] text-[#f5e6e6] text-xs font-semibold py-3 rounded-xl hover:bg-[#843333] transition">
                     Confirmar y eliminar
                 </button>
             </div>
@@ -612,7 +605,7 @@
 
 <!-- CONTADOR DE INACTIVIDAD -->
 <div id="inactivity-badge" style="display:none;"
-     class="fixed bottom-4 right-4 z-50 bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-zinc-500 shadow-lg select-none">
+     class="fixed bottom-4 right-4 z-50 bg-[#171717] border border-[#333] rounded-xl px-3 py-2 text-xs text-zinc-500 shadow-lg select-none">
     Sesión expira en <span id="inactivity-secs" class="text-white font-medium"></span>s
 </div>
 
@@ -762,6 +755,8 @@ document.getElementById('reset-modal').addEventListener('click', function(e) {
     interval = setInterval(tick, 1000);
 })();
 </script>
+
+<?php include __DIR__ . '/partials/tema-scripts.php'; ?>
 
 </body>
 </html>
