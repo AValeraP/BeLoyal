@@ -70,6 +70,11 @@ switch ($page) {
         (new ControladorAdmin())->eliminarProducto();
         break;
 
+    case 'admin_eliminar_definitivo_producto':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarDefinitivamenteProducto();
+        break;
+
     case 'admin_activar_producto':
         require_once 'Controlador/ControladorAdmin.php';
         (new ControladorAdmin())->activarProducto();

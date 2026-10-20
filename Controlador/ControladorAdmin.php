@@ -106,8 +106,11 @@ class ControladorAdmin
     {
         csrf_check();
         $modelo = new ModeloProductoAdmin($this->pdo);
-        $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
-        $_SESSION['admin_msg'] = 'Producto creado correctamente.';
+        $stock  = max(0, (int)$_POST['stock']);
+        $modelo->crear(trim($_POST['nombre']), (float)$_POST['precio'], $stock);
+        $_SESSION['admin_msg'] = $stock > 0
+            ? 'Producto creado correctamente.'
+            : 'Producto creado sin stock: queda desactivado hasta que añadas unidades.';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -116,8 +119,17 @@ class ControladorAdmin
     {
         csrf_check();
         $modelo = new ModeloProductoAdmin($this->pdo);
-        $modelo->actualizar((int)$_POST['id'], trim($_POST['nombre']), (float)$_POST['precio'], (int)$_POST['stock']);
-        $_SESSION['admin_msg'] = 'Producto actualizado correctamente.';
+        $id     = (int)$_POST['id'];
+        $antes  = $modelo->obtenerPorId($id);
+        $stock  = max(0, (int)$_POST['stock']);
+        $modelo->actualizar($id, trim($_POST['nombre']), (float)$_POST['precio'], $stock);
+        if ($stock === 0) {
+            $_SESSION['admin_msg'] = 'Producto actualizado. Sin stock: queda desactivado y no sale en el punto de venta.';
+        } elseif ($antes && (int)$antes['stock'] === 0 && !$antes['activo']) {
+            $_SESSION['admin_msg'] = 'Stock repuesto: el producto vuelve a estar activo en el punto de venta.';
+        } else {
+            $_SESSION['admin_msg'] = 'Producto actualizado correctamente.';
+        }
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -126,7 +138,33 @@ class ControladorAdmin
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
         $modelo->eliminar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = 'Producto eliminado.';
+        $_SESSION['admin_msg'] = 'Producto desactivado.';
+        header('Location: index.php?page=admin&seccion=productos');
+        exit;
+    }
+
+    public function eliminarDefinitivamenteProducto(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?page=admin&seccion=productos');
+            exit;
+        }
+        csrf_check();
+
+        $modelo   = new ModeloProductoAdmin($this->pdo);
+        $id       = (int)($_POST['id'] ?? 0);
+        $producto = $modelo->obtenerPorId($id);
+
+        if (!$producto) {
+            $_SESSION['admin_msg'] = 'Ese producto ya no existe.';
+        } elseif ($producto['activo']) {
+            $_SESSION['admin_msg'] = 'Desactiva el producto antes de eliminarlo definitivamente.';
+        } elseif ($modelo->tieneVentas($id)) {
+            $_SESSION['admin_msg'] = 'No se puede eliminar: el producto tiene ventas registradas. Déjalo desactivado.';
+        } else {
+            $modelo->eliminarDefinitivamente($id);
+            $_SESSION['admin_msg'] = 'Producto eliminado definitivamente.';
+        }
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -134,8 +172,9 @@ class ControladorAdmin
     public function activarProducto(): void
     {
         $modelo = new ModeloProductoAdmin($this->pdo);
-        $modelo->activar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = 'Producto activado.';
+        $_SESSION['admin_msg'] = $modelo->activar((int)$_GET['id'])
+            ? 'Producto activado.'
+            : 'No se puede activar un producto agotado: edítalo y añade stock (se activará solo).';
         header('Location: index.php?page=admin&seccion=productos');
         exit;
     }
@@ -236,8 +275,27 @@ class ControladorAdmin
 
     public function eliminarDefinitivamenteEmpleado(): void
     {
-        $modelo = new ModeloTrabajador($this->pdo);
-        $id     = (int)$_GET['id'];
+        // Solo por formulario POST con token CSRF: un enlace no puede borrar a nadie
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?page=admin&seccion=empleados');
+            exit;
+        }
+        csrf_check();
+
+        $modelo   = new ModeloTrabajador($this->pdo);
+        $id       = (int)($_POST['id'] ?? 0);
+        $empleado = $modelo->obtenerPorId($id);
+
+        if (!$empleado) {
+            $_SESSION['admin_msg'] = 'Ese empleado ya no existe.';
+            header('Location: index.php?page=admin&seccion=empleados');
+            exit;
+        }
+        if ($empleado['activo']) {
+            $_SESSION['admin_msg'] = 'Desactiva al empleado antes de eliminarlo definitivamente.';
+            header('Location: index.php?page=admin&seccion=empleados');
+            exit;
+        }
 
         if ($modelo->tieneVentas($id)) {
             $_SESSION['admin_msg'] = 'No se puede eliminar: el empleado tiene ventas registradas.';

@@ -1,169 +1,200 @@
 <style>
-@keyframes fadeIn  { from { opacity: 0 }                            to { opacity: 1 } }
-@keyframes slideUp { from { transform: translateY(20px); opacity:0 } to { transform: translateY(0); opacity: 1 } }
-@keyframes popIn   { from { transform: scale(0) }                   to { transform: scale(1) } }
-@keyframes spin    { to   { transform: rotate(360deg) } }
+/* Pasarela de cobro: mismo estilo que el panel (negro, plata y bordes con luz) */
+@keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { transform: translateY(16px) scale(.98); opacity: 0 } to { transform: none; opacity: 1 } }
+@keyframes popIn   { from { transform: scale(0) } to { transform: scale(1) } }
+@keyframes spin    { to { transform: rotate(360deg) } }
+@keyframes aro     { from { transform: scale(1); opacity: .7 } to { transform: scale(1.9); opacity: 0 } }
+@keyframes paso-entra { from { opacity: 0; transform: translateX(10px) } }
 
 #pago-overlay.open { display: flex; animation: fadeIn .18s ease; }
-.pago-modal        { animation: slideUp .22s ease; }
-.exito-pop         { animation: popIn .3s cubic-bezier(.17,.67,.28,1.3); }
-.spin-anim         { animation: spin .7s linear infinite; }
+.pago-modal  { animation: slideUp .25s cubic-bezier(.2,.7,.2,1); border-radius: 1.25rem; }
+.exito-pop   { animation: popIn .3s cubic-bezier(.17,.67,.28,1.3); }
+.spin-anim   { animation: spin .7s linear infinite; }
+.pago-paso:not(.hidden) { animation: paso-entra .25s cubic-bezier(.2,.7,.2,1); }
 
-/* Divisor "o" con líneas laterales */
-.pago-o-sep { position: relative; }
-.pago-o-sep::before,
-.pago-o-sep::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(255,255,255,0.06); }
-.pago-o-sep::before { left: 0; }
-.pago-o-sep::after  { right: 0; }
+.pago-etiqueta { font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase; color: #8a8a8a; }
+.pago-total { font-size: 2.75rem; font-weight: 300; letter-spacing: -.02em; line-height: 1.1; }
+.pago-linea { height: 2px; width: 60%; margin: .9rem auto 0; background: linear-gradient(90deg, transparent, #d4d4d4 50%, transparent); box-shadow: 0 1px 8px rgba(255,255,255,.3); }
+.pago-volver { display: inline-flex; align-items: center; gap: .3rem; margin-bottom: .9rem; font-size: .75rem; color: #737373; transition: color .2s, text-shadow .2s; }
+.pago-volver:hover { color: #f5f5f5; text-shadow: 0 0 8px rgba(255,255,255,.4); }
 
-/* Focus en los campos de tarjeta */
-.stripe-field-box:focus-within { border-color: rgba(255,255,255,0.35); }
+/* Botón de cerrar: pastilla metálica redonda */
+.pago-x { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9999px; font-size: 1rem; line-height: 1; color: #b5b5b5;
+    background: linear-gradient(180deg, #2a2a2a, #161616); border: 1px solid #3a3a3a; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); transition: color .2s, border-color .2s, box-shadow .2s; }
+.pago-x:hover { color: #fff; border-color: #737373; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 0 10px rgba(255,255,255,.25); }
+
+/* Opciones de pago: tarjeta metálica con icono, luz azul (tarjeta) o verde (efectivo) al pasar */
+.pago-opcion { position: relative; overflow: hidden; display: flex; align-items: center; gap: .875rem; width: 100%; padding: .875rem 1rem; margin-bottom: .6rem;
+    text-align: left; border-radius: .875rem; background: linear-gradient(160deg, #1f1f1f, #141414); border: 1px solid #2a2a2a;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07); transition: border-color .25s, box-shadow .25s, transform .15s; --luz: 255,255,255; }
+.pago-opcion::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.08) 50%, transparent 65%); transform: translateX(-100%); }
+.pago-opcion:hover { border-color: rgba(var(--luz), .55); box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 18px rgba(var(--luz), .18); transform: translateY(-1px); }
+.pago-opcion:hover::after { transform: translateX(100%); transition: transform .9s ease; }
+.pago-opcion:active { transform: scale(.98); }
+.pago-opcion:focus-visible { outline: 2px solid #a3a3a3; outline-offset: 2px; }
+.pago-opcion.es-tarjeta { --luz: 96,165,250; }
+.pago-opcion.es-efectivo { --luz: 52,211,153; }
+.pago-icono { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 9999px; color: #0a0a0a;
+    background: linear-gradient(135deg, #ffffff 0%, #c4c4c4 40%, #7a7a7a 60%, #e5e5e5 100%); box-shadow: 0 0 0 2px #171717, 0 0 0 3px rgba(255,255,255,.2), 0 0 12px rgba(255,255,255,.18); }
+.pago-icono svg { width: 18px; height: 18px; }
+.pago-opcion .led { width: 7px; height: 7px; border-radius: 9999px; background: rgb(var(--luz)); box-shadow: 0 0 6px rgb(var(--luz)); opacity: .35; transition: opacity .25s; }
+.pago-opcion:hover .led { opacity: 1; }
+
+/* Campos hundidos, como los formularios del admin */
+.pago-campo { border-radius: .75rem; background: #0d0d0d; border: 1px solid #2f2f2f; box-shadow: inset 0 1px 2px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.04); transition: border-color .2s, box-shadow .2s; }
+.pago-campo:focus-within { border-color: #8a8a8a; box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 0 0 3px rgba(255,255,255,.08), 0 0 14px rgba(255,255,255,.12); }
+.pago-caja { border-radius: .875rem; background: linear-gradient(160deg, #1c1c1c, #131313); border: 1px solid #262626; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+
+/* Importes rápidos en efectivo */
+.pago-rapido { flex: 1; padding: .45rem 0; border-radius: .5rem; font-size: .75rem; color: #b5b5b5; background: linear-gradient(180deg, #232323, #161616); border: 1px solid #2f2f2f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08); transition: color .2s, border-color .2s, box-shadow .2s, transform .12s; }
+.pago-rapido:hover { color: #fff; border-color: #4a4a4a; box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 10px rgba(255,255,255,.12); }
+.pago-rapido:active { transform: scale(.95); }
+.pago-cambio { font-size: 1.375rem; font-weight: 500; color: #34d399; text-shadow: 0 0 10px rgba(52,211,153,.55); }
+
+/* Confirmar en efectivo: botón metálico con luz verde */
+.btn-verde { display: flex; align-items: center; justify-content: center; gap: .5rem; width: 100%; padding: .8rem 1rem; border-radius: .75rem; font-size: .875rem; font-weight: 600;
+    color: #a7f3d0; background: linear-gradient(180deg, #1d2a24, #121a16); border: 1px solid rgba(52,211,153,.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 16px rgba(52,211,153,.18); transition: box-shadow .2s, transform .12s, color .2s; }
+.btn-verde:hover { color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 24px rgba(52,211,153,.35); text-shadow: 0 0 8px rgba(52,211,153,.6); }
+.btn-verde:active { transform: scale(.98); }
+.btn-verde:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; text-shadow: none; }
+
+/* Resultado: icono en un aro con luz que se expande */
+.pago-resultado { position: relative; display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 1rem; border-radius: 9999px; color: var(--c);
+    background: radial-gradient(circle, rgba(var(--rgb), .18), rgba(var(--rgb), .04)); border: 1px solid var(--c); box-shadow: 0 0 18px rgba(var(--rgb), .35), inset 0 0 12px rgba(var(--rgb), .2); }
+.pago-resultado::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 1px solid var(--c); animation: aro 1.6s ease-out infinite; }
+.pago-ok    { --c: #34d399; --rgb: 52,211,153; }
+.pago-error { --c: #f87171; --rgb: 248,113,113; }
 
 /* Overlay solo sobre el campo de número para tapar el botón Link de Stripe
    (se inyecta dentro del iframe cross-origin, inaccesible por CSS normal) */
 .stripe-number-box { position: relative; }
 .stripe-number-box::after {
-    content: '';
-    position: absolute;
-    right: 1px; top: 1px; bottom: 1px;
-    width: 148px;
-    background: #0f0f0f;
-    border-radius: 0 10px 10px 0;
-    z-index: 10;
-    pointer-events: all;
-    cursor: text;
+    content: ''; position: absolute; right: 1px; top: 1px; bottom: 1px; width: 148px;
+    background: #0d0d0d; border-radius: 0 11px 11px 0; z-index: 10; pointer-events: all; cursor: text;
 }
 
-
-/* Herencia de fuente en elementos de formulario */
-#pago-overlay button,
-#pago-overlay input { font-family: inherit; }
-
-/* Ocultar flechas de inputs numéricos en la pasarela */
+#pago-overlay button, #pago-overlay input { font-family: inherit; }
 #pago-overlay input[type=number]::-webkit-inner-spin-button,
 #pago-overlay input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 #pago-overlay input[type=number] { -moz-appearance: textfield; }
+
+@media (prefers-reduced-motion: reduce) {
+    #pago-overlay.open, .pago-modal, .exito-pop, .pago-paso:not(.hidden), .pago-resultado::after { animation: none; }
+    .pago-opcion::after { display: none; }
+}
 </style>
 
 <div id="pago-overlay" role="dialog" aria-modal="true" aria-label="Pasarela de pago"
-     class="hidden fixed inset-0 bg-black/75 backdrop-blur-[6px] z-[9999] items-center justify-center font-dm">
+     class="hidden fixed inset-0 bg-black/75 backdrop-blur-[6px] z-[9999] items-center justify-center font-inter">
 
-    <div class="pago-modal bl-glow relative bg-[#171717] border border-[#2a2a2a] rounded-3xl w-[400px] max-w-[94vw] max-h-[94vh] overflow-y-auto pb-[1.6rem] shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
+    <div class="pago-modal bl-panel card-glow w-[400px] max-w-[94vw] max-h-[94vh] overflow-y-auto pb-6" style="--delay:-3s">
 
         <!-- Cabecera -->
-        <div class="flex items-center justify-between px-[1.4rem] py-[0.9rem] bg-[#0d0d0d] border-b border-[#2a2a2a] rounded-t-3xl">
-            <span class="flex items-center gap-2.5">
-                <img src="public/img/logos/beloyal-logo.svg" alt="" class="logo-glow h-8 w-auto select-none" draggable="false">
-                <span class="glow-title text-[#f5f5f5] font-semibold text-[0.9rem] tracking-[0.12em] uppercase">Be Loyal</span>
-            </span>
-            <button id="pago-cerrar" aria-label="Cerrar"
-                    class="bg-white/[0.06] border-0 text-[#888] text-[1rem] cursor-pointer w-7 h-7 rounded-full flex items-center justify-center transition-all duration-150 hover:bg-white/[0.12] hover:text-white">×</button>
+        <div class="flex items-center gap-3 px-6 py-4" style="border-bottom:1px solid #262626">
+            <svg class="w-4 h-4 text-[#e5e5e5]" style="filter:drop-shadow(0 0 4px rgba(255,255,255,.55))" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            <span class="flex-1 text-sm font-medium titulo-luz">Cobro</span>
+            <button id="pago-cerrar" aria-label="Cerrar" class="pago-x">×</button>
         </div>
 
         <!-- Importe -->
-        <div class="flex flex-col items-center px-[1.4rem] pt-[1.6rem] pb-4 border-b border-white/[0.06]">
-            <span class="text-[0.72rem] uppercase tracking-[0.1em] text-[#666] mb-[0.4rem]">Total a cobrar</span>
-            <span id="pago-total-display" class="glow-title text-[2.8rem] font-light text-[#f5f5f5] tracking-[-0.02em]">0,00</span>
+        <div class="flex flex-col items-center px-6 pt-6 pb-5">
+            <span class="pago-etiqueta mb-2">Total a cobrar</span>
+            <span id="pago-total-display" class="pago-total plata">0,00</span>
+            <span class="pago-linea" aria-hidden="true"></span>
         </div>
 
         <!-- Paso 1: Selector de método -->
-        <div id="step-metodo" class="px-[1.4rem] pt-[1.2rem]">
-            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Elige el método de pago</p>
-            <button id="btn-ir-tarjeta"
-                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
-                Pagar con tarjeta
+        <div id="step-metodo" class="pago-paso px-6">
+            <p class="pago-etiqueta mb-3">Elige el método de pago</p>
+            <button id="btn-ir-tarjeta" class="pago-opcion es-tarjeta">
+                <span class="pago-icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span>
+                <span class="flex-1">
+                    <span class="block text-sm font-medium text-[#f5f5f5]">Pagar con tarjeta</span>
+                    <span class="block text-[11px] text-[#737373] mt-0.5">Visa, Mastercard y otras</span>
+                </span>
+                <span class="led" aria-hidden="true"></span>
             </button>
-            <button id="btn-ir-efectivo"
-                    class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white text-[0.9rem] font-medium cursor-pointer mb-[0.55rem] transition-all duration-150 text-left hover:border-white/30 hover:bg-white/[0.08]">
-                Cobrar en efectivo
+            <button id="btn-ir-efectivo" class="pago-opcion es-efectivo">
+                <span class="pago-icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg></span>
+                <span class="flex-1">
+                    <span class="block text-sm font-medium text-[#f5f5f5]">Cobrar en efectivo</span>
+                    <span class="block text-[11px] text-[#737373] mt-0.5">Te calcula el cambio</span>
+                </span>
+                <span class="led" aria-hidden="true"></span>
             </button>
         </div>
 
         <!-- Paso 2: Tarjeta Stripe -->
-        <div id="step-tarjeta" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <button id="btn-volver-metodo"
-                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
-            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Datos de la tarjeta</p>
-            <div id="stripe-card-number-el"
-                 class="stripe-field-box stripe-number-box border border-white/[0.12] rounded-xl px-4 py-[0.85rem] mb-[0.55rem] bg-[#0f0f0f] transition-colors duration-200"></div>
-            <div class="flex gap-3 mb-[0.7rem]">
-                <div id="stripe-card-expiry-el"
-                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-[#0f0f0f] transition-colors duration-200"></div>
-                <div id="stripe-card-cvc-el"
-                     class="stripe-field-box flex-1 border border-white/[0.12] rounded-xl px-4 py-[0.85rem] bg-[#0f0f0f] transition-colors duration-200"></div>
+        <div id="step-tarjeta" class="pago-paso hidden px-6">
+            <button id="btn-volver-metodo" class="pago-volver">← Volver</button>
+            <p class="pago-etiqueta mb-3">Datos de la tarjeta</p>
+            <div id="stripe-card-number-el" class="stripe-field-box stripe-number-box pago-campo px-4 py-[0.85rem] mb-2"></div>
+            <div class="flex gap-2 mb-2">
+                <div id="stripe-card-expiry-el" class="stripe-field-box pago-campo flex-1 px-4 py-[0.85rem]"></div>
+                <div id="stripe-card-cvc-el" class="stripe-field-box pago-campo flex-1 px-4 py-[0.85rem]"></div>
             </div>
-            <div id="stripe-card-error" class="text-[#d9a3a3] text-[0.8rem] min-h-[1.2em] mb-[0.5rem]" role="alert"></div>
-            <button id="btn-pagar-tarjeta"
-                    class="btn-glow w-full py-[0.85rem] rounded-xl border-0 bg-[#d4d4d4] text-[#0a0a0a] text-[0.95rem] font-bold cursor-pointer flex items-center justify-center gap-2 hover:bg-white active:scale-[0.98] disabled:bg-[#2a2a2a] disabled:text-[#555] disabled:cursor-not-allowed">
+            <div id="stripe-card-error" class="text-[#f87171] text-xs min-h-[1.2em] mb-2" role="alert"></div>
+            <button id="btn-pagar-tarjeta" class="btn-plata">
                 <span id="btn-pagar-label">Pagar <strong id="btn-pagar-importe"></strong></span>
                 <span id="btn-pagar-spinner" class="hidden w-[18px] h-[18px] border-2 border-black/20 border-t-black rounded-full spin-anim"></span>
             </button>
         </div>
 
         <!-- Paso 3: Efectivo -->
-        <div id="step-efectivo" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <button id="btn-volver-efectivo"
-                    class="bg-transparent border-0 text-[#555] text-[0.8rem] cursor-pointer p-0 mb-[0.8rem] transition-colors duration-150 hover:text-[#ccc]">← Volver</button>
-            <p class="font-semibold text-[0.88rem] mb-[0.9rem] text-[#ccc]">Cobro en efectivo</p>
-            <div class="flex justify-between items-baseline bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
-                <span class="text-[0.78rem] text-[#666]">Total</span>
-                <span id="efectivo-total" class="glow-title text-[1.8rem] font-light text-[#f5f5f5]">0,00</span>
-            </div>
-            <div class="bg-white/[0.04] border border-white/[0.06] rounded-xl px-[1.1rem] py-[0.9rem] mb-4">
-                <label class="text-[0.72rem] text-[#666] uppercase tracking-[0.08em] block mb-[0.5rem]">Entrega el cliente</label>
-                <div class="flex items-center border border-white/10 rounded-lg bg-white/[0.03] overflow-hidden">
-                    <span class="px-[0.7rem] text-[#555] text-[1rem]">€</span>
-                    <input type="number" id="efectivo-entrega" min="0" max="1000" step="0.01" placeholder="0,00"
-                           class="flex-1 border-0 outline-none text-[1.2rem] font-medium py-[0.55rem] px-[0.4rem] bg-transparent text-white placeholder-[#555]">
+        <div id="step-efectivo" class="pago-paso hidden px-6">
+            <button id="btn-volver-efectivo" class="pago-volver">← Volver</button>
+            <div class="pago-caja px-4 py-4 mb-3">
+                <label for="efectivo-entrega" class="pago-etiqueta block mb-2">Entrega el cliente</label>
+                <div class="pago-campo flex items-center overflow-hidden">
+                    <span class="pl-3 pr-1 text-[#737373]">€</span>
+                    <input type="number" id="efectivo-entrega" min="0" max="1000" step="0.01" placeholder="0,00" inputmode="decimal"
+                           class="flex-1 border-0 outline-none text-xl font-medium py-2 px-1 bg-transparent text-white placeholder-[#4a4a4a]">
                 </div>
-                <div class="flex justify-between mt-[0.7rem] text-[0.88rem] text-[#888]">
-                    <span>Cambio</span>
-                    <span id="efectivo-cambio" class="glow-text font-semibold text-[#f5f5f5]">€0,00</span>
+                <div class="flex gap-1.5 mt-2" aria-label="Importes rápidos">
+                    <button type="button" class="pago-rapido" data-entrega="exacto">Exacto</button>
+                    <button type="button" class="pago-rapido" data-entrega="10">10 €</button>
+                    <button type="button" class="pago-rapido" data-entrega="20">20 €</button>
+                    <button type="button" class="pago-rapido" data-entrega="50">50 €</button>
+                </div>
+                <div class="flex justify-between items-baseline mt-4 pt-3" style="border-top:1px solid #262626">
+                    <span class="text-xs text-[#8a8a8a]">Total <span id="efectivo-total" class="text-[#e5e5e5] ml-1">0,00</span></span>
+                    <span class="text-xs text-[#8a8a8a]">Cambio <span id="efectivo-cambio" class="pago-cambio ml-1">€0,00</span></span>
                 </div>
             </div>
-            <button id="btn-confirmar-efectivo"
-                    class="btn-glow w-full py-[0.85rem] rounded-xl bg-[#d4d4d4] text-[#0a0a0a] text-[0.95rem] font-bold cursor-pointer flex items-center justify-center hover:bg-white active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#d4d4d4]">
-                Confirmar cobro
-            </button>
+            <button id="btn-confirmar-efectivo" class="btn-verde">Confirmar cobro</button>
         </div>
 
         <!-- Paso 4: Éxito -->
-        <div id="step-exito" class="hidden px-[1.4rem] pt-[1.2rem]">
-            <div class="exito-pop w-[60px] h-[60px] bg-white/[0.06] border border-[#d4d4d4] text-[#f5f5f5] shadow-[0_0_24px_rgba(255,255,255,0.18)] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><polyline points="20 6 9 17 4 12"/></svg>
+        <div id="step-exito" class="pago-paso hidden px-6">
+            <div class="pago-resultado pago-ok exito-pop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <p class="glow-title text-center text-[1.2rem] font-semibold text-[#f5f5f5]">Cobro realizado</p>
-            <p id="exito-metodo-label" class="text-center text-[#666] text-[0.82rem] mt-[0.3rem]">Pago completado</p>
-            <p id="exito-importe-label" class="glow-title text-center text-[1.6rem] font-light text-[#f5f5f5] mt-[0.4rem]"></p>
-            <div id="email-ticket-box" class="my-4">
-                <p class="text-[0.78rem] text-[#666] text-center mb-[0.5rem]">¿Enviar ticket al cliente?</p>
-                <div class="flex gap-[0.4rem]">
+            <p class="text-center text-lg font-medium titulo-luz">Cobro realizado</p>
+            <p id="exito-metodo-label" class="text-center text-[#8a8a8a] text-xs mt-1">Pago completado</p>
+            <p id="exito-importe-label" class="text-center text-3xl font-light plata mt-2"></p>
+            <div id="email-ticket-box" class="pago-caja px-4 py-3 my-4">
+                <p class="pago-etiqueta mb-2">¿Enviar ticket al cliente?</p>
+                <div class="flex gap-2">
                     <input type="email" id="email-cliente-input" placeholder="email@cliente.com"
-                           class="flex-1 border border-white/[0.12] rounded-lg px-3 py-[0.55rem] text-[0.85rem] outline-none transition-colors duration-150 bg-white/[0.05] text-white placeholder-[#555] focus:border-white/[0.35]">
-                    <button id="btn-enviar-ticket"
-                            class="px-[0.9rem] py-[0.55rem] bg-white/[0.08] text-white border border-white/[0.15] rounded-lg text-[0.82rem] font-semibold cursor-pointer whitespace-nowrap transition-all duration-150 hover:bg-white/[0.14] hover:border-white/30 disabled:bg-transparent disabled:text-[#444] disabled:border-[#333] disabled:cursor-not-allowed">
-                        Enviar
-                    </button>
+                           class="pago-campo flex-1 min-w-0 px-3 py-2 text-sm outline-none text-white placeholder-[#4a4a4a]">
+                    <button id="btn-enviar-ticket" class="seg-btn">Enviar</button>
                 </div>
-                <p id="email-ticket-feedback" class="text-[0.78rem] text-center mt-[0.4rem] min-h-[1em] text-[#d4d4d4]"></p>
+                <p id="email-ticket-feedback" class="text-[0.78rem] text-center mt-[0.4rem] min-h-[1em] text-[#34d399]"></p>
             </div>
-            <button id="btn-nuevo-cobro"
-                    class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-4 hover:bg-white/10 active:scale-[0.98]">
-                Nueva venta
-            </button>
+            <button id="btn-nuevo-cobro" class="btn-plata">Nueva venta</button>
         </div>
 
         <!-- Paso 5: Error -->
-        <div id="step-error" class="hidden px-[1.4rem] pt-[1.2rem] pb-2">
-            <div class="exito-pop w-[60px] h-[60px] bg-[#2a1717] border border-[#7a4343] text-[#d9a3a3] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div id="step-error" class="pago-paso hidden px-6 pb-2">
+            <div class="pago-resultado pago-error exito-pop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </div>
-            <p class="text-center text-[1.2rem] font-semibold text-white">Cobro fallido</p>
-            <p id="error-msg-label" class="text-center text-[#d9a3a3] text-[0.82rem] mt-[0.3rem] px-2"></p>
-            <button id="btn-reintentar"
-                    class="w-full py-[0.85rem] rounded-xl bg-white/[0.06] text-white border border-white/10 text-[0.95rem] font-bold cursor-pointer transition-all duration-150 flex items-center justify-center mt-6 hover:bg-white/10 active:scale-[0.98]">
-                Volver al carrito
-            </button>
+            <p class="text-center text-lg font-medium titulo-luz">Cobro fallido</p>
+            <p id="error-msg-label" class="text-center text-[#f87171] text-xs mt-1 px-2"></p>
+            <button id="btn-reintentar" class="seg-btn w-full py-3 mt-6">Volver al carrito</button>
         </div>
 
     </div>
@@ -230,6 +261,7 @@
         const carritoBackdrop = document.getElementById('carrito-backdrop');
         if (carritoPanel)    carritoPanel.classList.remove('open');
         if (carritoBackdrop) carritoBackdrop.classList.remove('open');
+        document.body.classList.remove('carrito-abierto');
     }
 
     function initStripe() {
@@ -239,12 +271,12 @@
 
         const fieldStyle = {
             base: {
-                fontFamily: "'DM Sans', Arial, sans-serif",
+                fontFamily: "Inter, Arial, sans-serif",
                 fontSize: '16px',
                 color: '#fff',
-                '::placeholder': { color: '#555' },
+                '::placeholder': { color: '#4a4a4a' },
             },
-            invalid: { color: '#d9a3a3' },
+            invalid: { color: '#f87171' },
         };
 
         cardNumberEl = elements.create('cardNumber', { style: fieldStyle, disableLink: true });
@@ -370,6 +402,11 @@
     };
 
     btnCerrar.addEventListener('click', cerrarOverlay);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) cerrarOverlay(); });
+    document.querySelectorAll('.pago-rapido').forEach(b => b.addEventListener('click', () => {
+        efectivoEntrega.value = b.dataset.entrega === 'exacto' ? (totalCents / 100).toFixed(2) : b.dataset.entrega;
+        efectivoEntrega.dispatchEvent(new Event('input'));
+    }));
     overlay.addEventListener('click', e => { if (e.target === overlay) cerrarOverlay(); });
     btnIrTarjeta.addEventListener('click', () => irStep(stepTarjeta));
     btnIrEfectivo.addEventListener('click', () => irStep(stepEfectivo));
@@ -403,13 +440,13 @@
 
         if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
             feedback.textContent = 'Introduce un email válido';
-            feedback.className   = clsBase + ' text-[#d9a3a3]';
+            feedback.className   = clsBase + ' text-[#f87171]';
             return;
         }
 
         btnEnviar.disabled   = true;
         feedback.textContent = 'Enviando...';
-        feedback.className   = clsBase + ' text-[#d4d4d4]';
+        feedback.className   = clsBase + ' text-[#34d399]';
 
         try {
             const res = await fetch('index.php?page=enviar_ticket', {
@@ -433,17 +470,17 @@
             const data = await res.json();
             if (data.ok) {
                 feedback.textContent = 'Ticket enviado a ' + email;
-                feedback.className   = clsBase + ' text-[#d4d4d4]';
+                feedback.className   = clsBase + ' text-[#34d399]';
                 emailInput.value     = '';
                 btnEnviar.disabled   = false;
             } else {
                 feedback.textContent = 'Error: ' + (data.error || 'No se pudo enviar');
-                feedback.className   = clsBase + ' text-[#d9a3a3]';
+                feedback.className   = clsBase + ' text-[#f87171]';
                 btnEnviar.disabled   = false;
             }
         } catch (e) {
             feedback.textContent = 'Error de conexión';
-            feedback.className   = clsBase + ' text-[#d9a3a3]';
+            feedback.className   = clsBase + ' text-[#f87171]';
             btnEnviar.disabled   = false;
         }
     });

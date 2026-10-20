@@ -22,9 +22,9 @@ class ModeloProductos
     public function obtenerBebidas(): array
     {
         return $this->pdo->query(
-            "SELECT id_producto AS id, nombre, precio
+            "SELECT id_producto AS id, nombre, precio, stock
              FROM productos
-             WHERE activo = 1
+             WHERE activo = 1 AND stock > 0
              ORDER BY nombre"
         )->fetchAll(PDO::FETCH_ASSOC);
     }

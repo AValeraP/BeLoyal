@@ -70,6 +70,7 @@ class ControladorAutenticacion
             'rol'         => $usuario['rol'],
             'especialidad'=> $usuario['especialidad'],
         ];
+        $_SESSION['bienvenida'] = true; // el panel muestra la animación de entrada una vez
 
         $this->redirigirSegunRol($usuario['rol']);
     }

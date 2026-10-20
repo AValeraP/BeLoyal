@@ -94,7 +94,7 @@
 
     /* Accesibilidad: sin animación si el usuario lo prefiere */
     @media (prefers-reduced-motion: reduce) {
-      .globe, .orb, .logo-3d, .logo-stage::before,
+      .globe, .orb, .logo-3d, .logo-stage::before, .logo-giro, .logo-brillo, .pedestal-tapa::before,
       .card-glow, .card-glow::before, .card-glow::after, .glow-title,
       .login-scale, .reveal, .reveal-group > * { animation: none; }
       .cursor-light, .card-sheen { display: none; }
@@ -205,6 +205,9 @@
     }
     .scene-depth { position: absolute; inset: 0; will-change: transform; }
 
+    /* Postes de barbería animados (plata y grafito), dentro de la escena con profundidad */
+    .poste-barbero { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
     /* Reflejo dentro de la tarjeta, colocado donde está el cursor */
     .card-sheen {
       position: absolute;
@@ -238,18 +241,63 @@
       animation: backlight 6s ease-in-out infinite;
       pointer-events: none;
     }
+    /* El balanceo 3D va en un envoltorio para que el logo y su destello se muevan juntos */
+    .logo-giro {
+      position: relative;
+      transform-origin: 50% 50%;
+      animation: logo-tilt 12s ease-in-out infinite;
+    }
     .logo-3d {
       position: relative;
       display: block;
-      /* Relieve sutil: un leve resplandor y sombra de separación */
+      /* Neón: resplandor que late y, de vez en cuando, parpadea como un letrero de verdad */
       filter:
         drop-shadow(0 0 1px rgba(255,255,255,0.6))
         drop-shadow(0 0 7px rgba(255,255,255,0.28))
         drop-shadow(0 0 18px rgba(255,255,255,0.12))
         drop-shadow(0 6px 10px rgba(0,0,0,0.55));
-      transform-origin: 50% 50%;
-      animation: logo-tilt 12s ease-in-out infinite;
+      animation: neon 8s ease-in-out infinite;
     }
+    @keyframes neon {
+      0%, 100%, 60%, 63.5%, 66% {
+        filter: drop-shadow(0 0 1px rgba(255,255,255,0.6)) drop-shadow(0 0 7px rgba(255,255,255,0.28))
+                drop-shadow(0 0 18px rgba(255,255,255,0.12)) drop-shadow(0 6px 10px rgba(0,0,0,0.55));
+      }
+      30%, 45% {
+        filter: drop-shadow(0 0 2px rgba(255,255,255,0.9)) drop-shadow(0 0 12px rgba(255,255,255,0.5))
+                drop-shadow(0 0 30px rgba(255,255,255,0.25)) drop-shadow(0 6px 10px rgba(0,0,0,0.55));
+      }
+      62%, 65% {
+        filter: brightness(.55) drop-shadow(0 0 1px rgba(255,255,255,0.3)) drop-shadow(0 6px 10px rgba(0,0,0,0.55));
+      }
+    }
+    /* Destello que cruza el logo, recortado a su silueta */
+    .logo-brillo {
+      position: absolute; inset: 0; pointer-events: none;
+      -webkit-mask: var(--logo) center / contain no-repeat; mask: var(--logo) center / contain no-repeat;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.95) 50%, transparent 60%);
+      background-size: 300% 100%; background-repeat: no-repeat;
+      animation: logo-destello 6s ease-in-out infinite;
+    }
+    @keyframes logo-destello { 0%, 55% { background-position: 150% 0; } 85%, 100% { background-position: -50% 0; } }
+    /* Pedestal de plata bajo el logo: disco metálico con una luz que recorre su filo */
+    .pedestal { position: absolute; left: 50%; top: 100%; width: 120%; height: 26px; margin: 4px 0 0 -60%; pointer-events: none; }
+    .pedestal-luz { position: absolute; left: 10%; right: 10%; top: 24px; height: 18px; border-radius: 50%;
+      background: radial-gradient(closest-side, rgba(255,255,255,.25), transparent); filter: blur(4px); }
+    .pedestal-lado { position: absolute; left: 0; right: 0; top: 9px; height: 12px; border-radius: 0 0 50% 50% / 0 0 8px 8px;
+      background: linear-gradient(90deg, #1a1a1a, #9a9a9a 30%, #e5e5e5 45%, #6b6b6b 70%, #141414); }
+    .pedestal-tapa { position: absolute; left: 0; right: 0; top: 0; height: 18px; border-radius: 50%;
+      background: radial-gradient(ellipse at 40% 35%, #4a4a4a, #222 60%, #161616);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 0 0 1px rgba(255,255,255,.18); }
+    .pedestal-tapa::after { content: ""; position: absolute; inset: 3px 10%; border-radius: 50%; border: 1px solid rgba(255,255,255,.12); }
+    @property --filo { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+    .pedestal-tapa::before {
+      content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+      background: conic-gradient(from var(--filo), transparent 0deg, rgba(255,255,255,.55) 30deg, transparent 70deg);
+      -webkit-mask: radial-gradient(closest-side, transparent 88%, #000 90%); mask: radial-gradient(closest-side, transparent 88%, #000 90%);
+      animation: filo-luz 5s linear infinite;
+    }
+    @keyframes filo-luz { to { --filo: 360deg; } }
     @keyframes logo-tilt {
       0%, 100% { transform: rotateY(-5deg) rotateX(2deg); }
       50%      { transform: rotateY(5deg)  rotateX(-1deg); }
@@ -295,6 +343,9 @@
       <span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span>
       <span class="lat" style="--z:0;--s:1"></span>
     </div>
+
+    <!-- Postes de barbería a los dos lados: las franjas suben en espiral -->
+    <canvas id="poste-barbero" class="poste-barbero"></canvas>
     </div>
   </div>
 
@@ -311,12 +362,16 @@
 
       <!-- Logo 3D retroiluminado (cambia la ruta en src) -->
       <div class="reveal flex justify-center mb-9 pt-2" style="--d:.15s">
-        <div class="logo-stage">
-          <img
-            src="public/img/logos/beloyal-logo.svg"
-            alt="Be Loyal Barber"
-            class="logo-3d w-[135px] sm:w-[155px] h-auto select-none"
-            draggable="false">
+        <div class="logo-stage" style="--logo: url('public/img/logos/beloyal-logo.svg')">
+          <div class="logo-giro">
+            <img
+              src="public/img/logos/beloyal-logo.svg"
+              alt="Be Loyal Barber"
+              class="logo-3d w-[135px] sm:w-[155px] h-auto select-none"
+              draggable="false">
+            <span class="logo-brillo" aria-hidden="true"></span>
+          </div>
+          <div class="pedestal" aria-hidden="true"><span class="pedestal-luz"></span><span class="pedestal-lado"></span><span class="pedestal-tapa"></span></div>
         </div>
       </div>
 
@@ -469,6 +524,96 @@
         toggle.setAttribute('aria-pressed', String(visible));
         toggle.setAttribute('aria-label', visible ? 'Ocultar contraseña' : 'Mostrar contraseña');
       });
+    })();
+  </script>
+
+  <!-- JS: postes de barbería animados, uno a cada lado de la tarjeta -->
+  <script>
+    (function () {
+      const lienzo = document.getElementById('poste-barbero');
+      const c = lienzo.getContext('2d');
+      const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let w = 0, h = 0, postes = [];
+
+      function medir() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = innerWidth; h = innerHeight;
+        lienzo.width = Math.round(w * dpr); lienzo.height = Math.round(h * dpr);
+        c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const movil = w < 640;
+        // En el ordenador van a los lados de la tarjeta; en el móvil asoman por los bordes y más tenues
+        const r = movil ? Math.min(w, h) * .2 : Math.max(40, Math.min(110, Math.min(w, h) * .11));
+        const base = { r: r, arriba: h * .14, abajo: h * .86, alfa: movil ? .45 : 1 };
+        postes = [
+          Object.assign({ cx: movil ? r * .35 : w * .2, espejo: true }, base),    // izquierda
+          Object.assign({ cx: movil ? w - r * .35 : w * .8, espejo: false }, base) // derecha
+        ];
+      }
+
+      function metal(x1, x2) {
+        const t = c.createLinearGradient(x1, 0, x2, 0);
+        t.addColorStop(0, '#2a2a2a'); t.addColorStop(.35, '#f5f5f5'); t.addColorStop(.6, '#8a8a8a'); t.addColorStop(1, '#1a1a1a');
+        return t;
+      }
+
+      // espejo: el de la izquierda es el reflejo del de la derecha (franjas y brillo hacia la tarjeta)
+      function dibujarPoste(p, t) {
+        const { r, cx, arriba, abajo, alfa, espejo } = p, paso = r * 2.6, lado = espejo ? -1 : 1;
+        c.save();
+        c.globalAlpha = alfa;
+
+        // halo de luz detrás y reflejo en el suelo
+        let g = c.createRadialGradient(cx, (arriba + abajo) / 2, 0, cx, (arriba + abajo) / 2, r * 4);
+        g.addColorStop(0, 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = g; c.fillRect(cx - r * 4, arriba - r, r * 8, abajo - arriba + r * 2);
+        g = c.createLinearGradient(0, abajo + r * .4, 0, abajo + r * 2.4);
+        g.addColorStop(0, 'rgba(255,255,255,.07)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = g; c.fillRect(cx - r * 1.2, abajo + r * .4, r * 2.4, r * 2);
+
+        // franjas en espiral: el desplazamiento con el tiempo las hace subir
+        const avance = (t * paso * .35) % paso;
+        c.fillStyle = '#2a2a2a'; c.fillRect(cx - r, arriba, r * 2, abajo - arriba);
+        c.fillStyle = '#d4d4d4';
+        for (let px = -r; px < r; px += 1) {
+          const fase = lado * Math.asin(Math.max(-1, Math.min(1, px / r))) / (Math.PI * 2) * paso - avance;
+          for (let y = arriba - paso * 2; y < abajo + paso; y += paso) {
+            const y1 = Math.max(arriba, y + fase), y2 = Math.min(abajo, y + fase + paso / 2);
+            if (y2 > y1) c.fillRect(cx + px, y1, 1.5, y2 - y1);
+          }
+        }
+
+        // volumen del cilindro y brillo del cristal
+        g = c.createLinearGradient(cx - r * lado, 0, cx + r * lado, 0);
+        g.addColorStop(0, 'rgba(0,0,0,.8)'); g.addColorStop(.25, 'rgba(0,0,0,.15)'); g.addColorStop(.38, 'rgba(255,255,255,.35)');
+        g.addColorStop(.45, 'rgba(255,255,255,0)'); g.addColorStop(.8, 'rgba(0,0,0,.45)'); g.addColorStop(1, 'rgba(0,0,0,.9)');
+        c.fillStyle = g; c.fillRect(cx - r, arriba, r * 2, abajo - arriba);
+
+        // destello que sube por el cristal cada pocos segundos
+        const ciclo = (t % 5) / 5, yb = abajo - (abajo - arriba + r * 2) * ciclo, xb = cx - r * .25 * lado;
+        g = c.createRadialGradient(xb, yb, 0, xb, yb, r * 1.2);
+        g.addColorStop(0, 'rgba(255,255,255,.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = g; c.fillRect(cx - r, Math.max(arriba, yb - r * 1.2), r * 2, Math.min(abajo, yb + r * 1.2) - Math.max(arriba, yb - r * 1.2));
+
+        // remates metálicos: cúpula arriba y base abajo
+        c.fillStyle = espejo ? metal(cx + r * 1.2, cx - r * 1.2) : metal(cx - r * 1.2, cx + r * 1.2);
+        c.fillRect(cx - r * 1.2, arriba - r * .3, r * 2.4, r * .3);
+        c.beginPath(); c.ellipse(cx, arriba - r * .3, r * 1.2, r * .7, 0, Math.PI, 0); c.fill();
+        c.fillRect(cx - r * 1.2, abajo, r * 2.4, r * .4);
+        c.beginPath(); c.ellipse(cx, abajo + r * .4, r * 1.2, r * .2, 0, 0, Math.PI); c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - r * 1.2, arriba); c.lineTo(cx + r * 1.2, arriba); c.moveTo(cx - r * 1.2, abajo); c.lineTo(cx + r * 1.2, abajo); c.stroke();
+        c.restore();
+      }
+
+      function dibujar(t) {
+        c.clearRect(0, 0, w, h);
+        postes.forEach(function (p) { dibujarPoste(p, t); });
+      }
+
+      medir();
+      addEventListener('resize', function () { medir(); if (quieto) dibujar(0); });
+      if (quieto) { dibujar(0); return; }
+      (function bucle(ms) { dibujar((ms || 0) / 1000); requestAnimationFrame(bucle); })();
     })();
   </script>
 

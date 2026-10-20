@@ -133,7 +133,9 @@ class ModeloInforme
             $filtro = "AND fecha >= " . $this->pdo->quote($desde);
         }
         return $this->pdo->query(
-            "SELECT DATE(fecha) as dia, COUNT(*) as ventas, SUM(total) as ingresos
+            "SELECT DATE(fecha) as dia, COUNT(*) as ventas, SUM(total) as ingresos,
+                    COALESCE(SUM(CASE WHEN LOWER(metodo_pago) LIKE '%efectivo%' THEN total ELSE 0 END), 0) as ingresos_efectivo,
+                    COALESCE(SUM(CASE WHEN LOWER(metodo_pago) NOT LIKE '%efectivo%' AND metodo_pago IS NOT NULL THEN total ELSE 0 END), 0) as ingresos_tarjeta
              FROM ventas
              WHERE 1=1 $filtro
              GROUP BY DATE(fecha)
