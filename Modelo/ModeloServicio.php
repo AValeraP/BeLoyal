@@ -44,6 +44,20 @@ class ModeloServicio
         $stmt->execute([':id' => $id]);
     }
 
+    public function tieneVentas(int $id): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM detalle_servicio WHERE id_servicio = :id");
+        $stmt->execute([':id' => $id]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    // Borrado de verdad: solo si ya está desactivado
+    public function eliminarDefinitivamente(int $id): void
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM servicios WHERE id_servicio = :id AND activo = 0");
+        $stmt->execute([':id' => $id]);
+    }
+
     public function activar(int $id): void
     {
         $stmt = $this->pdo->prepare("UPDATE servicios SET activo = 1 WHERE id_servicio = :id");

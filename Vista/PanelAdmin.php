@@ -341,6 +341,8 @@
             .bl-details:hover, .bl-3d:hover { transform: none; }
             .bl-3d::after, .nav-item::after { display: none; }
             .aviso-icono { animation: none; }
+            .toast-bl { animation: toast-sale .01s linear 5s forwards; }
+            .toast-bl::before, .toast-bl::after, .toast-icono, .toast-icono::after, .fila.fila-destacada { animation: none !important; }
             .logo-3d, .logo-stage::before, .logo-mueve, .logo-brillo, .pedestal-tapa::before { animation: none; }
             .nav-item:hover, .nav-item:active { transform: none; }
             .bl-details > summary::after { display: none; }
@@ -447,6 +449,56 @@
         /* botón de menú en el móvil */
         #sidebar-toggle { background: linear-gradient(180deg, #232323, #161616); border: 1px solid #3a3a3a; box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 12px rgba(255,255,255,.08); }
 
+        /* Aviso tras una acción: entra girando desde la derecha con borde de luz de su color, 5 s y se va */
+        .toast-bl {
+            --c: #34d399; --rgb: 52,211,153;
+            position: fixed; top: 1rem; right: 1rem; z-index: 90; width: min(360px, calc(100vw - 2rem));
+            display: flex; align-items: flex-start; gap: .75rem; padding: .875rem .875rem 1rem 1rem; overflow: hidden;
+            border-radius: .875rem; background: linear-gradient(160deg, #1f1f1f, #141414); border: 1px solid rgba(var(--rgb), .35);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 24px rgba(var(--rgb), .18), 0 20px 40px -12px rgba(0,0,0,.85);
+            transform-origin: right center;
+            animation: toast-entra .55s cubic-bezier(.2,.9,.3,1.15) both, toast-sale .45s cubic-bezier(.6,0,.8,.3) 5s forwards;
+        }
+        .toast-bl::before { /* borde de luz que recorre el contorno */
+            content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; pointer-events: none;
+            background: conic-gradient(from var(--angle), transparent 0deg, rgba(var(--rgb), .9) 70deg, transparent 140deg, transparent 360deg);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+            animation: border-spin 2.5s linear infinite;
+        }
+        .toast-bl::after { /* destello al entrar */
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.12) 50%, transparent 65%);
+            transform: translateX(-100%); animation: toast-destello 1s ease .35s forwards;
+        }
+        .toast-aviso { --c: #f59e0b; --rgb: 245,158,11; }
+        .toast-error { --c: #f87171; --rgb: 248,113,113; }
+        .toast-icono { position: relative; display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 9999px; color: var(--c);
+            background: radial-gradient(circle, rgba(var(--rgb), .2), rgba(var(--rgb), .05)); border: 1px solid rgba(var(--rgb), .6);
+            box-shadow: 0 0 12px rgba(var(--rgb), .45); animation: toast-pop .45s cubic-bezier(.17,.67,.28,1.4) .2s both; }
+        .toast-icono::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 1px solid var(--c); animation: toast-aro 1.4s ease-out .4s 2; opacity: 0; }
+        .toast-icono svg { width: 15px; height: 15px; }
+        .toast-cuerpo { flex: 1; min-width: 0; padding-top: .1rem; }
+        .toast-titulo { display: block; font-size: .8125rem; font-weight: 600; color: #fff; text-shadow: 0 0 10px rgba(var(--rgb), .5); }
+        .toast-texto { display: block; margin-top: .15rem; font-size: .75rem; line-height: 1.4; color: #b5b5b5; }
+        .toast-x { display: grid; place-items: center; width: 22px; height: 22px; flex-shrink: 0; border-radius: 9999px; font-size: .875rem; line-height: 1; color: #737373; transition: color .2s, background .2s; }
+        .toast-x:hover { color: #fff; background: rgba(255,255,255,.08); }
+        .toast-barra { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; transform-origin: left; background: var(--c); box-shadow: 0 0 8px var(--c);
+            animation: toast-tiempo 5s linear forwards; }
+        .toast-bl.is-fuera { animation: toast-sale .35s cubic-bezier(.6,0,.8,.3) forwards; }
+        @keyframes toast-entra { from { opacity: 0; transform: perspective(800px) translateX(110%) rotateY(-35deg); } }
+        @keyframes toast-sale  { to { opacity: 0; transform: perspective(800px) translateX(60%) rotateY(-20deg) scale(.96); visibility: hidden; } }
+        @keyframes toast-destello { to { transform: translateX(100%); } }
+        @keyframes toast-pop   { from { transform: scale(0) rotate(-45deg); } }
+        @keyframes toast-aro   { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(1.8); } }
+        @keyframes toast-tiempo { to { transform: scaleX(0); } }
+        @media (max-width: 767px) { .toast-bl { top: 4rem; left: 1rem; right: 1rem; width: auto; } }
+
+        /* Tras una acción, la fila tocada se ilumina un momento para encontrarla de un vistazo */
+        .fila.fila-destacada { animation: fila-destaca 2.2s ease-out !important; }
+        @keyframes fila-destaca { 0%, 30% { background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25), 0 0 18px rgba(255,255,255,.12); } }
+        /* Al volver tras una acción, los desplegables aparecen ya abiertos, sin animación */
+        .sin-anim .bl-details[open] > summary + div, .sin-anim .bl-details[open] .fila, .sin-anim .bl-details[open] .fila-tabla { animation: none !important; }
+
         /* Fondo: sala de columnas en 3D, fija detrás del menú y del contenido */
         #fondo-sala { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
         #sidebar, main { position: relative; z-index: 1; }
@@ -540,9 +592,24 @@
 <!-- CONTENT -->
 <main class="flex-1 p-4 sm:p-7 overflow-y-auto pt-16 md:pt-7">
 
-    <?php if ($mensaje): ?>
-    <div class="text-xs font-light text-emerald-400 bg-emerald-900/30 border border-emerald-800/50 rounded-xl px-4 py-2.5 mb-5">
-        <?= htmlspecialchars($mensaje) ?>
+    <?php if ($mensaje):
+        // El tipo sale del propio texto: error (rojo), aviso (ámbar) o hecho (verde)
+        $tipoAviso = preg_match('/^(No se|Ya existe|Ese .+ ya no existe|Desactiva |Contraseña incorrecta|Para )/u', $mensaje) ? 'error'
+                   : (preg_match('/sin stock/iu', $mensaje) ? 'aviso' : 'ok');
+        $iconoAviso = [
+            'ok'    => '<path d="M20 6L9 17l-5-5"/>',
+            'aviso' => '<path d="M12 8v5M12 16.5h.01"/>',
+            'error' => '<path d="M18 6L6 18M6 6l12 12"/>',
+        ][$tipoAviso];
+    ?>
+    <div id="toast-bl" class="toast-bl toast-<?= $tipoAviso ?>" role="<?= $tipoAviso === 'error' ? 'alert' : 'status' ?>">
+        <span class="toast-icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?= $iconoAviso ?></svg></span>
+        <span class="toast-cuerpo">
+            <span class="toast-titulo"><?= ['ok' => 'Hecho', 'aviso' => 'Atención', 'error' => 'No se ha podido'][$tipoAviso] ?></span>
+            <span class="toast-texto"><?= htmlspecialchars($mensaje) ?></span>
+        </span>
+        <button type="button" class="toast-x" aria-label="Cerrar aviso">×</button>
+        <span class="toast-barra" aria-hidden="true"></span>
     </div>
     <?php endif; ?>
 
@@ -850,7 +917,6 @@
         $serviciosPorGrupo = [];
         foreach ($servicios as $s) $serviciosPorGrupo[$s['especialidad'] ?? 'peluqueria'][] = $s;
         $activos = count(array_filter($servicios, fn ($s) => $s['activo']));
-        $primerGrupo = array_key_first(array_intersect_key($grupos, $serviciosPorGrupo));
     ?>
     <!-- SERVICIOS -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -922,7 +988,7 @@
             $desde  = min(array_map(fn ($s) => (float) $s['precio'], $lista));
             $nAct   = count(array_filter($lista, fn ($s) => $s['activo']));
         ?>
-        <details class="bl-panel card-glow bl-details" style="--delay:-<?= 2 + array_search($esp, array_keys($grupos)) * 3 ?>s" <?= !$editServicio && $esp === $primerGrupo ? 'open' : '' ?>>
+        <details class="bl-panel card-glow bl-details" style="--delay:-<?= 2 + array_search($esp, array_keys($grupos)) * 3 ?>s">
             <summary>
                 <span class="globo-mini" aria-hidden="true"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span class="lat"></span></span>
                 <svg class="icono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?= $iconosGrupo[$esp] ?></svg>
@@ -940,12 +1006,13 @@
                     </span>
                     <span class="plata text-sm tabular-nums sm:w-20 sm:text-right"><?= $euros($s['precio']) ?></span>
                     <span class="estado-bl <?= $s['activo'] ? 'is-on' : '' ?>"><i></i><?= $s['activo'] ? 'Activo' : 'Inactivo' ?></span>
-                    <span class="flex gap-1.5 ml-auto sm:w-[10.5rem] justify-end">
+                    <span class="flex flex-wrap gap-1.5 ml-auto sm:w-[15.5rem] justify-end">
                         <a href="index.php?page=admin&seccion=servicios&editar=<?= $s['id_servicio'] ?>" class="seg-btn">Editar</a>
                         <?php if ($s['activo']): ?>
                         <a href="#" class="seg-btn btn-peligro" onclick="abrirConfirm('Dejará de aparecer en el punto de venta. Puedes volver a activarlo cuando quieras.', 'index.php?page=admin_eliminar_servicio&id=<?= $s['id_servicio'] ?>', '¿Desactivar este servicio?'); return false;">Desactivar</a>
                         <?php else: ?>
                         <a href="index.php?page=admin_activar_servicio&id=<?= $s['id_servicio'] ?>" class="seg-btn btn-ok">Activar</a>
+                        <button type="button" class="seg-btn btn-peligro" onclick="abrirBorrado(<?= (int) $s['id_servicio'] ?>, <?= htmlspecialchars(json_encode($s['nombre']), ENT_QUOTES) ?>, 'admin_eliminar_definitivo_servicio', 'Si el servicio aparece en alguna venta no se borrará, para no estropear el historial.')">Eliminar</button>
                         <?php endif; ?>
                     </span>
                 </div>
@@ -1343,6 +1410,59 @@
     let pendiente = 0;
     addEventListener('resize', function () { cancelAnimationFrame(pendiente); pendiente = requestAnimationFrame(dibujar); });
     dibujar();
+})();
+
+// ── Aviso tras una acción: 5 segundos y se va (o antes con la ×) ────────────
+(function () {
+    const t = document.getElementById('toast-bl');
+    if (!t) return;
+    const quitar = () => t.remove();
+    t.addEventListener('animationend', e => { if (e.target === t && e.animationName === 'toast-sale') quitar(); });
+    t.querySelector('.toast-x').addEventListener('click', () => { t.classList.add('is-fuera'); setTimeout(quitar, 400); });
+})();
+
+// ── Volver tal cual tras una acción ─────────────────────────────────────────
+// Al activar, desactivar, guardar o borrar la página se recarga; aquí se recuerdan los
+// desplegables abiertos, el punto de la lista y la fila tocada para dejarlo todo igual.
+// Entrando desde el menú lateral se empieza de cero (todo cerrado).
+(function () {
+    const CLAVE = 'bl-estado', seccion = <?= json_encode($seccion) ?>;
+    const main = document.querySelector('main');
+    const desplegables = () => [...main.querySelectorAll('details.bl-details')];
+    const editando = new URLSearchParams(location.search).has('editar');
+    let previo = null, ultimaFila = null, limpio = false;
+    try { previo = JSON.parse(sessionStorage.getItem(CLAVE)); sessionStorage.removeItem(CLAVE); } catch (e) {}
+
+    if (previo && previo.seccion === seccion) {
+        document.documentElement.classList.add('sin-anim');
+        const abiertos = new Set(previo.abiertos);
+        desplegables().forEach((d, i) => { d.open = abiertos.has(i); });
+        // Al pulsar "Editar" se sube al formulario; al guardar se vuelve donde estabas
+        main.scrollTop = editando ? 0 : (previo.vuelta ?? previo.scroll);
+        if (previo.fila && !editando) {
+            const fila = [...main.querySelectorAll('.fila')].find(f => f.querySelector('.fila-nombre')?.textContent.trim() === previo.fila);
+            if (fila) { fila.classList.add('fila-destacada'); fila.addEventListener('animationend', () => fila.classList.remove('fila-destacada'), { once: true }); }
+        }
+        requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('sin-anim')));
+    }
+
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.nav-item')) limpio = true;
+        const fila = e.target.closest('.fila');
+        if (fila) ultimaFila = fila.querySelector('.fila-nombre')?.textContent.trim() || null;
+    }, true);
+
+    addEventListener('pagehide', function () {
+        if (limpio) return;
+        const estado = {
+            seccion,
+            abiertos: desplegables().map((d, i) => d.open ? i : -1).filter(i => i >= 0),
+            scroll: main.scrollTop,
+            fila: ultimaFila || (editando && previo ? previo.fila : null),
+        };
+        if (editando && previo && previo.seccion === seccion) estado.vuelta = previo.vuelta ?? previo.scroll;
+        try { sessionStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) {}
+    });
 })();
 
 // ── Sidebar móvil ────────────────────────────────────────────────────────────

@@ -50,6 +50,11 @@ switch ($page) {
         (new ControladorAdmin())->eliminarServicio();
         break;
 
+    case 'admin_eliminar_definitivo_servicio':
+        require_once 'Controlador/ControladorAdmin.php';
+        (new ControladorAdmin())->eliminarDefinitivamenteServicio();
+        break;
+
     case 'admin_activar_servicio':
         require_once 'Controlador/ControladorAdmin.php';
         (new ControladorAdmin())->activarServicio();

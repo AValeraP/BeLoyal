@@ -86,7 +86,33 @@ class ControladorAdmin
     {
         $modelo = new ModeloServicio($this->pdo);
         $modelo->eliminar((int)$_GET['id']);
-        $_SESSION['admin_msg'] = 'Servicio eliminado.';
+        $_SESSION['admin_msg'] = 'Servicio desactivado.';
+        header('Location: index.php?page=admin&seccion=servicios');
+        exit;
+    }
+
+    public function eliminarDefinitivamenteServicio(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?page=admin&seccion=servicios');
+            exit;
+        }
+        csrf_check();
+
+        $modelo   = new ModeloServicio($this->pdo);
+        $id       = (int)($_POST['id'] ?? 0);
+        $servicio = $modelo->obtenerPorId($id);
+
+        if (!$servicio) {
+            $_SESSION['admin_msg'] = 'Ese servicio ya no existe.';
+        } elseif ($servicio['activo']) {
+            $_SESSION['admin_msg'] = 'Desactiva el servicio antes de eliminarlo definitivamente.';
+        } elseif ($modelo->tieneVentas($id)) {
+            $_SESSION['admin_msg'] = 'No se puede eliminar: el servicio tiene ventas registradas. Déjalo desactivado.';
+        } else {
+            $modelo->eliminarDefinitivamente($id);
+            $_SESSION['admin_msg'] = 'Servicio eliminado definitivamente.';
+        }
         header('Location: index.php?page=admin&seccion=servicios');
         exit;
     }
